@@ -13,6 +13,7 @@ export interface Pot {
   name: { ar: string; en: string };
   percentage: number;
   color: string;
+  iconKey: string;
   icon: (props: React.ComponentProps<'svg'>) => JSX.Element;
 }
 

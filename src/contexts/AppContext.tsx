@@ -5,7 +5,7 @@ import React, { createContext, useContext, useState, ReactNode, useEffect } from
 import type { User, Pot, Transaction } from '@/lib/types';
 import { DEFAULT_POTS } from '@/lib/constants';
 import { useIsMounted } from '@/hooks/use-is-mounted';
-import { potIcons } from '@/lib/icons';
+import { potIcons, PotIconKey } from '@/lib/icons';
 
 type Language = 'ar' | 'en';
 
@@ -17,7 +17,7 @@ interface AppState {
   language: Language;
   setUser: (user: User | null) => void;
   addTransaction: (transaction: Omit<Transaction, 'id' | 'date'>) => void;
-  updatePots: (pots: Pot[]) => void;
+  updatePots: (pots: Omit<Pot, 'icon'>[]) => void;
   toggleTheme: () => void;
   setLanguage: (language: Language) => void;
   getPotBalance: (potId: string) => number;
@@ -26,6 +26,13 @@ interface AppState {
 }
 
 const AppContext = createContext<AppState | undefined>(undefined);
+
+const addDynamicPotData = (pots: Omit<Pot, 'icon'>[]): Pot[] => {
+    return pots.map(pot => ({
+        ...pot,
+        icon: potIcons[pot.iconKey as PotIconKey] || potIcons.custom
+    }));
+};
 
 export const AppContextProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUserState] = useState<User | null>(null);
@@ -48,29 +55,29 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
       if (storedPots) {
         let needsMigration = false;
         const parsedPots = JSON.parse(storedPots);
+        
         const migratedPotsData = parsedPots.map(p => {
+            let pot = { ...p };
             if (typeof p.name === 'string') {
                 needsMigration = true;
                 const defaultPotData = DEFAULT_POTS.find(dp => dp.id === p.id);
                 const newName = defaultPotData ? defaultPotData.name : { ar: p.name, en: p.name };
-                return { ...p, name: newName };
+                pot.name = newName;
             }
-            return p;
+            if (!p.iconKey) {
+                needsMigration = true;
+                pot.iconKey = p.id.startsWith('custom-') ? 'custom' : p.id;
+            }
+            return pot;
         });
-
-        const potsWithIcons = migratedPotsData.map(pot => ({
-            ...pot,
-            icon: potIcons[pot.id as keyof typeof potIcons] || potIcons.custom
-        }));
         
-        setPots(potsWithIcons);
+        setPots(addDynamicPotData(migratedPotsData));
 
         if (needsMigration) {
-            const potsToStore = migratedPotsData.map(({ icon, ...rest }) => rest);
-            localStorage.setItem('al-mawazin-pots', JSON.stringify(potsToStore));
+            localStorage.setItem('al-mawazin-pots', JSON.stringify(migratedPotsData));
         }
       } else {
-        setPots(DEFAULT_POTS);
+        setPots(addDynamicPotData(DEFAULT_POTS));
       }
 
       if (storedTransactions) setTransactions(JSON.parse(storedTransactions));
@@ -99,14 +106,9 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
     }
   };
   
-  const updatePots = (updatedPots: Pot[]) => {
-    const potsWithIcons = updatedPots.map(pot => ({
-        ...pot,
-        icon: potIcons[pot.id as keyof typeof potIcons] || potIcons.custom
-    }));
-    setPots(potsWithIcons);
-    const potsToStore = updatedPots.map(({ icon, ...rest }) => rest);
-    localStorage.setItem('al-mawazin-pots', JSON.stringify(potsToStore));
+  const updatePots = (updatedPots: Omit<Pot, 'icon'>[]) => {
+    setPots(addDynamicPotData(updatedPots));
+    localStorage.setItem('al-mawazin-pots', JSON.stringify(updatedPots));
   };
 
   const addTransaction = (transaction: Omit<Transaction, 'id' | 'date'>) => {

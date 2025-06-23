@@ -12,7 +12,7 @@ import { AlertCircle, Trash2, Edit, Plus } from 'lucide-react';
 import { EditPotDialog } from '@/components/pots/EditPotDialog';
 import { ConfirmDeleteDialog } from '@/components/pots/ConfirmDeleteDialog';
 import { AddPotDialog } from '@/components/pots/AddPotDialog';
-import { potIcons } from '@/lib/icons';
+import { potIcons, PotIconKey } from '@/lib/icons';
 
 export default function ManagePotsPage() {
   const { pots, updatePots, language } = useApp();
@@ -23,7 +23,6 @@ export default function ManagePotsPage() {
   const [isAddPotDialogOpen, setAddPotDialogOpen] = useState(false);
 
   useEffect(() => {
-    // Deep copy to avoid mutating global state directly
     setLocalPots(JSON.parse(JSON.stringify(pots)));
   }, [pots]);
   
@@ -51,7 +50,8 @@ export default function ManagePotsPage() {
       });
       return;
     }
-    updatePots(localPots);
+    const potsToSave = localPots.map(({ icon, ...rest }) => rest);
+    updatePots(potsToSave);
     toast({
       title: language === 'ar' ? 'تم الحفظ' : 'Saved',
       description: language === 'ar' ? 'تم تحديث الموازين بنجاح.' : 'Pots have been updated successfully.',
@@ -68,10 +68,17 @@ export default function ManagePotsPage() {
     setPotToDelete(null);
   }
 
-  const handlePotAdd = (newPotData: Omit<Pot, 'icon'>) => {
+  const handlePotAdd = (newPotData: { name: string; percentage: number; color: string; iconKey: string; }) => {
     const newPot: Pot = {
-        ...newPotData,
-        icon: potIcons.custom
+        id: `custom-${new Date().getTime()}`,
+        name: {
+            ar: newPotData.name,
+            en: newPotData.name,
+        },
+        percentage: newPotData.percentage,
+        color: newPotData.color,
+        iconKey: newPotData.iconKey,
+        icon: potIcons[newPotData.iconKey as PotIconKey] || potIcons.custom
     }
     setLocalPots(prev => [...prev, newPot]);
     setAddPotDialogOpen(false);
@@ -95,6 +102,7 @@ export default function ManagePotsPage() {
         {localPots.map(pot => (
           <Card key={pot.id}>
             <CardContent className="p-4 flex items-center gap-4">
+               <pot.icon className="h-8 w-8 flex-shrink-0" style={{ color: pot.color }}/>
               <div className="flex-1 space-y-2">
                 <Label htmlFor={`pot-${pot.id}`}>{pot.name[language]}</Label>
                 <div className="relative">
@@ -112,9 +120,11 @@ export default function ManagePotsPage() {
                  <Button variant="ghost" size="icon" onClick={() => setPotToEdit(pot)}>
                     <Edit className="h-4 w-4" />
                  </Button>
-                 <Button variant="ghost" size="icon" onClick={() => setPotToDelete(pot)} className="text-destructive hover:text-destructive">
-                    <Trash2 className="h-4 w-4" />
-                 </Button>
+                 { !['necessities', 'freedom', 'saving', 'education', 'play', 'giving'].includes(pot.id) && (
+                    <Button variant="ghost" size="icon" onClick={() => setPotToDelete(pot)} className="text-destructive hover:text-destructive">
+                        <Trash2 className="h-4 w-4" />
+                    </Button>
+                 )}
               </div>
             </CardContent>
           </Card>
