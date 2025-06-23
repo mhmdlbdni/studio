@@ -83,8 +83,8 @@ export default function TransactionsPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[50%]">{t.table.description}</TableHead>
-                  <TableHead>{t.table.pot}</TableHead>
+                  <TableHead>{t.table.description}</TableHead>
+                  <TableHead className="text-center">{t.table.pot}</TableHead>
                   <TableHead className="text-right">{t.table.amount}</TableHead>
                 </TableRow>
               </TableHeader>
@@ -102,7 +102,7 @@ export default function TransactionsPage() {
                             {new Date(transaction.date).toLocaleDateString(dateLocale, { year: 'numeric', month: 'short', day: 'numeric' })}
                           </div>
                         </TableCell>
-                        <TableCell>{potName}</TableCell>
+                        <TableCell className="text-center">{potName}</TableCell>
                         <TableCell className={`text-right font-medium ${isExpense ? 'text-destructive' : 'text-green-500'}`}>
                           <div className="flex items-center justify-end gap-1">
                              <span>
