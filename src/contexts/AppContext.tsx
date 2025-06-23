@@ -5,6 +5,7 @@ import React, { createContext, useContext, useState, ReactNode, useEffect } from
 import type { User, Pot, Transaction } from '@/lib/types';
 import { DEFAULT_POTS } from '@/lib/constants';
 import { useIsMounted } from '@/hooks/use-is-mounted';
+import { potIcons } from '@/lib/icons';
 
 interface AppState {
   user: User | null;
@@ -37,8 +38,19 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
       const storedTheme = localStorage.getItem('al-mawazin-theme') as 'light' | 'dark' | null;
 
       if (storedUser) setUserState(JSON.parse(storedUser));
-      if (storedPots) setPots(JSON.parse(storedPots));
+      
+      if (storedPots) {
+        // Functions can't be stored in JSON, so we need to re-hydrate the icons.
+        const parsedPots = JSON.parse(storedPots) as Omit<Pot, 'icon'>[];
+        const potsWithIcons = parsedPots.map(pot => ({
+            ...pot,
+            icon: potIcons[pot.id as keyof typeof potIcons] || potIcons.custom
+        }));
+        setPots(potsWithIcons);
+      }
+
       if (storedTransactions) setTransactions(JSON.parse(storedTransactions));
+      
       if (storedTheme) {
         setTheme(storedTheme);
         document.documentElement.classList.toggle('dark', storedTheme === 'dark');
