@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AddTransactionDialog } from '@/components/dashboard/AddTransactionDialog';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Progress } from '@/components/ui/progress';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { ChatInterface } from '@/components/ai/ChatInterface';
 
 export default function DashboardPage() {
@@ -145,6 +145,7 @@ export default function DashboardPage() {
 
       <Dialog open={isChatOpen} onOpenChange={setChatOpen}>
         <DialogContent className="p-0 bg-transparent border-none shadow-none sm:max-w-lg w-full">
+          <DialogTitle className="sr-only">{language === 'ar' ? 'مرشد الموازين' : 'Al-Mawazin Guide'}</DialogTitle>
           <ChatInterface />
         </DialogContent>
       </Dialog>
