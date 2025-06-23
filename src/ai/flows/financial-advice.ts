@@ -35,7 +35,7 @@ const navigateToTool = ai.defineTool({
 
 
 // Define the input schema for the flow
-export const FinancialAdviceInputSchema = z.object({
+const FinancialAdviceInputSchema = z.object({
   query: z.string().describe('The user query for financial advice.'),
   financials: z.object({
     totalIncome: z.number().describe("The user's total income."),
