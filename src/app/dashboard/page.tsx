@@ -3,7 +3,7 @@
 
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
-import { Plus, Bot, ArrowUp, ArrowDown } from 'lucide-react';
+import { Plus, Bot } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,6 +13,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 export default function DashboardPage() {
   const { pots, user, getPotBalance, totalIncome, totalExpenses } = useApp();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [popoverOpen, setPopoverOpen] = useState(false);
   const [dialogInitialTab, setDialogInitialTab] = useState<'income' | 'expense'>('expense');
   const currency = user?.currency || 'YER';
 
@@ -28,36 +29,37 @@ export default function DashboardPage() {
   const openDialog = (tab: 'income' | 'expense') => {
     setDialogInitialTab(tab);
     setDialogOpen(true);
+    setPopoverOpen(false);
   }
 
   return (
-    <div className="space-y-6">
-      <div className="grid gap-4 md:grid-cols-3">
-         <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+    <div className="space-y-8">
+      <div className="grid grid-cols-3 gap-4">
+         <Card className="text-center">
+            <CardHeader className="flex flex-row items-center justify-center space-y-0 p-4 pb-2">
                 <CardTitle className="text-sm font-medium">إجمالي الدخل</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-4 pt-0">
                 <div className="text-2xl font-bold text-green-500">
                     {new Intl.NumberFormat('ar-EG', { style: 'currency', currency, minimumFractionDigits: 0 }).format(totalIncome)}
                 </div>
             </CardContent>
         </Card>
-        <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <Card className="text-center">
+            <CardHeader className="flex flex-row items-center justify-center space-y-0 p-4 pb-2">
                 <CardTitle className="text-sm font-medium">إجمالي المصروفات</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-4 pt-0">
                 <div className="text-2xl font-bold text-destructive">
                     {new Intl.NumberFormat('ar-EG', { style: 'currency', currency, minimumFractionDigits: 0 }).format(totalExpenses)}
                 </div>
             </CardContent>
         </Card>
-        <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">الصافي</CardTitle>
+        <Card className="text-center">
+            <CardHeader className="flex items-center justify-center p-4 pb-2">
+                <div className="text-sm font-medium leading-none">الصافي<br/>الحالي</div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-4 pt-0">
                 <div className="text-2xl font-bold text-primary">
                     {new Intl.NumberFormat('ar-EG', { style: 'currency', currency, minimumFractionDigits: 0 }).format(netBalance)}
                 </div>
@@ -65,24 +67,26 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      <div>
-        <h2 className="mb-4 font-headline text-lg font-medium">أوعية الموازنة (الموازين)</h2>
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
+      <div className="space-y-4">
+        <h2 className="mb-2 font-headline text-2xl font-bold text-right">الأوعية المالية</h2>
+        <div className="flex flex-col gap-3">
           {potDetails.map(pot => {
-            const Icon = pot.icon;
+            const PotIcon = pot.icon;
             return (
               <Link href={`/pots/${pot.id}`} key={pot.id}>
-                <Card className="hover:bg-accent transition-colors">
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">{pot.name}</CardTitle>
-                    <Icon className="h-4 w-4 text-muted-foreground" style={{ color: pot.color }}/>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-xl font-bold">
-                        {new Intl.NumberFormat('ar-EG', { style: 'currency', currency, minimumFractionDigits: 0 }).format(pot.balance)}
+                <Card className="hover:bg-accent transition-colors p-4">
+                    <div className="flex w-full items-center justify-between">
+                        <div className="text-lg font-bold" style={{ color: pot.color }}>
+                            {new Intl.NumberFormat('ar-EG', { style: 'currency', currency, minimumFractionDigits: 0 }).format(pot.balance)}
+                        </div>
+                        <div className="flex items-center gap-3 text-right">
+                            <div>
+                                <p className="font-semibold text-base">{pot.name}</p>
+                                <p className="text-xs text-muted-foreground">{pot.percentage}%</p>
+                            </div>
+                            <PotIcon className="h-7 w-7 flex-shrink-0" style={{ color: pot.color }}/>
+                        </div>
                     </div>
-                    <p className="text-xs text-muted-foreground">{pot.percentage}% من الدخل</p>
-                  </CardContent>
                 </Card>
               </Link>
             );
@@ -102,25 +106,25 @@ export default function DashboardPage() {
         </Link>
       </Button>
       
-      <Popover>
+      <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
         <PopoverTrigger asChild>
           <Button
-            className="fixed bottom-20 right-4 z-20 h-16 w-16 rounded-full shadow-lg lg:bottom-8 lg:right-8"
+            className="fixed bottom-20 right-4 z-20 h-16 w-16 rounded-full shadow-lg lg:bottom-8 lg:right-8 bg-primary hover:bg-primary/90"
             size="icon"
           >
             <Plus className="h-8 w-8" />
             <span className="sr-only">إضافة معاملة</span>
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-2" side="top" align="end">
-            <div className="flex flex-col gap-2">
-                <Button onClick={() => openDialog('expense')} variant="ghost" className="justify-start">
-                    <ArrowUp className="ml-2 h-4 w-4 text-destructive" />
-                    إضافة مصروف
-                </Button>
-                <Button onClick={() => openDialog('income')} variant="ghost" className="justify-start">
-                    <ArrowDown className="ml-2 h-4 w-4 text-green-500" />
+        <PopoverContent className="w-auto p-0 border-none bg-transparent shadow-none" side="top" align="end" sideOffset={15}>
+            <div className="flex flex-col items-end gap-3">
+                 <Button onClick={() => openDialog('income')} className="justify-center rounded-full bg-green-500 text-white hover:bg-green-600 h-11 px-6 shadow-lg">
+                    <Plus className="ml-2 h-4 w-4" />
                     إضافة دخل
+                </Button>
+                <Button onClick={() => openDialog('expense')} className="justify-center rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/90 h-11 px-6 shadow-lg">
+                    <span className="font-bold text-xl ml-2">−</span>
+                    إضافة مصروف
                 </Button>
             </div>
         </PopoverContent>
