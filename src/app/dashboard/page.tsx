@@ -53,16 +53,16 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
                 <div className="text-3xl font-bold">
-                    {new Intl.NumberFormat(language.code, { style: 'currency', currency, minimumFractionDigits: 0 }).format(netBalance)}
+                    {new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(netBalance)}
                 </div>
                 <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
                     <div className="flex items-center gap-1">
                         <TrendingUp className="h-4 w-4 text-green-500" />
-                        <span>{new Intl.NumberFormat(language.code, { style: 'currency', currency, minimumFractionDigits: 0 }).format(totalIncome)}</span>
+                        <span>{new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(totalIncome)}</span>
                     </div>
                     <div className="flex items-center gap-1">
                         <TrendingDown className="h-4 w-4 text-destructive" />
-                         <span>{new Intl.NumberFormat(language.code, { style: 'currency', currency, minimumFractionDigits: 0 }).format(totalExpenses)}</span>
+                         <span>{new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(totalExpenses)}</span>
                     </div>
                 </div>
             </CardContent>
@@ -91,7 +91,7 @@ export default function DashboardPage() {
                             <div className="flex w-full items-center justify-between">
                                 <p className="font-semibold text-base">{pot.name[language.key]}</p>
                                 <p className="text-sm font-bold" style={{ color: pot.color }}>
-                                  {new Intl.NumberFormat(language.code, { style: 'currency', currency, minimumFractionDigits: 0 }).format(pot.balance)}
+                                  {new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(pot.balance)}
                                 </p>
                             </div>
                             <div className="mt-2 flex items-center gap-2">

@@ -27,17 +27,17 @@ export default function PotDetailPage() {
   if (!pot) {
     return (
         <div className="flex flex-col items-center justify-center text-center py-10">
-            <h2 className="text-2xl font-bold">{language === 'ar' ? 'لم يتم العثور على الوعاء' : 'Pot Not Found'}</h2>
-            <p className="text-muted-foreground">{language === 'ar' ? 'قد يكون قد تم حذفه أو أن الرابط غير صحيح.' : 'It may have been deleted or the link is incorrect.'}</p>
+            <h2 className="text-2xl font-bold">{language.key === 'ar' ? 'لم يتم العثور على الوعاء' : 'Pot Not Found'}</h2>
+            <p className="text-muted-foreground">{language.key === 'ar' ? 'قد يكون قد تم حذفه أو أن الرابط غير صحيح.' : 'It may have been deleted or the link is incorrect.'}</p>
             <Button onClick={() => router.back()} className="mt-4">
-                <ArrowLeft className={`${language === 'ar' ? 'ml-2' : 'mr-2'} h-4 w-4`} />
-                {language === 'ar' ? 'العودة' : 'Back'}
+                <ArrowLeft className={`${language.key === 'ar' ? 'ml-2' : 'mr-2'} h-4 w-4`} />
+                {language.key === 'ar' ? 'العودة' : 'Back'}
             </Button>
         </div>
     );
   }
   
-  const locale = language === 'ar' ? 'ar-EG' : 'en-US';
+  const dateLocale = language.key === 'ar' ? language.code : 'en-US';
 
   return (
     <div className="space-y-6">
@@ -46,29 +46,29 @@ export default function PotDetailPage() {
                 <div className="flex items-center gap-4">
                     <pot.icon className="h-10 w-10" style={{ color: pot.color }} />
                     <div>
-                        <CardTitle className="text-2xl font-bold">{pot.name[language]}</CardTitle>
-                        <CardDescription>{pot.percentage}% {language === 'ar' ? 'من الدخل' : 'of income'}</CardDescription>
+                        <CardTitle className="text-2xl font-bold">{pot.name[language.key]}</CardTitle>
+                        <CardDescription>{pot.percentage}% {language.key === 'ar' ? 'من الدخل' : 'of income'}</CardDescription>
                     </div>
                 </div>
             </CardHeader>
             <CardContent>
                 <p className="text-3xl font-bold" style={{ color: pot.color }}>
-                    {new Intl.NumberFormat(locale, { style: 'currency', currency, minimumFractionDigits: 0 }).format(potBalance)}
+                    {new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(potBalance)}
                 </p>
-                <p className="text-sm text-muted-foreground">{language === 'ar' ? 'الرصيد الحالي' : 'Current Balance'}</p>
+                <p className="text-sm text-muted-foreground">{language.key === 'ar' ? 'الرصيد الحالي' : 'Current Balance'}</p>
             </CardContent>
         </Card>
 
         <Card>
             <CardHeader>
-                <CardTitle>{language === 'ar' ? 'سجل المعاملات' : 'Transaction History'}</CardTitle>
+                <CardTitle>{language.key === 'ar' ? 'سجل المعاملات' : 'Transaction History'}</CardTitle>
             </CardHeader>
             <CardContent>
                 {potTransactions.length === 0 ? (
                     <p className="text-muted-foreground text-center py-8">
-                        {language === 'ar' ? 'لا توجد معاملات في هذا الوعاء بعد.' : 'No transactions in this pot yet.'}
+                        {language.key === 'ar' ? 'لا توجد معاملات في هذا الوعاء بعد.' : 'No transactions in this pot yet.'}
                         <br/>
-                        {language === 'ar' ? 'ابدأ عندما تدخل ليسحر يحدث!' : 'Start by adding an income or expense!'}
+                        {language.key === 'ar' ? 'ابدأ عندما تدخل ليسحر يحدث!' : 'Start by adding an income or expense!'}
                     </p>
                 ) : (
                     <ul className="space-y-4">
@@ -84,12 +84,12 @@ export default function PotDetailPage() {
                                         </div>
                                         <div>
                                             <p className="font-semibold">{t.description}</p>
-                                            <p className="text-sm text-muted-foreground">{new Date(t.date).toLocaleDateString(locale)}</p>
+                                            <p className="text-sm text-muted-foreground">{new Date(t.date).toLocaleDateString(dateLocale)}</p>
                                         </div>
                                     </div>
                                     <p className={`font-bold ${isExpense ? 'text-destructive' : 'text-green-500'}`}>
                                         {isExpense ? '-' : '+'}
-                                        {new Intl.NumberFormat(locale, { style: 'currency', currency, minimumFractionDigits: 0 }).format(amountForPot)}
+                                        {new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(amountForPot)}
                                     </p>
                                 </li>
                             );
