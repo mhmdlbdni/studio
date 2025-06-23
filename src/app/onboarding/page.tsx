@@ -11,7 +11,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { useApp } from '@/contexts/AppContext';
 import { CURRENCIES, DEFAULT_POTS } from '@/lib/constants';
 import { potIcons } from '@/lib/icons';
-import { Scale } from 'lucide-react';
+import { Logo } from '@/components/icons/Logo';
 
 export default function OnboardingPage() {
   const [step, setStep] = useState(1);
@@ -37,7 +37,7 @@ export default function OnboardingPage() {
           <>
             <CardHeader className="text-center">
               <div className="mb-4 flex justify-center">
-                <Scale className="h-20 w-20 text-primary" />
+                <Logo className="h-20 w-20 text-primary" />
               </div>
               <CardTitle className="font-headline text-2xl font-bold">أهلاً بك في الموازين</CardTitle>
               <CardDescription className="text-base">
