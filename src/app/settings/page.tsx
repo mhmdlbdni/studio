@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useRouter } from 'next/navigation';
@@ -9,9 +10,11 @@ import { useApp } from '@/contexts/AppContext';
 import { CURRENCIES } from '@/lib/constants';
 import { ChevronLeft, Languages, Palette, SlidersHorizontal, LogOut, Info } from 'lucide-react';
 
+type Language = 'ar' | 'en';
+
 export default function SettingsPage() {
   const router = useRouter();
-  const { user, setUser } = useApp();
+  const { user, setUser, language, setLanguage } = useApp();
 
   const handleLogout = () => {
     localStorage.clear();
@@ -23,6 +26,10 @@ export default function SettingsPage() {
     if (user) {
       setUser({ ...user, currency: newCurrency });
     }
+  };
+
+  const handleLanguageChange = (newLanguage: Language) => {
+    setLanguage(newLanguage);
   };
 
   return (
@@ -47,13 +54,13 @@ export default function SettingsPage() {
           </div>
           <div className="space-y-2">
             <Label>اللغة</Label>
-            <Select defaultValue="ar">
+            <Select value={language} onValueChange={handleLanguageChange}>
               <SelectTrigger>
                 <SelectValue placeholder="اختر اللغة" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="ar">العربية</SelectItem>
-                <SelectItem value="en" disabled>English (قريباً)</SelectItem>
+                <SelectItem value="en">English</SelectItem>
               </SelectContent>
             </Select>
           </div>

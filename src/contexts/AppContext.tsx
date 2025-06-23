@@ -7,15 +7,19 @@ import { DEFAULT_POTS } from '@/lib/constants';
 import { useIsMounted } from '@/hooks/use-is-mounted';
 import { potIcons } from '@/lib/icons';
 
+type Language = 'ar' | 'en';
+
 interface AppState {
   user: User | null;
   pots: Pot[];
   transactions: Transaction[];
   theme: 'light' | 'dark';
+  language: Language;
   setUser: (user: User | null) => void;
   addTransaction: (transaction: Omit<Transaction, 'id' | 'date'>) => void;
   updatePots: (pots: Pot[]) => void;
   toggleTheme: () => void;
+  setLanguage: (language: Language) => void;
   getPotBalance: (potId: string) => number;
   totalIncome: number;
   totalExpenses: number;
@@ -25,9 +29,10 @@ const AppContext = createContext<AppState | undefined>(undefined);
 
 export const AppContextProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUserState] = useState<User | null>(null);
-  const [pots, setPots] = useState<Pot[]>(DEFAULT_POTS);
+  const [pots, setPots] = useState<Pot[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
+  const [language, setLanguageState] = useState<Language>('ar');
   const isMounted = useIsMounted();
 
   useEffect(() => {
@@ -36,17 +41,19 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
       const storedPots = localStorage.getItem('al-mawazin-pots');
       const storedTransactions = localStorage.getItem('al-mawazin-transactions');
       const storedTheme = localStorage.getItem('al-mawazin-theme') as 'light' | 'dark' | null;
+      const storedLanguage = localStorage.getItem('al-mawazin-language') as Language | null;
 
       if (storedUser) setUserState(JSON.parse(storedUser));
       
       if (storedPots) {
-        // Functions can't be stored in JSON, so we need to re-hydrate the icons.
         const parsedPots = JSON.parse(storedPots) as Omit<Pot, 'icon'>[];
         const potsWithIcons = parsedPots.map(pot => ({
             ...pot,
             icon: potIcons[pot.id as keyof typeof potIcons] || potIcons.custom
         }));
         setPots(potsWithIcons);
+      } else {
+        setPots(DEFAULT_POTS);
       }
 
       if (storedTransactions) setTransactions(JSON.parse(storedTransactions));
@@ -57,6 +64,12 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
       } else {
         document.documentElement.classList.add('dark');
       }
+
+      const effectiveLanguage = storedLanguage || 'ar';
+      setLanguageState(effectiveLanguage);
+      document.documentElement.lang = effectiveLanguage;
+      document.documentElement.dir = effectiveLanguage === 'ar' ? 'rtl' : 'ltr';
+
     }
   }, [isMounted]);
 
@@ -70,8 +83,9 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
   };
   
   const updatePots = (updatedPots: Pot[]) => {
+    const potsToStore = updatedPots.map(({ icon, ...rest }) => rest);
     setPots(updatedPots);
-    localStorage.setItem('al-mawazin-pots', JSON.stringify(updatedPots));
+    localStorage.setItem('al-mawazin-pots', JSON.stringify(potsToStore));
   };
 
   const addTransaction = (transaction: Omit<Transaction, 'id' | 'date'>) => {
@@ -116,15 +130,26 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
+  const setLanguage = (lang: Language) => {
+    setLanguageState(lang);
+    localStorage.setItem('al-mawazin-language', lang);
+    document.documentElement.lang = lang;
+    document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+    // You might want to reload the page to see translation changes
+    // window.location.reload(); 
+  };
+
   const value = {
     user,
     pots,
     transactions,
     theme,
+    language,
     setUser,
     addTransaction,
     updatePots,
     toggleTheme,
+    setLanguage,
     getPotBalance,
     totalIncome,
     totalExpenses
