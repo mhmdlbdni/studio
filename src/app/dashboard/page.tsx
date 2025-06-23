@@ -95,7 +95,7 @@ export default function DashboardPage() {
       <Button
         asChild
         variant="outline"
-        className="fixed bottom-40 right-4 z-20 h-14 w-14 rounded-full shadow-lg lg:bottom-28 lg:right-8"
+        className="fixed bottom-40 left-4 z-20 h-14 w-14 rounded-full shadow-lg lg:bottom-28 lg:left-8"
         size="icon"
       >
         <Link href="/support">
@@ -107,15 +107,15 @@ export default function DashboardPage() {
       <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
         <PopoverTrigger asChild>
           <Button
-            className="fixed bottom-20 right-4 z-20 h-16 w-16 rounded-full shadow-lg lg:bottom-8 lg:right-8 bg-primary hover:bg-primary/90"
+            className="fixed bottom-20 left-4 z-20 h-16 w-16 rounded-full shadow-lg lg:bottom-8 lg:left-8 bg-primary hover:bg-primary/90"
             size="icon"
           >
             <Plus className="h-8 w-8" />
             <span className="sr-only">إضافة معاملة</span>
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0 border-none bg-transparent shadow-none" side="top" align="end" sideOffset={15}>
-            <div className="flex flex-col items-end gap-3">
+        <PopoverContent className="w-auto p-0 border-none bg-transparent shadow-none" side="top" align="start" sideOffset={15}>
+            <div className="flex flex-col items-start gap-3">
                  <Button onClick={() => openDialog('income')} className="justify-center rounded-full bg-green-500 text-white hover:bg-green-600 h-11 px-6 shadow-lg">
                     <Plus className="ml-2 h-4 w-4" />
                     إضافة دخل
