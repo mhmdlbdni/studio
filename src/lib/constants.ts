@@ -113,7 +113,9 @@ const arTranslations = {
         type: 'النوع',
         description: 'الوصف',
         pot: 'الوعاء',
-        amount: 'المبلغ'
+        amount: 'المبلغ',
+        totalIncome: 'إجمالي الدخل',
+        totalExpenses: 'إجمالي المصروفات',
       }
     }
 };
@@ -169,7 +171,9 @@ const enTranslations: typeof arTranslations = {
           type: 'Type',
           description: 'Description',
           pot: 'Pot',
-          amount: 'Amount'
+          amount: 'Amount',
+          totalIncome: 'Total Income',
+          totalExpenses: 'Total Expenses',
         }
       }
 };

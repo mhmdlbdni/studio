@@ -2,8 +2,8 @@
 'use client';
 import { useState, useMemo } from 'react';
 import { useApp } from '@/contexts/AppContext';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { subDays, startOfWeek, startOfMonth, isWithinInterval } from 'date-fns';
 import { TrendingUp, TrendingDown } from 'lucide-react';
@@ -23,6 +23,9 @@ export default function TransactionsPage() {
 
   const filteredTransactions = useMemo(() => {
     const now = new Date();
+    // Sort transactions once before filtering
+    const sortedTransactions = [...transactions].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    
     let interval: Interval | null = null;
     
     switch (filter) {
@@ -37,11 +40,25 @@ export default function TransactionsPage() {
         break;
       case 'all':
       default:
-        return transactions;
+        return sortedTransactions;
     }
 
-    return transactions.filter(t => isWithinInterval(new Date(t.date), interval as Interval));
+    return sortedTransactions.filter(t => isWithinInterval(new Date(t.date), interval as Interval));
   }, [transactions, filter]);
+  
+  const { totalIncome, totalExpenses } = useMemo(() => {
+    return filteredTransactions.reduce(
+      (acc, transaction) => {
+        if (transaction.type === 'income') {
+          acc.totalIncome += transaction.amount;
+        } else {
+          acc.totalExpenses += transaction.amount;
+        }
+        return acc;
+      },
+      { totalIncome: 0, totalExpenses: 0 }
+    );
+  }, [filteredTransactions]);
 
   const t = language.translations.transactionsPage;
   const dateLocale = language.key === 'ar' ? language.code : 'en-US';
@@ -81,9 +98,11 @@ export default function TransactionsPage() {
                     return (
                       <TableRow key={transaction.id}>
                         <TableCell>
-                          {isExpense ? 
-                            <TrendingDown className="h-5 w-5 text-destructive" /> : 
-                            <TrendingUp className="h-5 w-5 text-green-500" />}
+                            <div className={`flex h-8 w-8 items-center justify-center rounded-full ${isExpense ? 'bg-destructive/10' : 'bg-green-500/10'}`}>
+                                {isExpense ? 
+                                    <TrendingDown className="h-5 w-5 text-destructive" /> : 
+                                    <TrendingUp className="h-5 w-5 text-green-500" />}
+                            </div>
                         </TableCell>
                         <TableCell>
                           <div className="font-medium">{transaction.description}</div>
@@ -107,6 +126,20 @@ export default function TransactionsPage() {
                   </TableRow>
                 )}
               </TableBody>
+              <TableFooter>
+                <TableRow className="bg-muted/50 font-medium">
+                  <TableCell colSpan={3}>{t.table.totalIncome}</TableCell>
+                  <TableCell className="text-right text-green-500">
+                      {new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(totalIncome)}
+                  </TableCell>
+                </TableRow>
+                <TableRow className="bg-muted/50 font-bold">
+                  <TableCell colSpan={3}>{t.table.totalExpenses}</TableCell>
+                  <TableCell className="text-right text-destructive">
+                    - {new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(totalExpenses)}
+                  </TableCell>
+                </TableRow>
+              </TableFooter>
             </Table>
           </div>
         </CardContent>
