@@ -75,13 +75,15 @@ export default function DashboardPage() {
             return (
               <Link href={`/pots/${pot.id}`} key={pot.id}>
                 <Card className="hover:bg-accent transition-colors p-4">
-                    <div className="flex w-full items-center gap-3">
-                        <PotIcon className="h-7 w-7 flex-shrink-0" style={{ color: pot.color }}/>
-                        <div>
-                            <p className="font-semibold text-base">{pot.name[language]}</p>
-                            <p className="text-xs text-muted-foreground">{pot.percentage}%</p>
+                    <div className="flex w-full items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <PotIcon className="h-7 w-7 flex-shrink-0" style={{ color: pot.color }}/>
+                            <div>
+                                <p className="font-semibold text-base">{pot.name[language]}</p>
+                                <p className="text-xs text-muted-foreground">{pot.percentage}%</p>
+                            </div>
                         </div>
-                        <div className={`${language === 'ar' ? 'mr-auto' : 'ml-auto'} text-lg font-bold`} style={{ color: pot.color }}>
+                        <div className="text-lg font-bold" style={{ color: pot.color }}>
                             {new Intl.NumberFormat(language === 'ar' ? 'ar-EG' : 'en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(pot.balance)}
                         </div>
                     </div>
