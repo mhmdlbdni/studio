@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from 'react';
@@ -57,8 +56,8 @@ export default function SupportPage() {
                     <CardTitle className="flex items-center gap-2"><Info /> {language === 'ar' ? 'معلومات التطبيق' : 'App Information'}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <p>{language === 'ar' ? 'تطبيق الموازين - الإصدار v1.0.0' : 'Al-Mawazin App - Version v1.0.0'}</p>
-                    <p className="text-sm text-muted-foreground">{language === 'ar' ? 'المطور: محمد عبدالواسع الأغبري' : 'Developer: Mohammed Abdulwasea Al-Aghbari'}</p>
+                    <p>{language === 'ar' ? 'تطبيق الموازين - الإصدار v4.0' : 'Al-Mawazin App - Version v4.0'}</p>
+                    <p className="text-sm text-muted-foreground">{language === 'ar' ? 'المطور: محمد عبدالواسع البعداني' : 'Developer: Mohammed Abdulwasea Al-Badani'}</p>
                 </CardContent>
             </Card>
         </div>
