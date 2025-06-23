@@ -9,11 +9,14 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AddTransactionDialog } from '@/components/dashboard/AddTransactionDialog';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { ChatInterface } from '@/components/ai/ChatInterface';
 
 export default function DashboardPage() {
   const { pots, user, getPotBalance, totalIncome, totalExpenses, language } = useApp();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [popoverOpen, setPopoverOpen] = useState(false);
+  const [isChatOpen, setChatOpen] = useState(false);
   const [dialogInitialTab, setDialogInitialTab] = useState<'income' | 'expense'>('expense');
   const currency = user?.currency || 'YER';
 
@@ -34,33 +37,36 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8">
-      <div className="grid grid-cols-3 gap-4">
-         <Card className="text-center">
-            <CardHeader className="flex flex-row items-center justify-center space-y-0 p-4 pb-2">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">{language === 'ar' ? 'إجمالي الدخل' : 'Total Income'}</CardTitle>
+                <span className="text-green-500">▲</span>
             </CardHeader>
-            <CardContent className="p-4 pt-0">
-                <div className="text-2xl font-bold text-green-500">
+            <CardContent>
+                <div className="text-2xl font-bold">
                     {new Intl.NumberFormat(language === 'ar' ? 'ar-EG' : 'en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(totalIncome)}
                 </div>
             </CardContent>
         </Card>
-        <Card className="text-center">
-            <CardHeader className="flex flex-row items-center justify-center space-y-0 p-4 pb-2">
+        <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">{language === 'ar' ? 'إجمالي المصروفات' : 'Total Expenses'}</CardTitle>
+                 <span className="text-destructive">▼</span>
             </CardHeader>
-            <CardContent className="p-4 pt-0">
-                <div className="text-2xl font-bold text-destructive">
-                    {new Intl.NumberFormat(language === 'ar' ? 'ar-EG' : 'en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(totalExpenses)}
+            <CardContent>
+                <div className="text-2xl font-bold">
+                     {new Intl.NumberFormat(language === 'ar' ? 'ar-EG' : 'en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(totalExpenses)}
                 </div>
             </CardContent>
         </Card>
-        <Card className="text-center">
-            <CardHeader className="flex items-center justify-center p-4 pb-2">
-                <div className="text-sm font-medium leading-none">{language === 'ar' ? 'الصافي' : 'Net'}<br/>{language === 'ar' ? 'الحالي' : 'Balance'}</div>
+        <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">{language === 'ar' ? 'الصافي الحالي' : 'Net Balance'}</CardTitle>
+                 <span className="text-primary">=</span>
             </CardHeader>
-            <CardContent className="p-4 pt-0">
-                <div className="text-2xl font-bold text-primary">
+            <CardContent>
+                <div className="text-2xl font-bold">
                     {new Intl.NumberFormat(language === 'ar' ? 'ar-EG' : 'en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(netBalance)}
                 </div>
             </CardContent>
@@ -68,23 +74,25 @@ export default function DashboardPage() {
       </div>
 
       <div className="space-y-4">
-        <h2 className={`mb-2 font-headline text-2xl font-bold ${language === 'ar' ? 'text-right' : 'text-left'}`}>{language === 'ar' ? 'الأوعية المالية' : 'Financial Pots'}</h2>
-        <div className="flex flex-col gap-3">
+        <h2 className={`font-headline text-xl font-bold ${language === 'ar' ? 'text-right' : 'text-left'}`}>{language === 'ar' ? 'الأوعية المالية' : 'Financial Pots'}</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {potDetails.map(pot => {
             const PotIcon = pot.icon;
             return (
               <Link href={`/pots/${pot.id}`} key={pot.id}>
                 <Card className="hover:bg-accent transition-colors p-4">
-                    <div className="flex w-full items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <PotIcon className="h-7 w-7 flex-shrink-0" style={{ color: pot.color }}/>
-                            <div>
+                    <div className={`flex w-full items-center justify-between gap-3 ${language === 'ar' ? 'flex-row-reverse' : 'flex-row'}`}>
+                        <div className="text-lg font-bold" style={{ color: pot.color }}>
+                            {new Intl.NumberFormat(language === 'ar' ? 'ar-EG' : 'en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(pot.balance)}
+                        </div>
+                        <div className={`flex items-center gap-3 ${language === 'ar' ? 'flex-row-reverse' : 'flex-row'}`}>
+                            <div className="p-2 bg-secondary rounded-md">
+                                <PotIcon className="h-6 w-6" style={{ color: pot.color }}/>
+                            </div>
+                            <div className={`${language === 'ar' ? 'text-right' : 'text-left'}`}>
                                 <p className="font-semibold text-base">{pot.name[language]}</p>
                                 <p className="text-xs text-muted-foreground">{pot.percentage}%</p>
                             </div>
-                        </div>
-                        <div className="text-lg font-bold" style={{ color: pot.color }}>
-                            {new Intl.NumberFormat(language === 'ar' ? 'ar-EG' : 'en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(pot.balance)}
                         </div>
                     </div>
                 </Card>
@@ -95,15 +103,13 @@ export default function DashboardPage() {
       </div>
 
       <Button
-        asChild
         variant="outline"
         className={`fixed bottom-40 ${language === 'ar' ? 'left-4' : 'right-4'} z-20 h-14 w-14 rounded-full shadow-lg lg:bottom-28 ${language === 'ar' ? 'lg:left-8' : 'lg:right-8'}`}
         size="icon"
+        onClick={() => setChatOpen(true)}
       >
-        <Link href="/support">
-          <Bot className="h-8 w-8" />
-          <span className="sr-only">{language === 'ar' ? 'مرشد الموازين' : 'Al-Mawazin Guide'}</span>
-        </Link>
+        <Bot className="h-8 w-8" />
+        <span className="sr-only">{language === 'ar' ? 'مرشد الموازين' : 'Al-Mawazin Guide'}</span>
       </Button>
       
       <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
@@ -135,6 +141,12 @@ export default function DashboardPage() {
         onOpenChange={setDialogOpen}
         initialTab={dialogInitialTab}
       />
+
+      <Dialog open={isChatOpen} onOpenChange={setChatOpen}>
+        <DialogContent className="p-0 bg-transparent border-none shadow-none sm:max-w-md w-full">
+          <ChatInterface />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
