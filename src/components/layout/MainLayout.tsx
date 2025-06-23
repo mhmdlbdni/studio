@@ -22,7 +22,6 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
   
   const navItems = [
     { href: '/dashboard', label: 'الرئيسية', icon: LayoutDashboard },
-    { href: '/manage-pots', label: 'الموازين', icon: SlidersHorizontal },
   ];
 
   return (
@@ -44,7 +43,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
         </div>
       </main>
       <footer className="fixed bottom-0 left-0 right-0 z-10 border-t bg-background/80 backdrop-blur-sm">
-        <nav className="mx-auto grid h-16 max-w-md grid-cols-2 items-center gap-4 px-4">
+        <nav className="mx-auto grid h-16 max-w-md grid-cols-1 items-center gap-4 px-4">
           {navItems.map((item) => {
             const isActive = pathname === item.href;
             return (
