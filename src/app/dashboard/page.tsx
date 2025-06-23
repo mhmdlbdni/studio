@@ -77,24 +77,22 @@ export default function DashboardPage() {
             return (
               <Link href={`/pots/${pot.id}`} key={pot.id}>
                 <Card className="hover:bg-accent transition-colors">
-                    <CardContent className="p-4">
-                      <div className={`flex w-full items-center gap-4 ${language === 'ar' ? 'flex-row-reverse' : 'flex-row'}`}>
-                          <div className="p-2 bg-secondary rounded-md">
-                              <PotIcon className="h-6 w-6" style={{ color: pot.color }}/>
-                          </div>
-                          <div className="flex-1">
-                              <div className={`flex w-full items-center justify-between ${language === 'ar' ? 'flex-row-reverse' : 'flex-row'}`}>
-                                  <p className="font-semibold text-base">{pot.name[language]}</p>
-                                  <p className="text-sm font-bold" style={{ color: pot.color }}>
-                                    {new Intl.NumberFormat(language === 'ar' ? 'ar-EG' : 'en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(pot.balance)}
-                                  </p>
-                              </div>
-                              <div className="mt-2 flex items-center gap-2">
-                                  <Progress value={spentPercentage} className="h-2" />
-                                  <span className="text-xs text-muted-foreground">{pot.percentage}%</span>
-                              </div>
-                          </div>
-                      </div>
+                    <CardContent className="p-4 flex items-center gap-4">
+                        <div className="p-2 bg-secondary rounded-md">
+                            <PotIcon className="h-6 w-6" style={{ color: pot.color }}/>
+                        </div>
+                        <div className="flex-1">
+                            <div className="flex w-full items-center justify-between">
+                                <p className="font-semibold text-base">{pot.name[language]}</p>
+                                <p className="text-sm font-bold" style={{ color: pot.color }}>
+                                  {new Intl.NumberFormat(language === 'ar' ? 'ar-EG' : 'en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(pot.balance)}
+                                </p>
+                            </div>
+                            <div className="mt-2 flex items-center gap-2">
+                                <Progress value={spentPercentage} className="h-2" />
+                                <span className="text-xs text-muted-foreground">{pot.percentage}%</span>
+                            </div>
+                        </div>
                     </CardContent>
                 </Card>
               </Link>
