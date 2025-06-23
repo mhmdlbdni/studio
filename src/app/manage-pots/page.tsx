@@ -8,9 +8,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import type { Pot } from '@/lib/types';
-import { AlertCircle, Trash2, Edit } from 'lucide-react';
+import { AlertCircle, Trash2, Edit, Plus } from 'lucide-react';
 import { EditPotDialog } from '@/components/pots/EditPotDialog';
 import { ConfirmDeleteDialog } from '@/components/pots/ConfirmDeleteDialog';
+import { AddPotDialog } from '@/components/pots/AddPotDialog';
+import { potIcons } from '@/lib/icons';
 
 export default function ManagePotsPage() {
   const { pots, updatePots, language } = useApp();
@@ -18,6 +20,7 @@ export default function ManagePotsPage() {
   const [localPots, setLocalPots] = useState<Pot[]>([]);
   const [potToEdit, setPotToEdit] = useState<Pot | null>(null);
   const [potToDelete, setPotToDelete] = useState<Pot | null>(null);
+  const [isAddPotDialogOpen, setAddPotDialogOpen] = useState(false);
 
   useEffect(() => {
     // Deep copy to avoid mutating global state directly
@@ -65,6 +68,15 @@ export default function ManagePotsPage() {
     setPotToDelete(null);
   }
 
+  const handlePotAdd = (newPotData: Omit<Pot, 'icon'>) => {
+    const newPot: Pot = {
+        ...newPotData,
+        icon: potIcons.custom
+    }
+    setLocalPots(prev => [...prev, newPot]);
+    setAddPotDialogOpen(false);
+  }
+
   return (
     <div className="space-y-6">
       <Card>
@@ -109,6 +121,11 @@ export default function ManagePotsPage() {
         ))}
       </div>
 
+      <Button variant="outline" className="w-full" onClick={() => setAddPotDialogOpen(true)}>
+        <Plus className={`h-4 w-4 ${language === 'ar' ? 'ml-2' : 'mr-2'}`} />
+        {language === 'ar' ? 'إضافة وعاء مخصص جديد' : 'Add New Custom Pot'}
+      </Button>
+
       <Button className="w-full" onClick={handleSaveChanges} disabled={totalPercentage !== 100}>
         {language === 'ar' ? 'حفظ التغييرات' : 'Save Changes'}
       </Button>
@@ -128,6 +145,14 @@ export default function ManagePotsPage() {
           onOpenChange={() => setPotToDelete(null)}
           onConfirm={() => handlePotDelete(potToDelete.id)}
          />
+      )}
+
+      {isAddPotDialogOpen && (
+        <AddPotDialog
+            open={isAddPotDialogOpen}
+            onOpenChange={setAddPotDialogOpen}
+            onSave={handlePotAdd}
+        />
       )}
 
     </div>
