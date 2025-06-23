@@ -48,7 +48,9 @@ export default function DashboardPage() {
             <CardHeader>
                 <div className="flex items-center justify-between">
                     <CardTitle className="text-sm font-medium">{t.netBalance}</CardTitle>
-                    <Wallet className="h-5 w-5 text-muted-foreground" />
+                    <Link href="/transactions">
+                      <Wallet className="h-5 w-5 text-muted-foreground hover:text-primary transition-colors" />
+                    </Link>
                 </div>
             </CardHeader>
             <CardContent>

@@ -101,6 +101,20 @@ const arTranslations = {
         added: 'تمت الإضافة',
         incomeSuccess: 'تمت إضافة الدخل وتوزيعه بنجاح!',
         expenseSuccess: 'تم تسجيل المصروف بنجاح!',
+    },
+    transactionsPage: {
+      title: 'سجل المعاملات',
+      all: 'الكل',
+      monthly: 'شهري',
+      weekly: 'أسبوعي',
+      daily: 'يومي',
+      noTransactions: 'لا توجد معاملات لهذه الفترة.',
+      table: {
+        type: 'النوع',
+        description: 'الوصف',
+        pot: 'الوعاء',
+        amount: 'المبلغ'
+      }
     }
 };
 
@@ -143,7 +157,21 @@ const enTranslations: typeof arTranslations = {
         added: 'Added',
         incomeSuccess: 'Income added and distributed successfully!',
         expenseSuccess: 'Expense recorded successfully!',
-    }
+    },
+    transactionsPage: {
+        title: 'Transaction History',
+        all: 'All',
+        monthly: 'Monthly',
+        weekly: 'Weekly',
+        daily: 'Daily',
+        noTransactions: 'No transactions for this period.',
+        table: {
+          type: 'Type',
+          description: 'Description',
+          pot: 'Pot',
+          amount: 'Amount'
+        }
+      }
 };
 
 export interface AppLanguage {

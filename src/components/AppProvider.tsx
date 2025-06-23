@@ -10,7 +10,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const isMounted = useIsMounted();
 
-  const mainLayoutRoutes = ['/dashboard', '/manage-pots', '/settings', '/support'];
+  const mainLayoutRoutes = ['/dashboard', '/manage-pots', '/settings', '/support', '/transactions'];
   const isMainLayout = mainLayoutRoutes.some(route => pathname.startsWith(route)) || pathname.startsWith('/pots/');
   
   if (!isMounted) {

@@ -14,11 +14,12 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
   const { user, theme, toggleTheme, language } = useApp();
 
   const getTitle = () => {
-    if (language === 'en') {
+    if (language.key === 'en') {
       if (pathname === '/dashboard') return `Welcome, ${user?.name || ''}!`;
       if (pathname === '/manage-pots') return 'Manage Pots';
       if (pathname === '/settings') return 'Settings';
       if (pathname === '/support') return 'Support';
+      if (pathname === '/transactions') return 'Transactions';
       if (pathname.startsWith('/pots/')) return 'Pot Details';
       return 'Al-Mawazin';
     }
@@ -26,6 +27,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
     if (pathname === '/manage-pots') return 'إدارة الموازين';
     if (pathname === '/settings') return 'الإعدادات';
     if (pathname === '/support') return 'الدعم';
+    if (pathname === '/transactions') return 'السجلات';
     if (pathname.startsWith('/pots/')) return 'تفاصيل الوعاء';
     return 'الموازين';
   };
@@ -40,7 +42,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
             {!isDashboard ? (
               <Button variant="ghost" size="icon" onClick={() => router.back()}>
                 <ArrowRight className="h-5 w-5" />
-                <span className="sr-only">{language === 'ar' ? 'العودة' : 'Back'}</span>
+                <span className="sr-only">{language.key === 'ar' ? 'العودة' : 'Back'}</span>
               </Button>
             ) : null}
             <h1 className="font-headline text-xl font-bold">{getTitle()}</h1>
@@ -52,7 +54,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
               <Button variant="ghost" size="icon" asChild>
                 <Link href="/settings">
                   <Settings className="h-5 w-5" />
-                  <span className="sr-only">{language === 'ar' ? 'الإعدادات' : 'Settings'}</span>
+                  <span className="sr-only">{language.key === 'ar' ? 'الإعدادات' : 'Settings'}</span>
                 </Link>
               </Button>
             )}
