@@ -46,12 +46,29 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
       if (storedUser) setUserState(JSON.parse(storedUser));
       
       if (storedPots) {
-        const parsedPots = JSON.parse(storedPots) as Omit<Pot, 'icon'>[];
-        const potsWithIcons = parsedPots.map(pot => ({
+        let needsMigration = false;
+        const parsedPots = JSON.parse(storedPots);
+        const migratedPotsData = parsedPots.map(p => {
+            if (typeof p.name === 'string') {
+                needsMigration = true;
+                const defaultPotData = DEFAULT_POTS.find(dp => dp.id === p.id);
+                const newName = defaultPotData ? defaultPotData.name : { ar: p.name, en: p.name };
+                return { ...p, name: newName };
+            }
+            return p;
+        });
+
+        const potsWithIcons = migratedPotsData.map(pot => ({
             ...pot,
             icon: potIcons[pot.id as keyof typeof potIcons] || potIcons.custom
         }));
+        
         setPots(potsWithIcons);
+
+        if (needsMigration) {
+            const potsToStore = migratedPotsData.map(({ icon, ...rest }) => rest);
+            localStorage.setItem('al-mawazin-pots', JSON.stringify(potsToStore));
+        }
       } else {
         setPots(DEFAULT_POTS);
       }
@@ -83,8 +100,12 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
   };
   
   const updatePots = (updatedPots: Pot[]) => {
+    const potsWithIcons = updatedPots.map(pot => ({
+        ...pot,
+        icon: potIcons[pot.id as keyof typeof potIcons] || potIcons.custom
+    }));
+    setPots(potsWithIcons);
     const potsToStore = updatedPots.map(({ icon, ...rest }) => rest);
-    setPots(updatedPots);
     localStorage.setItem('al-mawazin-pots', JSON.stringify(potsToStore));
   };
 
@@ -135,8 +156,6 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
     localStorage.setItem('al-mawazin-language', lang);
     document.documentElement.lang = lang;
     document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
-    // You might want to reload the page to see translation changes
-    // window.location.reload(); 
   };
 
   const value = {

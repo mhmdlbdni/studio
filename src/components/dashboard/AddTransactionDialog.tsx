@@ -20,17 +20,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useApp } from '@/contexts/AppContext';
 import { useToast } from '@/hooks/use-toast';
 
-const incomeSchema = z.object({
-  description: z.string().min(2, 'الوصف قصير جداً'),
-  amount: z.coerce.number().positive('المبلغ يجب أن يكون إيجابياً'),
-});
-
-const expenseSchema = z.object({
-  description: z.string().min(2, 'الوصف قصير جداً'),
-  amount: z.coerce.number().positive('المبلغ يجب أن يكون إيجابياً'),
-  potId: z.string({ required_error: 'الرجاء اختيار وعاء' }),
-});
-
 interface AddTransactionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -66,28 +55,28 @@ export function AddTransactionDialog({ open, onOpenChange, initialTab = 'expense
 
   const incomeForm = useForm({
     resolver: zodResolver(currentIncomeSchema),
-    defaultValues: { description: '', amount: '' },
+    defaultValues: { description: '', amount: '' as any },
   });
 
   const expenseForm = useForm({
     resolver: zodResolver(currentExpenseSchema),
-    defaultValues: { description: '', amount: '', potId: '' },
+    defaultValues: { description: '', amount: '' as any, potId: '' },
   });
 
   useEffect(() => {
-    incomeForm.reset();
-    expenseForm.reset();
+    incomeForm.reset({ description: '', amount: '' as any });
+    expenseForm.reset({ description: '', amount: '' as any, potId: '' });
   }, [language, incomeForm, expenseForm]);
 
 
-  const handleIncomeSubmit = (values) => {
+  const handleIncomeSubmit = (values: z.infer<typeof currentIncomeSchema>) => {
     addTransaction({ ...values, type: 'income' });
     toast({ title: language === 'ar' ? 'تمت الإضافة' : 'Added', description: language === 'ar' ? 'تم توزيع الدخل بنجاح.' : 'Income distributed successfully.' });
     onOpenChange(false);
     incomeForm.reset();
   };
 
-  const handleExpenseSubmit = (values) => {
+  const handleExpenseSubmit = (values: z.infer<typeof currentExpenseSchema>) => {
     addTransaction({ ...values, type: 'expense' });
     toast({ title: language === 'ar' ? 'تمت الإضافة' : 'Added', description: language === 'ar' ? 'تم تسجيل المصروف بنجاح.' : 'Expense recorded successfully.' });
     onOpenChange(false);
@@ -156,7 +145,7 @@ export function AddTransactionDialog({ open, onOpenChange, initialTab = 'expense
                         </FormControl>
                         <SelectContent>
                           {pots.map(pot => (
-                            <SelectItem key={pot.id} value={pot.id}>{pot.name}</SelectItem>
+                            <SelectItem key={pot.id} value={pot.id}>{pot.name[language]}</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>

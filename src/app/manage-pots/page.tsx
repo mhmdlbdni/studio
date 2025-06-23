@@ -84,16 +84,16 @@ export default function ManagePotsPage() {
           <Card key={pot.id}>
             <CardContent className="p-4 flex items-center gap-4">
               <div className="flex-1 space-y-2">
-                <Label htmlFor={`pot-${pot.id}`}>{pot.name}</Label>
+                <Label htmlFor={`pot-${pot.id}`}>{pot.name[language]}</Label>
                 <div className="relative">
                   <Input
                     id={`pot-${pot.id}`}
                     type="number"
                     value={pot.percentage}
                     onChange={e => handlePercentageChange(pot.id, e.target.value)}
-                    className="pr-8"
+                    className={language === 'en' ? 'pl-8' : 'pr-8'}
                   />
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">%</span>
+                  <span className={`absolute top-1/2 -translate-y-1/2 text-muted-foreground ${language === 'ar' ? 'left-3' : 'right-3'}`}>%</span>
                 </div>
               </div>
               <div className="flex gap-2">

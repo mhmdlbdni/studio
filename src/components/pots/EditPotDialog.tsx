@@ -22,10 +22,10 @@ const potSchema = (language: 'ar' | 'en') => z.object({
 export function EditPotDialog({ open, onOpenChange, pot, onSave }: { open: boolean, onOpenChange: (open: boolean) => void, pot: Pot, onSave: (pot: Pot) => void }) {
   const { language } = useApp();
   
-  const form = useForm({
+  const form = useForm<z.infer<ReturnType<typeof potSchema>>>({
     resolver: zodResolver(potSchema(language)),
     defaultValues: {
-      name: pot?.name || '',
+      name: pot?.name?.[language] || '',
       percentage: pot?.percentage || 0,
     },
   });
@@ -33,18 +33,28 @@ export function EditPotDialog({ open, onOpenChange, pot, onSave }: { open: boole
   useEffect(() => {
     if (pot) {
       form.reset({
-        name: pot.name,
+        name: pot.name[language],
         percentage: pot.percentage,
       });
     }
-  }, [pot, form]);
+  }, [pot, form, language]);
 
   useEffect(() => {
     form.trigger();
   }, [language, form]);
 
-  const handleSubmit = (values) => {
-    onSave({ ...pot, ...values });
+  const handleSubmit = (values: z.infer<ReturnType<typeof potSchema>>) => {
+    if (!pot) return;
+
+    const updatedPot: Pot = {
+      ...pot,
+      name: {
+        ...pot.name,
+        [language]: values.name,
+      },
+      percentage: values.percentage,
+    };
+    onSave(updatedPot);
     onOpenChange(false);
   };
 
@@ -54,7 +64,7 @@ export function EditPotDialog({ open, onOpenChange, pot, onSave }: { open: boole
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)}>
             <DialogHeader>
-              <DialogTitle>{language === 'ar' ? `تعديل وعاء "${pot?.name}"` : `Edit Pot "${pot?.name}"`}</DialogTitle>
+              <DialogTitle>{language === 'ar' ? `تعديل وعاء "${pot?.name.ar}"` : `Edit Pot "${pot?.name.en}"`}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 py-4">
               <FormField

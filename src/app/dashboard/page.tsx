@@ -78,7 +78,7 @@ export default function DashboardPage() {
                     <div className="flex w-full items-center gap-3">
                         <PotIcon className="h-7 w-7 flex-shrink-0" style={{ color: pot.color }}/>
                         <div>
-                            <p className="font-semibold text-base">{pot.name}</p>
+                            <p className="font-semibold text-base">{pot.name[language]}</p>
                             <p className="text-xs text-muted-foreground">{pot.percentage}%</p>
                         </div>
                         <div className={`${language === 'ar' ? 'mr-auto' : 'ml-auto'} text-lg font-bold`} style={{ color: pot.color }}>
@@ -115,7 +115,7 @@ export default function DashboardPage() {
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0 border-none bg-transparent shadow-none" side="top" align={language === 'ar' ? 'start' : 'end'} sideOffset={15}>
-            <div className="flex flex-col items-start gap-3">
+            <div className="flex flex-col items-end gap-3">
                  <Button onClick={() => openDialog('income')} className="justify-center rounded-full bg-green-500 text-white hover:bg-green-600 h-11 px-6 shadow-lg">
                     <Plus className={`${language === 'ar' ? 'ml-2' : 'mr-2'} h-4 w-4`} />
                     {language === 'ar' ? 'إضافة دخل' : 'Add Income'}

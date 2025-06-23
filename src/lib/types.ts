@@ -10,7 +10,7 @@ export interface Transaction {
 
 export interface Pot {
   id: string;
-  name: string;
+  name: { ar: string; en: string };
   percentage: number;
   color: string;
   icon: (props: React.ComponentProps<'svg'>) => JSX.Element;

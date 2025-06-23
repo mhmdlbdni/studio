@@ -46,7 +46,7 @@ export default function PotDetailPage() {
                 <div className="flex items-center gap-4">
                     <pot.icon className="h-10 w-10" style={{ color: pot.color }} />
                     <div>
-                        <CardTitle className="text-2xl font-bold">{pot.name}</CardTitle>
+                        <CardTitle className="text-2xl font-bold">{pot.name[language]}</CardTitle>
                         <CardDescription>{pot.percentage}% {language === 'ar' ? 'من الدخل' : 'of income'}</CardDescription>
                     </div>
                 </div>
