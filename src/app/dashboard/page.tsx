@@ -21,6 +21,8 @@ export default function DashboardPage() {
   const [isChatOpen, setChatOpen] = useState(false);
   const currency = user?.currency || 'YER';
 
+  const t = language.translations.dashboard;
+
   const potDetails = useMemo(() => {
     return pots.map(pot => ({
       ...pot,
@@ -45,7 +47,7 @@ export default function DashboardPage() {
        <Card>
             <CardHeader>
                 <div className="flex items-center justify-between">
-                    <CardTitle className="text-sm font-medium">{language.dashboard.netBalance}</CardTitle>
+                    <CardTitle className="text-sm font-medium">{t.netBalance}</CardTitle>
                     <Wallet className="h-5 w-5 text-muted-foreground" />
                 </div>
             </CardHeader>
@@ -67,7 +69,7 @@ export default function DashboardPage() {
         </Card>
 
       <div className="space-y-4">
-        <h2 className={`font-headline text-xl font-bold ${language.dir === 'rtl' ? 'text-right' : 'text-left'}`}>{language.dashboard.financialPots}</h2>
+        <h2 className={`font-headline text-xl font-bold ${language.dir === 'rtl' ? 'text-right' : 'text-left'}`}>{t.financialPots}</h2>
         <div className="grid grid-cols-1 gap-4">
           {potDetails.map(pot => {
             const PotIcon = pot.icon;
@@ -112,7 +114,7 @@ export default function DashboardPage() {
         onClick={() => setChatOpen(true)}
       >
         <Bot className="h-8 w-8" />
-        <span className="sr-only">{language.dashboard.guide}</span>
+        <span className="sr-only">{t.guide}</span>
       </Button>
       
       <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
@@ -122,18 +124,18 @@ export default function DashboardPage() {
             size="icon"
           >
             <Plus className="h-8 w-8" />
-            <span className="sr-only">{language.dashboard.addTransaction}</span>
+            <span className="sr-only">{t.addTransaction}</span>
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0 border-none bg-transparent shadow-none" side="top" align={language.dir === 'rtl' ? 'start' : 'end'} sideOffset={15}>
             <div className="flex flex-col items-end gap-3">
                  <Button onClick={openIncomeDialog} className="justify-center rounded-full bg-green-500 text-white hover:bg-green-600 h-11 px-6 shadow-lg">
                     <Plus className={`${language.dir === 'rtl' ? 'ml-2' : 'mr-2'} h-4 w-4`} />
-                    {language.dashboard.addIncome}
+                    {t.addIncome}
                 </Button>
                 <Button onClick={openExpenseDialog} className="justify-center rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/90 h-11 px-6 shadow-lg">
                     <span className={`font-bold text-xl ${language.dir === 'rtl' ? 'ml-2' : 'mr-2'}`}>−</span>
-                    {language.dashboard.addExpense}
+                    {t.addExpense}
                 </Button>
             </div>
         </PopoverContent>
@@ -152,7 +154,7 @@ export default function DashboardPage() {
 
       <Dialog open={isChatOpen} onOpenChange={setChatOpen}>
         <DialogContent className="p-0 bg-transparent border-none shadow-none sm:max-w-lg w-full">
-          <DialogTitle className="sr-only">{language.dashboard.guide}</DialogTitle>
+          <DialogTitle className="sr-only">{t.guide}</DialogTitle>
           <ChatInterface />
         </DialogContent>
       </Dialog>
