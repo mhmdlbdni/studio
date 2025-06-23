@@ -3,7 +3,6 @@
  * @fileOverview An AI agent that provides financial advice to users and can interact with the app.
  *
  * - getFinancialAdvice - A function that takes a user's query and financial data, and returns financial advice or a tool request.
- * - FinancialAdviceInput - The input type for the getFinancialAdvice function.
  */
 
 import {ai} from '@/ai/genkit';
@@ -47,7 +46,7 @@ const FinancialAdviceInputSchema = z.object({
     })).describe("A list of the user's financial pots.")
   }),
 });
-export type FinancialAdviceInput = z.infer<typeof FinancialAdviceInputSchema>;
+type FinancialAdviceInput = z.infer<typeof FinancialAdviceInputSchema>;
 
 
 const financialAdvicePrompt = `You are "مرشد الموازين", a professional, creative, and friendly financial guide for the "الموازين" app. Your primary role is to help users achieve financial well-being.
@@ -77,10 +76,15 @@ User's query: {{{query}}}`;
  * The client is responsible for handling the tool request.
  */
 export async function getFinancialAdvice(input: FinancialAdviceInput) {
-    return await ai.generate({
+    const response = await ai.generate({
         prompt: financialAdvicePrompt,
         model: 'googleai/gemini-2.0-flash',
         input: input,
         tools: [addIncomeTool, addExpenseTool, navigateToTool],
     });
+
+    return {
+        text: response.text,
+        toolRequests: response.toolRequests,
+    };
 }
