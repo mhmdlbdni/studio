@@ -3,15 +3,17 @@
 
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
-import { Plus, Bot } from 'lucide-react';
+import { Plus, Bot, ArrowUp, ArrowDown } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AddTransactionDialog } from '@/components/dashboard/AddTransactionDialog';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 export default function DashboardPage() {
   const { pots, user, getPotBalance, totalIncome, totalExpenses } = useApp();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogInitialTab, setDialogInitialTab] = useState<'income' | 'expense'>('expense');
   const currency = user?.currency || 'YER';
 
   const potDetails = useMemo(() => {
@@ -22,6 +24,11 @@ export default function DashboardPage() {
   }, [pots, getPotBalance]);
 
   const netBalance = totalIncome - totalExpenses;
+
+  const openDialog = (tab: 'income' | 'expense') => {
+    setDialogInitialTab(tab);
+    setDialogOpen(true);
+  }
 
   return (
     <div className="space-y-6">
@@ -85,7 +92,8 @@ export default function DashboardPage() {
 
       <Button
         asChild
-        className="fixed bottom-40 left-4 z-20 h-14 w-14 rounded-full shadow-lg lg:bottom-28 lg:left-8"
+        variant="outline"
+        className="fixed bottom-40 right-4 z-20 h-14 w-14 rounded-full shadow-lg lg:bottom-28 lg:right-8"
         size="icon"
       >
         <Link href="/support">
@@ -94,16 +102,35 @@ export default function DashboardPage() {
         </Link>
       </Button>
       
-      <Button
-        onClick={() => setDialogOpen(true)}
-        className="fixed bottom-20 left-4 z-20 h-16 w-16 rounded-full shadow-lg lg:bottom-8 lg:left-8"
-        size="icon"
-      >
-        <Plus className="h-8 w-8" />
-        <span className="sr-only">إضافة معاملة</span>
-      </Button>
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button
+            className="fixed bottom-20 right-4 z-20 h-16 w-16 rounded-full shadow-lg lg:bottom-8 lg:right-8"
+            size="icon"
+          >
+            <Plus className="h-8 w-8" />
+            <span className="sr-only">إضافة معاملة</span>
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-auto p-2" side="top" align="end">
+            <div className="flex flex-col gap-2">
+                <Button onClick={() => openDialog('expense')} variant="ghost" className="justify-start">
+                    <ArrowUp className="ml-2 h-4 w-4 text-destructive" />
+                    إضافة مصروف
+                </Button>
+                <Button onClick={() => openDialog('income')} variant="ghost" className="justify-start">
+                    <ArrowDown className="ml-2 h-4 w-4 text-green-500" />
+                    إضافة دخل
+                </Button>
+            </div>
+        </PopoverContent>
+      </Popover>
 
-      <AddTransactionDialog open={dialogOpen} onOpenChange={setDialogOpen} />
+      <AddTransactionDialog 
+        open={dialogOpen} 
+        onOpenChange={setDialogOpen}
+        initialTab={dialogInitialTab}
+      />
     </div>
   );
 }

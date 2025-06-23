@@ -1,6 +1,6 @@
 
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -31,10 +31,24 @@ const expenseSchema = z.object({
   potId: z.string({ required_error: 'الرجاء اختيار وعاء' }),
 });
 
-export function AddTransactionDialog({ open, onOpenChange }) {
+interface AddTransactionDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  initialTab?: 'income' | 'expense';
+}
+
+export function AddTransactionDialog({ open, onOpenChange, initialTab = 'expense' }: AddTransactionDialogProps) {
   const { addTransaction, pots } = useApp();
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState('expense');
+  const [activeTab, setActiveTab] = useState(initialTab);
+
+  useEffect(() => {
+    if (open) {
+      setActiveTab(initialTab);
+      incomeForm.reset();
+      expenseForm.reset();
+    }
+  }, [open, initialTab]);
 
   const incomeForm = useForm({
     resolver: zodResolver(incomeSchema),
@@ -59,9 +73,17 @@ export function AddTransactionDialog({ open, onOpenChange }) {
     onOpenChange(false);
     expenseForm.reset();
   };
+  
+  const handleOpenChange = (isOpen: boolean) => {
+    if (!isOpen) {
+      incomeForm.reset();
+      expenseForm.reset();
+    }
+    onOpenChange(isOpen);
+  };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-2">
@@ -70,7 +92,7 @@ export function AddTransactionDialog({ open, onOpenChange }) {
           </TabsList>
           <TabsContent value="expense">
             <Form {...expenseForm}>
-              <form onSubmit={expenseForm.handleSubmit(handleExpenseSubmit)} className="space-y-4">
+              <form onSubmit={expenseForm.handleSubmit(handleExpenseSubmit)} className="space-y-4 pt-4">
                 <DialogHeader>
                   <DialogTitle>إضافة مصروف جديد</DialogTitle>
                 </DialogHeader>
@@ -131,7 +153,7 @@ export function AddTransactionDialog({ open, onOpenChange }) {
           </TabsContent>
           <TabsContent value="income">
             <Form {...incomeForm}>
-              <form onSubmit={incomeForm.handleSubmit(handleIncomeSubmit)} className="space-y-4">
+              <form onSubmit={incomeForm.handleSubmit(handleIncomeSubmit)} className="space-y-4 pt-4">
                 <DialogHeader>
                   <DialogTitle>إضافة دخل جديد</DialogTitle>
                 </DialogHeader>
