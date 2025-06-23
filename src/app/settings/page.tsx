@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useRouter } from 'next/navigation';
@@ -8,17 +7,22 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import { useApp } from '@/contexts/AppContext';
 import { CURRENCIES } from '@/lib/constants';
-import { ThemeToggle } from '@/components/settings/ThemeToggle';
 import { ChevronLeft, Languages, Palette, SlidersHorizontal, LogOut, Info } from 'lucide-react';
 
 export default function SettingsPage() {
   const router = useRouter();
-  const { user, setUser, theme, toggleTheme } = useApp();
+  const { user, setUser } = useApp();
 
   const handleLogout = () => {
     localStorage.clear();
     setUser(null);
     router.push('/onboarding');
+  };
+
+  const handleCurrencyChange = (newCurrency: string) => {
+    if (user) {
+      setUser({ ...user, currency: newCurrency });
+    }
   };
 
   return (
@@ -28,13 +32,9 @@ export default function SettingsPage() {
           <CardTitle className="flex items-center gap-2"><Palette/> التخصيص والعرض</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <Label>المظهر</Label>
-            <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
-          </div>
           <div className="space-y-2">
             <Label>العملة</Label>
-            <Select value={user?.currency} disabled>
+            <Select value={user?.currency} onValueChange={handleCurrencyChange}>
               <SelectTrigger>
                 <SelectValue placeholder="اختر العملة" />
               </SelectTrigger>
@@ -47,13 +47,13 @@ export default function SettingsPage() {
           </div>
           <div className="space-y-2">
             <Label>اللغة</Label>
-            <Select defaultValue="ar" disabled>
+            <Select defaultValue="ar">
               <SelectTrigger>
                 <SelectValue placeholder="اختر اللغة" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="ar">العربية</SelectItem>
-                <SelectItem value="en">English</SelectItem>
+                <SelectItem value="en" disabled>English (قريباً)</SelectItem>
               </SelectContent>
             </Select>
           </div>

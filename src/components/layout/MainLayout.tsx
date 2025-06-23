@@ -4,12 +4,13 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Settings, LayoutDashboard, SlidersHorizontal } from 'lucide-react';
+import { Settings } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
+import { ThemeToggle } from '@/components/settings/ThemeToggle';
 
 export function MainLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { user } = useApp();
+  const { user, theme, toggleTheme } = useApp();
 
   const getTitle = () => {
     if (pathname === '/dashboard') return `مرحباً، ${user?.name || ''}!`;
@@ -20,21 +21,20 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
     return 'الموازين';
   };
   
-  const navItems = [
-    { href: '/dashboard', label: 'الرئيسية', icon: LayoutDashboard },
-  ];
-
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
       <header className="sticky top-0 z-10 border-b bg-background/80 backdrop-blur-sm">
         <div className="mx-auto flex h-16 max-w-screen-md items-center justify-between px-4 sm:px-6">
           <h1 className="font-headline text-xl font-bold">{getTitle()}</h1>
-          <Button variant="ghost" size="icon" asChild>
-            <Link href="/settings">
-              <Settings className="h-5 w-5" />
-              <span className="sr-only">الإعدادات</span>
-            </Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
+            <Button variant="ghost" size="icon" asChild>
+              <Link href="/settings">
+                <Settings className="h-5 w-5" />
+                <span className="sr-only">الإعدادات</span>
+              </Link>
+            </Button>
+          </div>
         </div>
       </header>
       <main className="w-full flex-1 overflow-y-auto">
