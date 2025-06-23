@@ -49,7 +49,12 @@ const FinancialAdviceInputSchema = z.object({
 type FinancialAdviceInput = z.infer<typeof FinancialAdviceInputSchema>;
 
 
-const financialAdvicePrompt = `You are "مرشد الموازين", a professional, creative, and friendly financial guide for the "الموازين" app. Your primary role is to help users achieve financial well-being.
+const financialAdvicePrompt = ai.definePrompt({
+    name: 'financialAdvicePrompt',
+    input: { schema: FinancialAdviceInputSchema },
+    model: 'googleai/gemini-2.0-flash',
+    tools: [addIncomeTool, addExpenseTool, navigateToTool],
+    prompt: `You are "مرشد الموازين", a professional, creative, and friendly financial guide for the "الموازين" app. Your primary role is to help users achieve financial well-being.
 Your answers MUST be concise, encouraging, and delivered in Arabic.
 
 You have access to the user's real-time financial data and a set of tools to help them manage their finances directly.
@@ -68,7 +73,9 @@ User's Financial Summary:
 
 Begin the conversation now.
 
-User's query: {{{query}}}`;
+User's query: {{{query}}}`
+});
+
 
 /**
  * This flow takes the user's query and financial data, calls the AI model,
@@ -76,12 +83,7 @@ User's query: {{{query}}}`;
  * The client is responsible for handling the tool request.
  */
 export async function getFinancialAdvice(input: FinancialAdviceInput) {
-    const response = await ai.generate({
-        prompt: financialAdvicePrompt,
-        model: 'googleai/gemini-2.0-flash',
-        input: input,
-        tools: [addIncomeTool, addExpenseTool, navigateToTool],
-    });
+    const response = await financialAdvicePrompt(input);
 
     return {
         text: response.text,
