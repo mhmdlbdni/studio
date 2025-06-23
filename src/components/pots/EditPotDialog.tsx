@@ -36,9 +36,9 @@ export function EditPotDialog({ open, onOpenChange, pot, onSave }: { open: boole
 
   
   const form = useForm<z.infer<ReturnType<typeof potSchema>>>({
-    resolver: zodResolver(potSchema(language)),
+    resolver: zodResolver(potSchema(language.key)),
     defaultValues: {
-      name: pot?.name?.[language] || '',
+      name: pot?.name?.[language.key] || '',
       percentage: pot?.percentage || 0,
       color: pot?.color || PRESET_COLORS[0],
       iconKey: pot?.iconKey || 'custom',
@@ -48,17 +48,17 @@ export function EditPotDialog({ open, onOpenChange, pot, onSave }: { open: boole
   useEffect(() => {
     if (pot) {
       form.reset({
-        name: pot.name[language],
+        name: pot.name[language.key],
         percentage: pot.percentage,
         color: pot.color,
         iconKey: pot.iconKey,
       });
     }
-  }, [pot, form, language]);
+  }, [pot, form, language.key]);
 
   useEffect(() => {
     form.trigger();
-  }, [language, form]);
+  }, [language.key, form]);
 
   const handleSubmit = (values: z.infer<ReturnType<typeof potSchema>>) => {
     if (!pot) return;
@@ -67,7 +67,7 @@ export function EditPotDialog({ open, onOpenChange, pot, onSave }: { open: boole
       ...pot,
       name: {
         ...pot.name,
-        [language]: values.name,
+        [language.key]: values.name,
       },
       percentage: values.percentage,
       color: values.color,
@@ -96,7 +96,7 @@ export function EditPotDialog({ open, onOpenChange, pot, onSave }: { open: boole
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)}>
             <DialogHeader>
-              <DialogTitle>{language === 'ar' ? `تعديل وعاء "${pot?.name.ar}"` : `Edit Pot "${pot?.name.en}"`}</DialogTitle>
+              <DialogTitle>{language.key === 'ar' ? `تعديل وعاء "${pot?.name.ar}"` : `Edit Pot "${pot?.name.en}"`}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 py-4">
               <FormField
@@ -104,7 +104,7 @@ export function EditPotDialog({ open, onOpenChange, pot, onSave }: { open: boole
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{language === 'ar' ? 'اسم الوعاء' : 'Pot Name'}</FormLabel>
+                    <FormLabel>{language.key === 'ar' ? 'اسم الوعاء' : 'Pot Name'}</FormLabel>
                     <FormControl>
                       <Input {...field} disabled={isDefaultPot} />
                     </FormControl>
@@ -117,7 +117,7 @@ export function EditPotDialog({ open, onOpenChange, pot, onSave }: { open: boole
                 name="percentage"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{language === 'ar' ? 'النسبة المئوية' : 'Percentage'}</FormLabel>
+                    <FormLabel>{language.key === 'ar' ? 'النسبة المئوية' : 'Percentage'}</FormLabel>
                     <FormControl>
                       <Input type="number" {...field} />
                     </FormControl>
@@ -130,7 +130,7 @@ export function EditPotDialog({ open, onOpenChange, pot, onSave }: { open: boole
                 name="color"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{language === 'ar' ? 'اختر لوناً' : 'Choose a color'}</FormLabel>
+                    <FormLabel>{language.key === 'ar' ? 'اختر لوناً' : 'Choose a color'}</FormLabel>
                     <FormControl>
                       <RadioGroup
                         onValueChange={field.onChange}
@@ -153,19 +153,19 @@ export function EditPotDialog({ open, onOpenChange, pot, onSave }: { open: boole
                 name="iconKey"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{language === 'ar' ? 'اختر أيقونة' : 'Choose an icon'}</FormLabel>
+                    <FormLabel>{language.key === 'ar' ? 'اختر أيقونة' : 'Choose an icon'}</FormLabel>
                     <Popover open={isIconPopoverOpen} onOpenChange={setIconPopoverOpen}>
                         <PopoverTrigger asChild>
                             <FormControl>
                                 <Button variant="outline" role="combobox" className="w-full justify-start" disabled={isDefaultPot}>
-                                    <SelectedIcon className={`h-5 w-5 ${language === 'ar' ? 'ml-2' : 'mr-2'}`} />
-                                    {iconList.find(i => i.key === field.value)?.name[language] || 'Select icon'}
+                                    <SelectedIcon className={`h-5 w-5 ${language.dir === 'rtl' ? 'ml-2' : 'mr-2'}`} />
+                                    {iconList.find(i => i.key === field.value)?.name[language.key] || 'Select icon'}
                                 </Button>
                             </FormControl>
                         </PopoverTrigger>
                         <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
                             <Input
-                                placeholder={language === 'ar' ? 'ابحث عن أيقونة...' : 'Search icon...'}
+                                placeholder={language.key === 'ar' ? 'ابحث عن أيقونة...' : 'Search icon...'}
                                 className="m-2 w-[calc(100%-1rem)]"
                                 value={iconSearch}
                                 onChange={e => setIconSearch(e.target.value)}
@@ -185,7 +185,7 @@ export function EditPotDialog({ open, onOpenChange, pot, onSave }: { open: boole
                                                 }}
                                             >
                                                 <IconComp className="h-6 w-6"/>
-                                                <span className="text-xs">{icon.name[language]}</span>
+                                                <span className="text-xs">{icon.name[language.key]}</span>
                                             </Button>
                                         )
                                     })}
@@ -199,8 +199,8 @@ export function EditPotDialog({ open, onOpenChange, pot, onSave }: { open: boole
               />
             </div>
             <DialogFooter>
-              <DialogClose asChild><Button type="button" variant="ghost">{language === 'ar' ? 'إلغاء' : 'Cancel'}</Button></DialogClose>
-              <Button type="submit">{language === 'ar' ? 'حفظ التغييرات' : 'Save Changes'}</Button>
+              <DialogClose asChild><Button type="button" variant="ghost">{language.key === 'ar' ? 'إلغاء' : 'Cancel'}</Button></DialogClose>
+              <Button type="submit">{language.key === 'ar' ? 'حفظ التغييرات' : 'Save Changes'}</Button>
             </DialogFooter>
           </form>
         </Form>

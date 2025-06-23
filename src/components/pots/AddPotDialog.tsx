@@ -32,7 +32,7 @@ export function AddPotDialog({ open, onOpenChange, onSave }: { open: boolean, on
   const [isIconPopoverOpen, setIconPopoverOpen] = useState(false);
   
   const form = useForm<z.infer<ReturnType<typeof potSchema>>>({
-    resolver: zodResolver(potSchema(language)),
+    resolver: zodResolver(potSchema(language.key)),
     defaultValues: {
       name: '',
       percentage: 0,
@@ -72,7 +72,7 @@ export function AddPotDialog({ open, onOpenChange, onSave }: { open: boolean, on
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)}>
             <DialogHeader>
-              <DialogTitle>{language === 'ar' ? 'إضافة وعاء مخصص جديد' : 'Add New Custom Pot'}</DialogTitle>
+              <DialogTitle>{language.key === 'ar' ? 'إضافة وعاء مخصص جديد' : 'Add New Custom Pot'}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 py-4">
               <FormField
@@ -80,9 +80,9 @@ export function AddPotDialog({ open, onOpenChange, onSave }: { open: boolean, on
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{language === 'ar' ? 'اسم الوعاء' : 'Pot Name'}</FormLabel>
+                    <FormLabel>{language.key === 'ar' ? 'اسم الوعاء' : 'Pot Name'}</FormLabel>
                     <FormControl>
-                      <Input placeholder={language === 'ar' ? 'مثال: صندوق السفر' : 'e.g., Travel Fund'} {...field} />
+                      <Input placeholder={language.key === 'ar' ? 'مثال: صندوق السفر' : 'e.g., Travel Fund'} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -93,7 +93,7 @@ export function AddPotDialog({ open, onOpenChange, onSave }: { open: boolean, on
                 name="percentage"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{language === 'ar' ? 'النسبة المئوية' : 'Percentage'}</FormLabel>
+                    <FormLabel>{language.key === 'ar' ? 'النسبة المئوية' : 'Percentage'}</FormLabel>
                     <FormControl>
                       <Input type="number" {...field} />
                     </FormControl>
@@ -106,7 +106,7 @@ export function AddPotDialog({ open, onOpenChange, onSave }: { open: boolean, on
                 name="color"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{language === 'ar' ? 'اختر لوناً' : 'Choose a color'}</FormLabel>
+                    <FormLabel>{language.key === 'ar' ? 'اختر لوناً' : 'Choose a color'}</FormLabel>
                     <FormControl>
                       <RadioGroup
                         onValueChange={field.onChange}
@@ -129,19 +129,19 @@ export function AddPotDialog({ open, onOpenChange, onSave }: { open: boolean, on
                 name="iconKey"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{language === 'ar' ? 'اختر أيقونة' : 'Choose an icon'}</FormLabel>
+                    <FormLabel>{language.key === 'ar' ? 'اختر أيقونة' : 'Choose an icon'}</FormLabel>
                     <Popover open={isIconPopoverOpen} onOpenChange={setIconPopoverOpen}>
                         <PopoverTrigger asChild>
                             <FormControl>
                                 <Button variant="outline" role="combobox" className="w-full justify-start">
-                                    <SelectedIcon className={`h-5 w-5 ${language === 'ar' ? 'ml-2' : 'mr-2'}`} />
-                                    {iconList.find(i => i.key === field.value)?.name[language] || 'Select icon'}
+                                    <SelectedIcon className={`h-5 w-5 ${language.dir === 'rtl' ? 'ml-2' : 'mr-2'}`} />
+                                    {iconList.find(i => i.key === field.value)?.name[language.key] || 'Select icon'}
                                 </Button>
                             </FormControl>
                         </PopoverTrigger>
                         <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
                             <Input
-                                placeholder={language === 'ar' ? 'ابحث عن أيقونة...' : 'Search icon...'}
+                                placeholder={language.key === 'ar' ? 'ابحث عن أيقونة...' : 'Search icon...'}
                                 className="m-2 w-[calc(100%-1rem)]"
                                 value={iconSearch}
                                 onChange={e => setIconSearch(e.target.value)}
@@ -161,7 +161,7 @@ export function AddPotDialog({ open, onOpenChange, onSave }: { open: boolean, on
                                                 }}
                                             >
                                                 <IconComp className="h-6 w-6"/>
-                                                <span className="text-xs">{icon.name[language]}</span>
+                                                <span className="text-xs">{icon.name[language.key]}</span>
                                             </Button>
                                         )
                                     })}
@@ -175,8 +175,8 @@ export function AddPotDialog({ open, onOpenChange, onSave }: { open: boolean, on
               />
             </div>
             <DialogFooter>
-              <DialogClose asChild><Button type="button" variant="ghost">{language === 'ar' ? 'إلغاء' : 'Cancel'}</Button></DialogClose>
-              <Button type="submit">{language === 'ar' ? 'إضافة الوعاء' : 'Add Pot'}</Button>
+              <DialogClose asChild><Button type="button" variant="ghost">{language.key === 'ar' ? 'إلغاء' : 'Cancel'}</Button></DialogClose>
+              <Button type="submit">{language.key === 'ar' ? 'إضافة الوعاء' : 'Add Pot'}</Button>
             </DialogFooter>
           </form>
         </Form>

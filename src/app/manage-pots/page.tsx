@@ -47,16 +47,16 @@ export default function ManagePotsPage() {
     if (totalPercentage !== 100) {
       toast({
         variant: 'destructive',
-        title: language === 'ar' ? 'خطأ' : 'Error',
-        description: language === 'ar' ? 'يجب أن يكون مجموع النسب 100% لحفظ التغييرات.' : 'The sum of percentages must be 100% to save changes.',
+        title: language.key === 'ar' ? 'خطأ' : 'Error',
+        description: language.key === 'ar' ? 'يجب أن يكون مجموع النسب 100% لحفظ التغييرات.' : 'The sum of percentages must be 100% to save changes.',
       });
       return;
     }
     const potsToSave = localPots.map(({ icon, ...rest }) => rest);
     updatePots(potsToSave);
     toast({
-      title: language === 'ar' ? 'تم الحفظ' : 'Saved',
-      description: language === 'ar' ? 'تم تحديث الموازين بنجاح.' : 'Pots have been updated successfully.',
+      title: language.key === 'ar' ? 'تم الحفظ' : 'Saved',
+      description: language.key === 'ar' ? 'تم تحديث الموازين بنجاح.' : 'Pots have been updated successfully.',
     });
   };
 
@@ -90,11 +90,11 @@ export default function ManagePotsPage() {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>{language === 'ar' ? 'إجمالي النسب' : 'Total Percentage'}: <span className={totalPercentage !== 100 ? 'text-destructive' : 'text-green-500'}>{totalPercentage}%</span></CardTitle>
+          <CardTitle>{language.key === 'ar' ? 'إجمالي النسب' : 'Total Percentage'}: <span className={totalPercentage !== 100 ? 'text-destructive' : 'text-green-500'}>{totalPercentage}%</span></CardTitle>
           {totalPercentage !== 100 && (
             <CardDescription className="text-destructive flex items-center gap-1">
               <AlertCircle className="h-4 w-4"/>
-              {language === 'ar' ? 'يجب أن يكون مجموع النسب 100% لحفظ التغييرات.' : 'The sum of percentages must be 100% to save changes.'}
+              {language.key === 'ar' ? 'يجب أن يكون مجموع النسب 100% لحفظ التغييرات.' : 'The sum of percentages must be 100% to save changes.'}
             </CardDescription>
           )}
         </CardHeader>
@@ -108,16 +108,16 @@ export default function ManagePotsPage() {
               <CardContent className="p-4 flex items-center gap-4">
                 {PotIcon && <PotIcon className="h-8 w-8 flex-shrink-0" style={{ color: pot.color }}/>}
                 <div className="flex-1 space-y-2">
-                  <Label htmlFor={`pot-${pot.id}`}>{pot.name[language]}</Label>
+                  <Label htmlFor={`pot-${pot.id}`}>{pot.name[language.key]}</Label>
                   <div className="relative">
                     <Input
                       id={`pot-${pot.id}`}
                       type="number"
                       value={pot.percentage}
                       onChange={e => handlePercentageChange(pot.id, e.target.value)}
-                      className={language === 'en' ? 'pl-8' : 'pr-8'}
+                      className={language.dir === 'ltr' ? 'pl-8' : 'pr-8'}
                     />
-                    <span className={`absolute top-1/2 -translate-y-1/2 text-muted-foreground ${language === 'ar' ? 'left-3' : 'right-3'}`}>%</span>
+                    <span className={`absolute top-1/2 -translate-y-1/2 text-muted-foreground ${language.dir === 'rtl' ? 'left-3' : 'right-3'}`}>%</span>
                   </div>
                 </div>
                 <div className="flex gap-2">
@@ -137,12 +137,12 @@ export default function ManagePotsPage() {
       </div>
 
       <Button variant="outline" className="w-full" onClick={() => setAddPotDialogOpen(true)}>
-        <Plus className={`h-4 w-4 ${language === 'ar' ? 'ml-2' : 'mr-2'}`} />
-        {language === 'ar' ? 'إضافة وعاء مخصص جديد' : 'Add New Custom Pot'}
+        <Plus className={`h-4 w-4 ${language.dir === 'rtl' ? 'ml-2' : 'mr-2'}`} />
+        {language.key === 'ar' ? 'إضافة وعاء مخصص جديد' : 'Add New Custom Pot'}
       </Button>
 
       <Button className="w-full" onClick={handleSaveChanges} disabled={totalPercentage !== 100}>
-        {language === 'ar' ? 'حفظ التغييرات' : 'Save Changes'}
+        {language.key === 'ar' ? 'حفظ التغييرات' : 'Save Changes'}
       </Button>
 
       {potToEdit && (

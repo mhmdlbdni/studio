@@ -36,14 +36,14 @@ export default function SettingsPage() {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2"><Palette/> {language === 'ar' ? 'التخصيص والعرض' : 'Customization & Display'}</CardTitle>
+          <CardTitle className="flex items-center gap-2"><Palette/> {language.key === 'ar' ? 'التخصيص والعرض' : 'Customization & Display'}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label>{language === 'ar' ? 'العملة' : 'Currency'}</Label>
+            <Label>{language.key === 'ar' ? 'العملة' : 'Currency'}</Label>
             <Select value={user?.currency} onValueChange={handleCurrencyChange}>
               <SelectTrigger>
-                <SelectValue placeholder={language === 'ar' ? "اختر العملة" : "Select Currency"} />
+                <SelectValue placeholder={language.key === 'ar' ? "اختر العملة" : "Select Currency"} />
               </SelectTrigger>
               <SelectContent>
                 {CURRENCIES.map(c => (
@@ -53,10 +53,10 @@ export default function SettingsPage() {
             </Select>
           </div>
           <div className="space-y-2">
-            <Label>{language === 'ar' ? 'اللغة' : 'Language'}</Label>
-            <Select value={language} onValueChange={handleLanguageChange}>
+            <Label>{language.key === 'ar' ? 'اللغة' : 'Language'}</Label>
+            <Select value={language.key} onValueChange={handleLanguageChange}>
               <SelectTrigger>
-                <SelectValue placeholder={language === 'ar' ? "اختر اللغة" : "Select Language"} />
+                <SelectValue placeholder={language.key === 'ar' ? "اختر اللغة" : "Select Language"} />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="ar">العربية</SelectItem>
@@ -69,11 +69,11 @@ export default function SettingsPage() {
       
       <Card>
         <CardHeader>
-            <CardTitle className="flex items-center gap-2"><SlidersHorizontal /> {language === 'ar' ? 'إدارة الأموال' : 'Financial Management'}</CardTitle>
+            <CardTitle className="flex items-center gap-2"><SlidersHorizontal /> {language.key === 'ar' ? 'إدارة الأموال' : 'Financial Management'}</CardTitle>
         </CardHeader>
         <CardContent>
              <Button variant="ghost" className="w-full justify-between" onClick={() => router.push('/manage-pots')}>
-                <span>{language === 'ar' ? 'إدارة الموازين' : 'Manage Pots'}</span>
+                <span>{language.key === 'ar' ? 'إدارة الموازين' : 'Manage Pots'}</span>
                 <ChevronLeft />
             </Button>
         </CardContent>
@@ -81,11 +81,11 @@ export default function SettingsPage() {
 
       <Card>
         <CardHeader>
-            <CardTitle className="flex items-center gap-2"><Info /> {language === 'ar' ? 'الدعم والمعلومات' : 'Support & Information'}</CardTitle>
+            <CardTitle className="flex items-center gap-2"><Info /> {language.key === 'ar' ? 'الدعم والمعلومات' : 'Support & Information'}</CardTitle>
         </CardHeader>
         <CardContent>
              <Button variant="ghost" className="w-full justify-between" onClick={() => router.push('/support')}>
-                <span>{language === 'ar' ? 'الدعم والمساعدة' : 'Support & Help'}</span>
+                <span>{language.key === 'ar' ? 'الدعم والمساعدة' : 'Support & Help'}</span>
                 <ChevronLeft />
             </Button>
         </CardContent>
@@ -93,10 +93,10 @@ export default function SettingsPage() {
 
       <Card>
         <CardHeader>
-            <CardTitle className="flex items-center gap-2"><LogOut /> {language === 'ar' ? 'الحساب' : 'Account'}</CardTitle>
+            <CardTitle className="flex items-center gap-2"><LogOut /> {language.key === 'ar' ? 'الحساب' : 'Account'}</CardTitle>
         </CardHeader>
         <CardContent>
-            <Button variant="destructive" className="w-full" onClick={handleLogout}>{language === 'ar' ? 'تسجيل الخروج' : 'Logout'}</Button>
+            <Button variant="destructive" className="w-full" onClick={handleLogout}>{language.key === 'ar' ? 'تسجيل الخروج' : 'Logout'}</Button>
         </CardContent>
       </Card>
     </div>
