@@ -8,7 +8,6 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import {generate} from 'genkit/generate';
 
 // Define Tools that the AI can request to use.
 // The actual logic is handled on the client, but the definitions here tell the AI what's possible.
@@ -78,7 +77,7 @@ User's query: {{{query}}}`;
  * The client is responsible for handling the tool request.
  */
 export async function getFinancialAdvice(input: FinancialAdviceInput) {
-    return await generate({
+    return await ai.generate({
         prompt: financialAdvicePrompt,
         model: 'googleai/gemini-2.0-flash',
         input: input,
