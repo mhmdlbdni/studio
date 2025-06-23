@@ -83,8 +83,7 @@ export default function TransactionsPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>{t.table.type}</TableHead>
-                  <TableHead>{t.table.description}</TableHead>
+                  <TableHead className="w-[50%]">{t.table.description}</TableHead>
                   <TableHead>{t.table.pot}</TableHead>
                   <TableHead className="text-right">{t.table.amount}</TableHead>
                 </TableRow>
@@ -98,13 +97,6 @@ export default function TransactionsPage() {
                     return (
                       <TableRow key={transaction.id}>
                         <TableCell>
-                            <div className={`flex h-8 w-8 items-center justify-center rounded-full ${isExpense ? 'bg-destructive/10' : 'bg-green-500/10'}`}>
-                                {isExpense ? 
-                                    <TrendingDown className="h-5 w-5 text-destructive" /> : 
-                                    <TrendingUp className="h-5 w-5 text-green-500" />}
-                            </div>
-                        </TableCell>
-                        <TableCell>
                           <div className="font-medium">{transaction.description}</div>
                           <div className="text-sm text-muted-foreground">
                             {new Date(transaction.date).toLocaleDateString(dateLocale, { year: 'numeric', month: 'short', day: 'numeric' })}
@@ -112,15 +104,22 @@ export default function TransactionsPage() {
                         </TableCell>
                         <TableCell>{potName}</TableCell>
                         <TableCell className={`text-right font-medium ${isExpense ? 'text-destructive' : 'text-green-500'}`}>
-                          {isExpense ? '-' : '+'}
-                          {new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(transaction.amount)}
+                          <div className="flex items-center justify-end gap-1">
+                             <span>
+                                {isExpense ? '-' : '+'}
+                                {new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(transaction.amount)}
+                             </span>
+                             {isExpense ? 
+                                <TrendingDown className="h-4 w-4" /> : 
+                                <TrendingUp className="h-4 w-4" />}
+                          </div>
                         </TableCell>
                       </TableRow>
                     )
                   })
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={4} className="h-24 text-center">
+                    <TableCell colSpan={3} className="h-24 text-center">
                       {t.noTransactions}
                     </TableCell>
                   </TableRow>
@@ -128,13 +127,13 @@ export default function TransactionsPage() {
               </TableBody>
               <TableFooter>
                 <TableRow className="bg-muted/50 font-medium">
-                  <TableCell colSpan={3}>{t.table.totalIncome}</TableCell>
+                  <TableCell colSpan={2}>{t.table.totalIncome}</TableCell>
                   <TableCell className="text-right text-green-500">
                       {new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(totalIncome)}
                   </TableCell>
                 </TableRow>
                 <TableRow className="bg-muted/50 font-bold">
-                  <TableCell colSpan={3}>{t.table.totalExpenses}</TableCell>
+                  <TableCell colSpan={2}>{t.table.totalExpenses}</TableCell>
                   <TableCell className="text-right text-destructive">
                     - {new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(totalExpenses)}
                   </TableCell>
