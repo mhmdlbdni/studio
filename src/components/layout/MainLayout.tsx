@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Settings, LayoutDashboard, SlidersHorizontal, MessageSquareHeart } from 'lucide-react';
+import { Settings, LayoutDashboard, SlidersHorizontal } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 
 export function MainLayout({ children }: { children: React.ReactNode }) {
@@ -23,7 +23,6 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
   const navItems = [
     { href: '/dashboard', label: 'الرئيسية', icon: LayoutDashboard },
     { href: '/manage-pots', label: 'الموازين', icon: SlidersHorizontal },
-    { href: '/support', label: 'الدعم', icon: MessageSquareHeart },
   ];
 
   return (
@@ -45,7 +44,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
         </div>
       </main>
       <footer className="fixed bottom-0 left-0 right-0 z-10 border-t bg-background/80 backdrop-blur-sm">
-        <nav className="mx-auto grid h-16 max-w-md grid-cols-3 items-center gap-4 px-4">
+        <nav className="mx-auto grid h-16 max-w-md grid-cols-2 items-center gap-4 px-4">
           {navItems.map((item) => {
             const isActive = pathname === item.href;
             return (
