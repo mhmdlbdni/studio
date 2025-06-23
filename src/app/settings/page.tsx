@@ -36,14 +36,14 @@ export default function SettingsPage() {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2"><Palette/> التخصيص والعرض</CardTitle>
+          <CardTitle className="flex items-center gap-2"><Palette/> {language === 'ar' ? 'التخصيص والعرض' : 'Customization & Display'}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label>العملة</Label>
+            <Label>{language === 'ar' ? 'العملة' : 'Currency'}</Label>
             <Select value={user?.currency} onValueChange={handleCurrencyChange}>
               <SelectTrigger>
-                <SelectValue placeholder="اختر العملة" />
+                <SelectValue placeholder={language === 'ar' ? "اختر العملة" : "Select Currency"} />
               </SelectTrigger>
               <SelectContent>
                 {CURRENCIES.map(c => (
@@ -53,10 +53,10 @@ export default function SettingsPage() {
             </Select>
           </div>
           <div className="space-y-2">
-            <Label>اللغة</Label>
+            <Label>{language === 'ar' ? 'اللغة' : 'Language'}</Label>
             <Select value={language} onValueChange={handleLanguageChange}>
               <SelectTrigger>
-                <SelectValue placeholder="اختر اللغة" />
+                <SelectValue placeholder={language === 'ar' ? "اختر اللغة" : "Select Language"} />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="ar">العربية</SelectItem>
@@ -69,11 +69,11 @@ export default function SettingsPage() {
       
       <Card>
         <CardHeader>
-            <CardTitle className="flex items-center gap-2"><SlidersHorizontal /> إدارة الأموال</CardTitle>
+            <CardTitle className="flex items-center gap-2"><SlidersHorizontal /> {language === 'ar' ? 'إدارة الأموال' : 'Financial Management'}</CardTitle>
         </CardHeader>
         <CardContent>
              <Button variant="ghost" className="w-full justify-between" onClick={() => router.push('/manage-pots')}>
-                <span>إدارة الموازين</span>
+                <span>{language === 'ar' ? 'إدارة الموازين' : 'Manage Pots'}</span>
                 <ChevronLeft />
             </Button>
         </CardContent>
@@ -81,11 +81,11 @@ export default function SettingsPage() {
 
       <Card>
         <CardHeader>
-            <CardTitle className="flex items-center gap-2"><Info /> الدعم والمعلومات</CardTitle>
+            <CardTitle className="flex items-center gap-2"><Info /> {language === 'ar' ? 'الدعم والمعلومات' : 'Support & Information'}</CardTitle>
         </CardHeader>
         <CardContent>
              <Button variant="ghost" className="w-full justify-between" onClick={() => router.push('/support')}>
-                <span>الدعم والمساعدة</span>
+                <span>{language === 'ar' ? 'الدعم والمساعدة' : 'Support & Help'}</span>
                 <ChevronLeft />
             </Button>
         </CardContent>
@@ -93,10 +93,10 @@ export default function SettingsPage() {
 
       <Card>
         <CardHeader>
-            <CardTitle className="flex items-center gap-2"><LogOut /> الحساب</CardTitle>
+            <CardTitle className="flex items-center gap-2"><LogOut /> {language === 'ar' ? 'الحساب' : 'Account'}</CardTitle>
         </CardHeader>
         <CardContent>
-            <Button variant="destructive" className="w-full" onClick={handleLogout}>تسجيل الخروج</Button>
+            <Button variant="destructive" className="w-full" onClick={handleLogout}>{language === 'ar' ? 'تسجيل الخروج' : 'Logout'}</Button>
         </CardContent>
       </Card>
     </div>

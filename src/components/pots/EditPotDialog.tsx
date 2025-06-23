@@ -9,15 +9,21 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogC
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import type { Pot } from '@/lib/types';
+import { useApp } from '@/contexts/AppContext';
 
-const potSchema = z.object({
-  name: z.string().min(2, 'اسم الوعاء قصير جداً'),
-  percentage: z.coerce.number().min(0, 'النسبة لا يمكن أن تكون سالبة').max(100, 'النسبة لا يمكن أن تتجاوز 100'),
+const potSchema = (language: 'ar' | 'en') => z.object({
+  name: z.string().min(2, language === 'ar' ? 'اسم الوعاء قصير جداً' : 'Pot name is too short'),
+  percentage: z.coerce.number()
+    .min(0, language === 'ar' ? 'النسبة لا يمكن أن تكون سالبة' : 'Percentage cannot be negative')
+    .max(100, language === 'ar' ? 'النسبة لا يمكن أن تتجاوز 100' : 'Percentage cannot exceed 100'),
 });
 
+
 export function EditPotDialog({ open, onOpenChange, pot, onSave }: { open: boolean, onOpenChange: (open: boolean) => void, pot: Pot, onSave: (pot: Pot) => void }) {
+  const { language } = useApp();
+  
   const form = useForm({
-    resolver: zodResolver(potSchema),
+    resolver: zodResolver(potSchema(language)),
     defaultValues: {
       name: pot?.name || '',
       percentage: pot?.percentage || 0,
@@ -33,6 +39,10 @@ export function EditPotDialog({ open, onOpenChange, pot, onSave }: { open: boole
     }
   }, [pot, form]);
 
+  useEffect(() => {
+    form.trigger();
+  }, [language, form]);
+
   const handleSubmit = (values) => {
     onSave({ ...pot, ...values });
     onOpenChange(false);
@@ -44,7 +54,7 @@ export function EditPotDialog({ open, onOpenChange, pot, onSave }: { open: boole
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)}>
             <DialogHeader>
-              <DialogTitle>تعديل وعاء "{pot?.name}"</DialogTitle>
+              <DialogTitle>{language === 'ar' ? `تعديل وعاء "${pot?.name}"` : `Edit Pot "${pot?.name}"`}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 py-4">
               <FormField
@@ -52,7 +62,7 @@ export function EditPotDialog({ open, onOpenChange, pot, onSave }: { open: boole
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>اسم الوعاء</FormLabel>
+                    <FormLabel>{language === 'ar' ? 'اسم الوعاء' : 'Pot Name'}</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
@@ -65,7 +75,7 @@ export function EditPotDialog({ open, onOpenChange, pot, onSave }: { open: boole
                 name="percentage"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>النسبة المئوية</FormLabel>
+                    <FormLabel>{language === 'ar' ? 'النسبة المئوية' : 'Percentage'}</FormLabel>
                     <FormControl>
                       <Input type="number" {...field} />
                     </FormControl>
@@ -75,8 +85,8 @@ export function EditPotDialog({ open, onOpenChange, pot, onSave }: { open: boole
               />
             </div>
             <DialogFooter>
-              <DialogClose asChild><Button type="button" variant="ghost">إلغاء</Button></DialogClose>
-              <Button type="submit">حفظ التغييرات</Button>
+              <DialogClose asChild><Button type="button" variant="ghost">{language === 'ar' ? 'إلغاء' : 'Cancel'}</Button></DialogClose>
+              <Button type="submit">{language === 'ar' ? 'حفظ التغييرات' : 'Save Changes'}</Button>
             </DialogFooter>
           </form>
         </Form>

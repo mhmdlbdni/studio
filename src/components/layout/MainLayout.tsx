@@ -11,9 +11,17 @@ import { ThemeToggle } from '@/components/settings/ThemeToggle';
 export function MainLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, theme, toggleTheme } = useApp();
+  const { user, theme, toggleTheme, language } = useApp();
 
   const getTitle = () => {
+    if (language === 'en') {
+      if (pathname === '/dashboard') return `Welcome, ${user?.name || ''}!`;
+      if (pathname === '/manage-pots') return 'Manage Pots';
+      if (pathname === '/settings') return 'Settings';
+      if (pathname === '/support') return 'Support';
+      if (pathname.startsWith('/pots/')) return 'Pot Details';
+      return 'Al-Mawazin';
+    }
     if (pathname === '/dashboard') return `مرحباً، ${user?.name || ''}!`;
     if (pathname === '/manage-pots') return 'إدارة الموازين';
     if (pathname === '/settings') return 'الإعدادات';
@@ -32,7 +40,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
             {!isDashboard ? (
               <Button variant="ghost" size="icon" onClick={() => router.back()}>
                 <ArrowRight className="h-5 w-5" />
-                <span className="sr-only">العودة</span>
+                <span className="sr-only">{language === 'ar' ? 'العودة' : 'Back'}</span>
               </Button>
             ) : null}
             <h1 className="font-headline text-xl font-bold">{getTitle()}</h1>
@@ -44,7 +52,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
               <Button variant="ghost" size="icon" asChild>
                 <Link href="/settings">
                   <Settings className="h-5 w-5" />
-                  <span className="sr-only">الإعدادات</span>
+                  <span className="sr-only">{language === 'ar' ? 'الإعدادات' : 'Settings'}</span>
                 </Link>
               </Button>
             )}

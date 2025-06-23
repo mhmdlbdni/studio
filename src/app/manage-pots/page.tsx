@@ -13,7 +13,7 @@ import { EditPotDialog } from '@/components/pots/EditPotDialog';
 import { ConfirmDeleteDialog } from '@/components/pots/ConfirmDeleteDialog';
 
 export default function ManagePotsPage() {
-  const { pots, updatePots } = useApp();
+  const { pots, updatePots, language } = useApp();
   const { toast } = useToast();
   const [localPots, setLocalPots] = useState<Pot[]>([]);
   const [potToEdit, setPotToEdit] = useState<Pot | null>(null);
@@ -43,15 +43,15 @@ export default function ManagePotsPage() {
     if (totalPercentage !== 100) {
       toast({
         variant: 'destructive',
-        title: 'خطأ',
-        description: 'يجب أن يكون مجموع النسب 100% لحفظ التغييرات.',
+        title: language === 'ar' ? 'خطأ' : 'Error',
+        description: language === 'ar' ? 'يجب أن يكون مجموع النسب 100% لحفظ التغييرات.' : 'The sum of percentages must be 100% to save changes.',
       });
       return;
     }
     updatePots(localPots);
     toast({
-      title: 'تم الحفظ',
-      description: 'تم تحديث الموازين بنجاح.',
+      title: language === 'ar' ? 'تم الحفظ' : 'Saved',
+      description: language === 'ar' ? 'تم تحديث الموازين بنجاح.' : 'Pots have been updated successfully.',
     });
   };
 
@@ -69,11 +69,11 @@ export default function ManagePotsPage() {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>إجمالي النسب: <span className={totalPercentage !== 100 ? 'text-destructive' : 'text-green-500'}>{totalPercentage}%</span></CardTitle>
+          <CardTitle>{language === 'ar' ? 'إجمالي النسب' : 'Total Percentage'}: <span className={totalPercentage !== 100 ? 'text-destructive' : 'text-green-500'}>{totalPercentage}%</span></CardTitle>
           {totalPercentage !== 100 && (
             <CardDescription className="text-destructive flex items-center gap-1">
               <AlertCircle className="h-4 w-4"/>
-              يجب أن يكون مجموع النسب 100% لحفظ التغييرات.
+              {language === 'ar' ? 'يجب أن يكون مجموع النسب 100% لحفظ التغييرات.' : 'The sum of percentages must be 100% to save changes.'}
             </CardDescription>
           )}
         </CardHeader>
@@ -110,7 +110,7 @@ export default function ManagePotsPage() {
       </div>
 
       <Button className="w-full" onClick={handleSaveChanges} disabled={totalPercentage !== 100}>
-        حفظ التغييرات
+        {language === 'ar' ? 'حفظ التغييرات' : 'Save Changes'}
       </Button>
 
       {potToEdit && (

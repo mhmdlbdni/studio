@@ -11,7 +11,7 @@ import { AddTransactionDialog } from '@/components/dashboard/AddTransactionDialo
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 export default function DashboardPage() {
-  const { pots, user, getPotBalance, totalIncome, totalExpenses } = useApp();
+  const { pots, user, getPotBalance, totalIncome, totalExpenses, language } = useApp();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [dialogInitialTab, setDialogInitialTab] = useState<'income' | 'expense'>('expense');
@@ -37,38 +37,38 @@ export default function DashboardPage() {
       <div className="grid grid-cols-3 gap-4">
          <Card className="text-center">
             <CardHeader className="flex flex-row items-center justify-center space-y-0 p-4 pb-2">
-                <CardTitle className="text-sm font-medium">إجمالي الدخل</CardTitle>
+                <CardTitle className="text-sm font-medium">{language === 'ar' ? 'إجمالي الدخل' : 'Total Income'}</CardTitle>
             </CardHeader>
             <CardContent className="p-4 pt-0">
                 <div className="text-2xl font-bold text-green-500">
-                    {new Intl.NumberFormat('ar-EG', { style: 'currency', currency, minimumFractionDigits: 0 }).format(totalIncome)}
+                    {new Intl.NumberFormat(language === 'ar' ? 'ar-EG' : 'en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(totalIncome)}
                 </div>
             </CardContent>
         </Card>
         <Card className="text-center">
             <CardHeader className="flex flex-row items-center justify-center space-y-0 p-4 pb-2">
-                <CardTitle className="text-sm font-medium">إجمالي المصروفات</CardTitle>
+                <CardTitle className="text-sm font-medium">{language === 'ar' ? 'إجمالي المصروفات' : 'Total Expenses'}</CardTitle>
             </CardHeader>
             <CardContent className="p-4 pt-0">
                 <div className="text-2xl font-bold text-destructive">
-                    {new Intl.NumberFormat('ar-EG', { style: 'currency', currency, minimumFractionDigits: 0 }).format(totalExpenses)}
+                    {new Intl.NumberFormat(language === 'ar' ? 'ar-EG' : 'en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(totalExpenses)}
                 </div>
             </CardContent>
         </Card>
         <Card className="text-center">
             <CardHeader className="flex items-center justify-center p-4 pb-2">
-                <div className="text-sm font-medium leading-none">الصافي<br/>الحالي</div>
+                <div className="text-sm font-medium leading-none">{language === 'ar' ? 'الصافي' : 'Net'}<br/>{language === 'ar' ? 'الحالي' : 'Balance'}</div>
             </CardHeader>
             <CardContent className="p-4 pt-0">
                 <div className="text-2xl font-bold text-primary">
-                    {new Intl.NumberFormat('ar-EG', { style: 'currency', currency, minimumFractionDigits: 0 }).format(netBalance)}
+                    {new Intl.NumberFormat(language === 'ar' ? 'ar-EG' : 'en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(netBalance)}
                 </div>
             </CardContent>
         </Card>
       </div>
 
       <div className="space-y-4">
-        <h2 className="mb-2 font-headline text-2xl font-bold text-right">الأوعية المالية</h2>
+        <h2 className={`mb-2 font-headline text-2xl font-bold ${language === 'ar' ? 'text-right' : 'text-left'}`}>{language === 'ar' ? 'الأوعية المالية' : 'Financial Pots'}</h2>
         <div className="flex flex-col gap-3">
           {potDetails.map(pot => {
             const PotIcon = pot.icon;
@@ -81,8 +81,8 @@ export default function DashboardPage() {
                             <p className="font-semibold text-base">{pot.name}</p>
                             <p className="text-xs text-muted-foreground">{pot.percentage}%</p>
                         </div>
-                        <div className="mr-auto text-lg font-bold" style={{ color: pot.color }}>
-                            {new Intl.NumberFormat('ar-EG', { style: 'currency', currency, minimumFractionDigits: 0 }).format(pot.balance)}
+                        <div className={`${language === 'ar' ? 'mr-auto' : 'ml-auto'} text-lg font-bold`} style={{ color: pot.color }}>
+                            {new Intl.NumberFormat(language === 'ar' ? 'ar-EG' : 'en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(pot.balance)}
                         </div>
                     </div>
                 </Card>
@@ -95,34 +95,34 @@ export default function DashboardPage() {
       <Button
         asChild
         variant="outline"
-        className="fixed bottom-40 left-4 z-20 h-14 w-14 rounded-full shadow-lg lg:bottom-28 lg:left-8"
+        className={`fixed bottom-40 ${language === 'ar' ? 'left-4' : 'right-4'} z-20 h-14 w-14 rounded-full shadow-lg lg:bottom-28 ${language === 'ar' ? 'lg:left-8' : 'lg:right-8'}`}
         size="icon"
       >
         <Link href="/support">
           <Bot className="h-8 w-8" />
-          <span className="sr-only">مرشد الموازين</span>
+          <span className="sr-only">{language === 'ar' ? 'مرشد الموازين' : 'Al-Mawazin Guide'}</span>
         </Link>
       </Button>
       
       <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
         <PopoverTrigger asChild>
           <Button
-            className="fixed bottom-20 left-4 z-20 h-16 w-16 rounded-full shadow-lg lg:bottom-8 lg:left-8 bg-primary hover:bg-primary/90"
+            className={`fixed bottom-20 ${language === 'ar' ? 'left-4' : 'right-4'} z-20 h-16 w-16 rounded-full shadow-lg ${language === 'ar' ? 'lg:bottom-8 lg:left-8' : 'lg:bottom-8 lg:right-8'} bg-primary hover:bg-primary/90`}
             size="icon"
           >
             <Plus className="h-8 w-8" />
-            <span className="sr-only">إضافة معاملة</span>
+            <span className="sr-only">{language === 'ar' ? 'إضافة معاملة' : 'Add Transaction'}</span>
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0 border-none bg-transparent shadow-none" side="top" align="start" sideOffset={15}>
+        <PopoverContent className="w-auto p-0 border-none bg-transparent shadow-none" side="top" align={language === 'ar' ? 'start' : 'end'} sideOffset={15}>
             <div className="flex flex-col items-start gap-3">
                  <Button onClick={() => openDialog('income')} className="justify-center rounded-full bg-green-500 text-white hover:bg-green-600 h-11 px-6 shadow-lg">
-                    <Plus className="ml-2 h-4 w-4" />
-                    إضافة دخل
+                    <Plus className={`${language === 'ar' ? 'ml-2' : 'mr-2'} h-4 w-4`} />
+                    {language === 'ar' ? 'إضافة دخل' : 'Add Income'}
                 </Button>
                 <Button onClick={() => openDialog('expense')} className="justify-center rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/90 h-11 px-6 shadow-lg">
-                    <span className="font-bold text-xl ml-2">−</span>
-                    إضافة مصروف
+                    <span className={`font-bold text-xl ${language === 'ar' ? 'ml-2' : 'mr-2'}`}>−</span>
+                    {language === 'ar' ? 'إضافة مصروف' : 'Add Expense'}
                 </Button>
             </div>
         </PopoverContent>

@@ -38,7 +38,7 @@ interface AddTransactionDialogProps {
 }
 
 export function AddTransactionDialog({ open, onOpenChange, initialTab = 'expense' }: AddTransactionDialogProps) {
-  const { addTransaction, pots } = useApp();
+  const { addTransaction, pots, language } = useApp();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState(initialTab);
 
@@ -49,27 +49,47 @@ export function AddTransactionDialog({ open, onOpenChange, initialTab = 'expense
       expenseForm.reset();
     }
   }, [open, initialTab]);
+  
+  const getValidationMessages = (lang: 'ar' | 'en') => ({
+    incomeSchema: z.object({
+        description: z.string().min(2, lang === 'ar' ? 'الوصف قصير جداً' : 'Description is too short'),
+        amount: z.coerce.number().positive(lang === 'ar' ? 'المبلغ يجب أن يكون إيجابياً' : 'Amount must be positive'),
+    }),
+    expenseSchema: z.object({
+        description: z.string().min(2, lang === 'ar' ? 'الوصف قصير جداً' : 'Description is too short'),
+        amount: z.coerce.number().positive(lang === 'ar' ? 'المبلغ يجب أن يكون إيجابياً' : 'Amount must be positive'),
+        potId: z.string({ required_error: lang === 'ar' ? 'الرجاء اختيار وعاء' : 'Please select a pot' }),
+    }),
+  });
+
+  const { incomeSchema: currentIncomeSchema, expenseSchema: currentExpenseSchema } = getValidationMessages(language);
 
   const incomeForm = useForm({
-    resolver: zodResolver(incomeSchema),
+    resolver: zodResolver(currentIncomeSchema),
     defaultValues: { description: '', amount: '' },
   });
 
   const expenseForm = useForm({
-    resolver: zodResolver(expenseSchema),
+    resolver: zodResolver(currentExpenseSchema),
     defaultValues: { description: '', amount: '', potId: '' },
   });
 
+  useEffect(() => {
+    incomeForm.reset();
+    expenseForm.reset();
+  }, [language, incomeForm, expenseForm]);
+
+
   const handleIncomeSubmit = (values) => {
     addTransaction({ ...values, type: 'income' });
-    toast({ title: 'تمت الإضافة', description: 'تم توزيع الدخل بنجاح.' });
+    toast({ title: language === 'ar' ? 'تمت الإضافة' : 'Added', description: language === 'ar' ? 'تم توزيع الدخل بنجاح.' : 'Income distributed successfully.' });
     onOpenChange(false);
     incomeForm.reset();
   };
 
   const handleExpenseSubmit = (values) => {
     addTransaction({ ...values, type: 'expense' });
-    toast({ title: 'تمت الإضافة', description: 'تم تسجيل المصروف بنجاح.' });
+    toast({ title: language === 'ar' ? 'تمت الإضافة' : 'Added', description: language === 'ar' ? 'تم تسجيل المصروف بنجاح.' : 'Expense recorded successfully.' });
     onOpenChange(false);
     expenseForm.reset();
   };
@@ -87,23 +107,23 @@ export function AddTransactionDialog({ open, onOpenChange, initialTab = 'expense
       <DialogContent className="sm:max-w-[425px]">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="expense">إضافة مصروف</TabsTrigger>
-            <TabsTrigger value="income">إضافة دخل</TabsTrigger>
+            <TabsTrigger value="expense">{language === 'ar' ? 'إضافة مصروف' : 'Add Expense'}</TabsTrigger>
+            <TabsTrigger value="income">{language === 'ar' ? 'إضافة دخل' : 'Add Income'}</TabsTrigger>
           </TabsList>
           <TabsContent value="expense">
             <Form {...expenseForm}>
               <form onSubmit={expenseForm.handleSubmit(handleExpenseSubmit)} className="space-y-4 pt-4">
                 <DialogHeader>
-                  <DialogTitle>إضافة مصروف جديد</DialogTitle>
+                  <DialogTitle>{language === 'ar' ? 'إضافة مصروف جديد' : 'Add New Expense'}</DialogTitle>
                 </DialogHeader>
                 <FormField
                   control={expenseForm.control}
                   name="description"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>الوصف</FormLabel>
+                      <FormLabel>{language === 'ar' ? 'الوصف' : 'Description'}</FormLabel>
                       <FormControl>
-                        <Input placeholder="مثال: فاتورة الكهرباء، غداء عمل" {...field} />
+                        <Input placeholder={language === 'ar' ? "مثال: فاتورة الكهرباء، غداء عمل" : "e.g., Electricity bill, business lunch"} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -114,7 +134,7 @@ export function AddTransactionDialog({ open, onOpenChange, initialTab = 'expense
                   name="amount"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>المبلغ</FormLabel>
+                      <FormLabel>{language === 'ar' ? 'المبلغ' : 'Amount'}</FormLabel>
                       <FormControl>
                         <Input type="number" {...field} />
                       </FormControl>
@@ -127,11 +147,11 @@ export function AddTransactionDialog({ open, onOpenChange, initialTab = 'expense
                   name="potId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>اختر الوعاء للخصم منه</FormLabel>
+                      <FormLabel>{language === 'ar' ? 'اختر الوعاء للخصم منه' : 'Select pot to deduct from'}</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="اختر وعاء..." />
+                            <SelectValue placeholder={language === 'ar' ? 'اختر وعاء...' : 'Select a pot...'} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -145,8 +165,8 @@ export function AddTransactionDialog({ open, onOpenChange, initialTab = 'expense
                   )}
                 />
                 <DialogFooter>
-                  <DialogClose asChild><Button type="button" variant="ghost">إلغاء</Button></DialogClose>
-                  <Button type="submit">إتمام الخصم</Button>
+                  <DialogClose asChild><Button type="button" variant="ghost">{language === 'ar' ? 'إلغاء' : 'Cancel'}</Button></DialogClose>
+                  <Button type="submit">{language === 'ar' ? 'إتمام الخصم' : 'Confirm Expense'}</Button>
                 </DialogFooter>
               </form>
             </Form>
@@ -155,16 +175,16 @@ export function AddTransactionDialog({ open, onOpenChange, initialTab = 'expense
             <Form {...incomeForm}>
               <form onSubmit={incomeForm.handleSubmit(handleIncomeSubmit)} className="space-y-4 pt-4">
                 <DialogHeader>
-                  <DialogTitle>إضافة دخل جديد</DialogTitle>
+                  <DialogTitle>{language === 'ar' ? 'إضافة دخل جديد' : 'Add New Income'}</DialogTitle>
                 </DialogHeader>
                  <FormField
                   control={incomeForm.control}
                   name="description"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>مصدر الدخل</FormLabel>
+                      <FormLabel>{language === 'ar' ? 'مصدر الدخل' : 'Income Source'}</FormLabel>
                       <FormControl>
-                        <Input placeholder="مثال: الراتب الشهري، مشروع جانبي" {...field} />
+                        <Input placeholder={language === 'ar' ? 'مثال: الراتب الشهري، مشروع جانبي' : 'e.g., Monthly salary, side project'} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -175,7 +195,7 @@ export function AddTransactionDialog({ open, onOpenChange, initialTab = 'expense
                   name="amount"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>المبلغ</FormLabel>
+                      <FormLabel>{language === 'ar' ? 'المبلغ' : 'Amount'}</FormLabel>
                       <FormControl>
                         <Input type="number" {...field} />
                       </FormControl>
@@ -184,8 +204,8 @@ export function AddTransactionDialog({ open, onOpenChange, initialTab = 'expense
                   )}
                 />
                 <DialogFooter>
-                  <DialogClose asChild><Button type="button" variant="ghost">إلغاء</Button></DialogClose>
-                  <Button type="submit">توزيع الدخل</Button>
+                  <DialogClose asChild><Button type="button" variant="ghost">{language === 'ar' ? 'إلغاء' : 'Cancel'}</Button></DialogClose>
+                  <Button type="submit">{language === 'ar' ? 'توزيع الدخل' : 'Distribute Income'}</Button>
                 </DialogFooter>
               </form>
             </Form>

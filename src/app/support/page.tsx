@@ -6,6 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { ChatInterface } from '@/components/ai/ChatInterface';
 import { Button } from '@/components/ui/button';
 import { MessageCircle, Info, Phone, Bot } from 'lucide-react';
+import { useApp } from '@/contexts/AppContext';
+
 
 const WhatsAppIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -16,6 +18,7 @@ const WhatsAppIcon = (props: React.SVGProps<SVGSVGElement>) => (
 
 
 export default function SupportPage() {
+    const { language } = useApp();
     const openLink = (url: string) => {
         window.open(url, '_blank');
     };
@@ -24,8 +27,8 @@ export default function SupportPage() {
         <div className="space-y-6">
             <Card>
                 <CardHeader>
-                    <CardTitle className="flex items-center gap-2"><Bot /> المساعدة الذكية</CardTitle>
-                    <CardDescription>هل لديك سؤال؟ "مرشد الموازين" جاهز للمساعدة فوراً.</CardDescription>
+                    <CardTitle className="flex items-center gap-2"><Bot /> {language === 'ar' ? 'المساعدة الذكية' : 'Smart Assistance'}</CardTitle>
+                    <CardDescription>{language === 'ar' ? 'هل لديك سؤال؟ "مرشد الموازين" جاهز للمساعدة فوراً.' : "Have a question? 'Al-Mawazin Guide' is ready to help instantly."}</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <ChatInterface />
@@ -34,28 +37,28 @@ export default function SupportPage() {
 
             <Card>
                 <CardHeader>
-                    <CardTitle className="flex items-center gap-2"><MessageCircle /> التواصل المباشر</CardTitle>
-                    <CardDescription>للدعم الفني أو تقديم الاقتراحات</CardDescription>
+                    <CardTitle className="flex items-center gap-2"><MessageCircle /> {language === 'ar' ? 'التواصل المباشر' : 'Direct Contact'}</CardTitle>
+                    <CardDescription>{language === 'ar' ? 'للدعم الفني أو تقديم الاقتراحات' : 'For technical support or suggestions'}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-2">
                     <Button variant="outline" className="w-full justify-start gap-2" onClick={() => openLink('https://wa.me/967777798804')}>
                         <WhatsAppIcon className="h-5 w-5 text-green-500" />
-                        تواصل معنا عبر واتساب
+                        {language === 'ar' ? 'تواصل معنا عبر واتساب' : 'Contact us via WhatsApp'}
                     </Button>
                     <Button variant="outline" className="w-full justify-start gap-2" onClick={() => openLink('tel:+967777798804')}>
                         <Phone className="h-5 w-5" />
-                        الاتصال المباشر
+                        {language === 'ar' ? 'الاتصال المباشر' : 'Direct Call'}
                     </Button>
                 </CardContent>
             </Card>
 
             <Card>
                 <CardHeader>
-                    <CardTitle className="flex items-center gap-2"><Info /> معلومات التطبيق</CardTitle>
+                    <CardTitle className="flex items-center gap-2"><Info /> {language === 'ar' ? 'معلومات التطبيق' : 'App Information'}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <p>تطبيق الموازين - الإصدار v1.0.0</p>
-                    <p className="text-sm text-muted-foreground">المطور: محمد عبدالواسع الأغبري</p>
+                    <p>{language === 'ar' ? 'تطبيق الموازين - الإصدار v1.0.0' : 'Al-Mawazin App - Version v1.0.0'}</p>
+                    <p className="text-sm text-muted-foreground">{language === 'ar' ? 'المطور: محمد عبدالواسع الأغبري' : 'Developer: Mohammed Abdulwasea Al-Aghbari'}</p>
                 </CardContent>
             </Card>
         </div>
