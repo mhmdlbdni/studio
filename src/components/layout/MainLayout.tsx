@@ -38,31 +38,10 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
         </div>
       </header>
       <main className="w-full flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-screen-md p-4 pb-24 sm:p-6">
+        <div className="mx-auto max-w-screen-md p-4 sm:p-6">
             {children}
         </div>
       </main>
-      <footer className="fixed bottom-0 left-0 right-0 z-10 border-t bg-background/80 backdrop-blur-sm">
-        <nav className="mx-auto grid h-16 max-w-md grid-cols-1 items-center gap-4 px-4">
-          {navItems.map((item) => {
-            const isActive = pathname === item.href;
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`flex flex-col items-center justify-center gap-1 rounded-lg p-2 transition-colors ${
-                  isActive
-                    ? 'text-primary'
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                <item.icon className="h-6 w-6" />
-                <span className="text-xs font-medium">{item.label}</span>
-              </Link>
-            );
-          })}
-        </nav>
-      </footer>
     </div>
   );
 }
