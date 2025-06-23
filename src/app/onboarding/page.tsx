@@ -18,7 +18,7 @@ export default function OnboardingPage() {
   const [name, setName] = useState('');
   const [currency, setCurrency] = useState('YER');
   const router = useRouter();
-  const { setUser, updatePots } = useApp();
+  const { setUser, updatePots, language } = useApp();
 
   const handleNext = () => setStep(s => s + 1);
 
@@ -37,7 +37,7 @@ export default function OnboardingPage() {
           <>
             <CardHeader className="text-center">
               <div className="mb-4 flex justify-center">
-                <Logo className="h-20 w-20 text-primary" />
+                <Logo className="h-20 w-20" />
               </div>
               <CardTitle className="font-headline text-2xl font-bold">أهلاً بك في الموازين</CardTitle>
               <CardDescription className="text-base">
