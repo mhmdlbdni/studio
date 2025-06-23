@@ -38,6 +38,7 @@ const questionPool = {
 };
 
 const shuffleArray = (array: string[]) => {
+    if (typeof window === 'undefined') return array;
     const newArray = [...array];
     for (let i = newArray.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -61,11 +62,9 @@ export function ChatInterface() {
   }, [messages, isLoading]);
   
   const generateSuggestions = () => {
-    if (typeof window !== 'undefined') {
       const staticQuestion = language === 'ar' ? 'ما هو نظام الموازين؟' : 'What is the Al-Mawazin system?';
       const randomQuestions = shuffleArray(questionPool[language]).slice(0, 2);
       setSuggestedQuestions([staticQuestion, ...randomQuestions]);
-    }
   }
 
   useEffect(() => {
@@ -170,8 +169,7 @@ export function ChatInterface() {
                 {suggestedQuestions.map((q) => (
                     <Button 
                         key={q} 
-                        variant="outline" 
-                        size="sm"
+                        variant="outline"
                         onClick={() => handleSend(q)}
                         className={`h-auto max-w-xs whitespace-normal rounded-full border-primary/50 bg-transparent text-primary hover:bg-primary/10 hover:text-primary ${language === 'ar' ? 'self-end text-right' : 'self-start text-left'}`}
                     >
