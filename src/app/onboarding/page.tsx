@@ -65,7 +65,7 @@ export default function OnboardingPage() {
                             <div className="rounded-full bg-secondary p-3">
                                 <Icon className="h-6 w-6" style={{color: pot.color}}/>
                             </div>
-                            <p className="text-xs">{pot.name}</p>
+                            <p className="text-xs">{pot.name.ar}</p>
                         </div>
                     )
                 })}
