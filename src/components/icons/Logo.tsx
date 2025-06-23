@@ -1,11 +1,10 @@
 import React from 'react';
 
 export const Logo = (props: React.SVGProps<SVGSVGElement>) => (
-    <svg {...props} width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M5 7h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-        <path d="M12 7v12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-        <path d="M9 21h6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-        <path d="M5 7a4 4 0 0 0-4 4v0a4 4 0 0 0 4 4h0" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-        <path d="M19 7a4 4 0 0 1 4 4v0a4 4 0 0 1-4 4h0" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+    <svg {...props} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M3 12H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+        <path d="M12 12V6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+        <circle cx="12" cy="4" r="1.5" fill="currentColor"/>
+        <path d="M12 12C10.8954 12 10 12.8954 10 14C10 15.1046 10.8954 16 12 16H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
 );
