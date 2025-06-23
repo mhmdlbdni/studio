@@ -85,7 +85,7 @@ export default function DashboardPage() {
 
       <Button
         asChild
-        className="fixed bottom-40 right-4 z-20 h-14 w-14 rounded-full shadow-lg lg:bottom-28 lg:right-8"
+        className="fixed bottom-40 left-4 z-20 h-14 w-14 rounded-full shadow-lg lg:bottom-28 lg:left-8"
         size="icon"
       >
         <Link href="/support">
@@ -96,7 +96,7 @@ export default function DashboardPage() {
       
       <Button
         onClick={() => setDialogOpen(true)}
-        className="fixed bottom-20 right-4 z-20 h-16 w-16 rounded-full shadow-lg lg:bottom-8 lg:right-8"
+        className="fixed bottom-20 left-4 z-20 h-16 w-16 rounded-full shadow-lg lg:bottom-8 lg:left-8"
         size="icon"
       >
         <Plus className="h-8 w-8" />
