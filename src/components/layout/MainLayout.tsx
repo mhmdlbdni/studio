@@ -28,16 +28,22 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
-      <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6">
-        <h1 className="font-headline text-xl font-bold">{getTitle()}</h1>
-        <Button variant="ghost" size="icon" asChild>
-          <Link href="/settings">
-            <Settings className="h-5 w-5" />
-            <span className="sr-only">الإعدادات</span>
-          </Link>
-        </Button>
+      <header className="sticky top-0 z-10 border-b bg-background/80 backdrop-blur-sm">
+        <div className="mx-auto flex h-16 max-w-screen-md items-center justify-between px-4 sm:px-6">
+          <h1 className="font-headline text-xl font-bold">{getTitle()}</h1>
+          <Button variant="ghost" size="icon" asChild>
+            <Link href="/settings">
+              <Settings className="h-5 w-5" />
+              <span className="sr-only">الإعدادات</span>
+            </Link>
+          </Button>
+        </div>
       </header>
-      <main className="flex-1 overflow-y-auto p-4 pb-24 sm:p-6">{children}</main>
+      <main className="w-full flex-1 overflow-y-auto">
+        <div className="mx-auto max-w-screen-md p-4 pb-24 sm:p-6">
+            {children}
+        </div>
+      </main>
       <footer className="fixed bottom-0 left-0 right-0 z-10 border-t bg-background/80 backdrop-blur-sm">
         <nav className="mx-auto grid h-16 max-w-md grid-cols-3 items-center gap-4 px-4">
           {navItems.map((item) => {
