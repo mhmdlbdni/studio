@@ -23,7 +23,9 @@ export default function ManagePotsPage() {
   const [isAddPotDialogOpen, setAddPotDialogOpen] = useState(false);
 
   useEffect(() => {
-    setLocalPots(JSON.parse(JSON.stringify(pots)));
+    // Create a local copy of pots for editing, preserving the icon component.
+    // JSON.parse(JSON.stringify()) would strip the function.
+    setLocalPots(pots.map(p => ({ ...p, name: { ...p.name } })));
   }, [pots]);
   
   const totalPercentage = useMemo(() => {
@@ -99,36 +101,39 @@ export default function ManagePotsPage() {
       </Card>
 
       <div className="space-y-4">
-        {localPots.map(pot => (
-          <Card key={pot.id}>
-            <CardContent className="p-4 flex items-center gap-4">
-               <pot.icon className="h-8 w-8 flex-shrink-0" style={{ color: pot.color }}/>
-              <div className="flex-1 space-y-2">
-                <Label htmlFor={`pot-${pot.id}`}>{pot.name[language]}</Label>
-                <div className="relative">
-                  <Input
-                    id={`pot-${pot.id}`}
-                    type="number"
-                    value={pot.percentage}
-                    onChange={e => handlePercentageChange(pot.id, e.target.value)}
-                    className={language === 'en' ? 'pl-8' : 'pr-8'}
-                  />
-                  <span className={`absolute top-1/2 -translate-y-1/2 text-muted-foreground ${language === 'ar' ? 'left-3' : 'right-3'}`}>%</span>
+        {localPots.map(pot => {
+          const PotIcon = pot.icon;
+          return (
+            <Card key={pot.id}>
+              <CardContent className="p-4 flex items-center gap-4">
+                {PotIcon && <PotIcon className="h-8 w-8 flex-shrink-0" style={{ color: pot.color }}/>}
+                <div className="flex-1 space-y-2">
+                  <Label htmlFor={`pot-${pot.id}`}>{pot.name[language]}</Label>
+                  <div className="relative">
+                    <Input
+                      id={`pot-${pot.id}`}
+                      type="number"
+                      value={pot.percentage}
+                      onChange={e => handlePercentageChange(pot.id, e.target.value)}
+                      className={language === 'en' ? 'pl-8' : 'pr-8'}
+                    />
+                    <span className={`absolute top-1/2 -translate-y-1/2 text-muted-foreground ${language === 'ar' ? 'left-3' : 'right-3'}`}>%</span>
+                  </div>
                 </div>
-              </div>
-              <div className="flex gap-2">
-                 <Button variant="ghost" size="icon" onClick={() => setPotToEdit(pot)}>
-                    <Edit className="h-4 w-4" />
-                 </Button>
-                 { !['necessities', 'freedom', 'saving', 'education', 'play', 'giving'].includes(pot.id) && (
-                    <Button variant="ghost" size="icon" onClick={() => setPotToDelete(pot)} className="text-destructive hover:text-destructive">
-                        <Trash2 className="h-4 w-4" />
-                    </Button>
-                 )}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+                <div className="flex gap-2">
+                   <Button variant="ghost" size="icon" onClick={() => setPotToEdit(pot)}>
+                      <Edit className="h-4 w-4" />
+                   </Button>
+                   { !['necessities', 'freedom', 'saving', 'education', 'play', 'giving'].includes(pot.id) && (
+                      <Button variant="ghost" size="icon" onClick={() => setPotToDelete(pot)} className="text-destructive hover:text-destructive">
+                          <Trash2 className="h-4 w-4" />
+                      </Button>
+                   )}
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
 
       <Button variant="outline" className="w-full" onClick={() => setAddPotDialogOpen(true)}>
