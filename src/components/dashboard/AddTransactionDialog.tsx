@@ -1,6 +1,6 @@
 
 'use client';
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -10,196 +10,177 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogFooter,
   DialogClose,
 } from '@/components/ui/dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useApp } from '@/contexts/AppContext';
 import { useToast } from '@/hooks/use-toast';
+import { TrendingUp, TrendingDown } from 'lucide-react';
 
 interface AddTransactionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  initialTab?: 'income' | 'expense';
+  type: 'income' | 'expense';
 }
 
-export function AddTransactionDialog({ open, onOpenChange, initialTab = 'expense' }: AddTransactionDialogProps) {
+const getValidationSchemas = (t: any) => ({
+  incomeSchema: z.object({
+    description: z.string().min(2, { message: t.validation.descTooShort }),
+    amount: z.coerce.number().positive({ message: t.validation.amountPositive }),
+  }),
+  expenseSchema: z.object({
+    description: z.string().min(2, { message: t.validation.descTooShort }),
+    amount: z.coerce.number().positive({ message: t.validation.amountPositive }),
+    potId: z.string({ required_error: t.validation.potRequired }),
+  }),
+});
+
+
+export function AddTransactionDialog({ open, onOpenChange, type }: AddTransactionDialogProps) {
   const { addTransaction, pots, language } = useApp();
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState(initialTab);
-
-  useEffect(() => {
-    if (open) {
-      setActiveTab(initialTab);
-      incomeForm.reset();
-      expenseForm.reset();
-    }
-  }, [open, initialTab]);
   
-  const getValidationMessages = (lang: 'ar' | 'en') => ({
-    incomeSchema: z.object({
-        description: z.string().min(2, lang === 'ar' ? 'الوصف قصير جداً' : 'Description is too short'),
-        amount: z.coerce.number().positive(lang === 'ar' ? 'المبلغ يجب أن يكون إيجابياً' : 'Amount must be positive'),
-    }),
-    expenseSchema: z.object({
-        description: z.string().min(2, lang === 'ar' ? 'الوصف قصير جداً' : 'Description is too short'),
-        amount: z.coerce.number().positive(lang === 'ar' ? 'المبلغ يجب أن يكون إيجابياً' : 'Amount must be positive'),
-        potId: z.string({ required_error: lang === 'ar' ? 'الرجاء اختيار وعاء' : 'Please select a pot' }),
-    }),
-  });
+  const { incomeSchema, expenseSchema } = getValidationSchemas(language.translations);
 
-  const { incomeSchema: currentIncomeSchema, expenseSchema: currentExpenseSchema } = getValidationMessages(language);
-
-  const incomeForm = useForm({
-    resolver: zodResolver(currentIncomeSchema),
+  const incomeForm = useForm<z.infer<typeof incomeSchema>>({
+    resolver: zodResolver(incomeSchema),
     defaultValues: { description: '', amount: '' as any },
   });
 
-  const expenseForm = useForm({
-    resolver: zodResolver(currentExpenseSchema),
+  const expenseForm = useForm<z.infer<typeof expenseSchema>>({
+    resolver: zodResolver(expenseSchema),
     defaultValues: { description: '', amount: '' as any, potId: '' },
   });
-
-  useEffect(() => {
-    incomeForm.reset({ description: '', amount: '' as any });
-    expenseForm.reset({ description: '', amount: '' as any, potId: '' });
-  }, [language, incomeForm, expenseForm]);
-
-
-  const handleIncomeSubmit = (values: z.infer<typeof currentIncomeSchema>) => {
-    addTransaction({ ...values, type: 'income' });
-    toast({ title: language === 'ar' ? 'تمت الإضافة' : 'Added', description: language === 'ar' ? 'تم توزيع الدخل بنجاح.' : 'Income distributed successfully.' });
-    onOpenChange(false);
-    incomeForm.reset();
-  };
-
-  const handleExpenseSubmit = (values: z.infer<typeof currentExpenseSchema>) => {
-    addTransaction({ ...values, type: 'expense' });
-    toast({ title: language === 'ar' ? 'تمت الإضافة' : 'Added', description: language === 'ar' ? 'تم تسجيل المصروف بنجاح.' : 'Expense recorded successfully.' });
-    onOpenChange(false);
-    expenseForm.reset();
-  };
   
-  const handleOpenChange = (isOpen: boolean) => {
-    if (!isOpen) {
-      incomeForm.reset();
-      expenseForm.reset();
+  useEffect(() => {
+    if (!open) {
+      incomeForm.reset({ description: '', amount: '' as any });
+      expenseForm.reset({ description: '', amount: '' as any, potId: '' });
     }
+  }, [open, language, incomeForm, expenseForm]);
+
+
+  const handleIncomeSubmit = (values: z.infer<typeof incomeSchema>) => {
+    addTransaction({ ...values, type: 'income' });
+    toast({ title: language.translations.toast.added, description: language.translations.toast.incomeSuccess });
+    onOpenChange(false);
+  };
+
+  const handleExpenseSubmit = (values: z.infer<typeof expenseSchema>) => {
+    addTransaction({ ...values, type: 'expense' });
+    toast({ title: language.translations.toast.added, description: language.translations.toast.expenseSuccess });
+    onOpenChange(false);
+  };
+
+  const handleOpenChange = (isOpen: boolean) => {
     onOpenChange(isOpen);
   };
+  
+  const t = language.translations.addTransactionDialog;
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="expense">{language === 'ar' ? 'إضافة مصروف' : 'Add Expense'}</TabsTrigger>
-            <TabsTrigger value="income">{language === 'ar' ? 'إضافة دخل' : 'Add Income'}</TabsTrigger>
-          </TabsList>
-          <TabsContent value="expense">
-            <Form {...expenseForm}>
-              <form onSubmit={expenseForm.handleSubmit(handleExpenseSubmit)} className="space-y-4 pt-4">
-                <DialogHeader>
-                  <DialogTitle>{language === 'ar' ? 'إضافة مصروف جديد' : 'Add New Expense'}</DialogTitle>
-                </DialogHeader>
-                <FormField
-                  control={expenseForm.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{language === 'ar' ? 'الوصف' : 'Description'}</FormLabel>
+        {type === 'income' && (
+          <Form {...incomeForm}>
+            <form onSubmit={incomeForm.handleSubmit(handleIncomeSubmit)} className="space-y-4">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                    <TrendingUp className="text-green-500"/> {t.income.title}
+                </DialogTitle>
+                <DialogDescription>{t.income.description}</DialogDescription>
+              </DialogHeader>
+              <FormField
+                control={incomeForm.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t.income.sourceLabel}</FormLabel>
+                    <FormControl><Input placeholder={t.income.sourcePlaceholder} {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={incomeForm.control}
+                name="amount"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t.income.amountLabel}</FormLabel>
+                    <FormControl><Input type="number" {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <DialogFooter>
+                <DialogClose asChild><Button type="button" variant="ghost">{t.cancel}</Button></DialogClose>
+                <Button type="submit">{t.income.submitButton}</Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        )}
+        {type === 'expense' && (
+          <Form {...expenseForm}>
+            <form onSubmit={expenseForm.handleSubmit(handleExpenseSubmit)} className="space-y-4">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                    <TrendingDown className="text-destructive"/> {t.expense.title}
+                </DialogTitle>
+                <DialogDescription>{t.expense.description}</DialogDescription>
+              </DialogHeader>
+              <FormField
+                control={expenseForm.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t.expense.descLabel}</FormLabel>
+                    <FormControl><Input placeholder={t.expense.descPlaceholder} {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={expenseForm.control}
+                name="amount"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t.expense.amountLabel}</FormLabel>
+                    <FormControl><Input type="number" {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={expenseForm.control}
+                name="potId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t.expense.potLabel}</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
-                        <Input placeholder={language === 'ar' ? "مثال: فاتورة الكهرباء، غداء عمل" : "e.g., Electricity bill, business lunch"} {...field} />
+                        <SelectTrigger><SelectValue placeholder={t.expense.potPlaceholder} /></SelectTrigger>
                       </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={expenseForm.control}
-                  name="amount"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{language === 'ar' ? 'المبلغ' : 'Amount'}</FormLabel>
-                      <FormControl>
-                        <Input type="number" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={expenseForm.control}
-                  name="potId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{language === 'ar' ? 'اختر الوعاء للخصم منه' : 'Select pot to deduct from'}</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder={language === 'ar' ? 'اختر وعاء...' : 'Select a pot...'} />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {pots.map(pot => (
-                            <SelectItem key={pot.id} value={pot.id}>{pot.name[language]}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <DialogFooter>
-                  <DialogClose asChild><Button type="button" variant="ghost">{language === 'ar' ? 'إلغاء' : 'Cancel'}</Button></DialogClose>
-                  <Button type="submit">{language === 'ar' ? 'إتمام الخصم' : 'Confirm Expense'}</Button>
-                </DialogFooter>
-              </form>
-            </Form>
-          </TabsContent>
-          <TabsContent value="income">
-            <Form {...incomeForm}>
-              <form onSubmit={incomeForm.handleSubmit(handleIncomeSubmit)} className="space-y-4 pt-4">
-                <DialogHeader>
-                  <DialogTitle>{language === 'ar' ? 'إضافة دخل جديد' : 'Add New Income'}</DialogTitle>
-                </DialogHeader>
-                 <FormField
-                  control={incomeForm.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{language === 'ar' ? 'مصدر الدخل' : 'Income Source'}</FormLabel>
-                      <FormControl>
-                        <Input placeholder={language === 'ar' ? 'مثال: الراتب الشهري، مشروع جانبي' : 'e.g., Monthly salary, side project'} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={incomeForm.control}
-                  name="amount"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{language === 'ar' ? 'المبلغ' : 'Amount'}</FormLabel>
-                      <FormControl>
-                        <Input type="number" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <DialogFooter>
-                  <DialogClose asChild><Button type="button" variant="ghost">{language === 'ar' ? 'إلغاء' : 'Cancel'}</Button></DialogClose>
-                  <Button type="submit">{language === 'ar' ? 'توزيع الدخل' : 'Distribute Income'}</Button>
-                </DialogFooter>
-              </form>
-            </Form>
-          </TabsContent>
-        </Tabs>
+                      <SelectContent>
+                        {pots.map(pot => (
+                          <SelectItem key={pot.id} value={pot.id}>{pot.name[language.key]}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <DialogFooter>
+                <DialogClose asChild><Button type="button" variant="ghost">{t.cancel}</Button></DialogClose>
+                <Button type="submit">{t.expense.submitButton}</Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        )}
       </DialogContent>
     </Dialog>
   );

@@ -1,25 +1,23 @@
 
 'use client';
 
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback, useMemo } from 'react';
 import type { User, Pot, Transaction } from '@/lib/types';
-import { DEFAULT_POTS } from '@/lib/constants';
+import { DEFAULT_POTS, AppLanguage, getLanguagePack, LanguageKey } from '@/lib/constants';
 import { useIsMounted } from '@/hooks/use-is-mounted';
 import { potIcons, PotIconKey } from '@/lib/icons';
-
-type Language = 'ar' | 'en';
 
 interface AppState {
   user: User | null;
   pots: Pot[];
   transactions: Transaction[];
   theme: 'light' | 'dark';
-  language: Language;
+  language: AppLanguage;
   setUser: (user: User | null) => void;
   addTransaction: (transaction: Omit<Transaction, 'id' | 'date'>) => void;
   updatePots: (pots: Omit<Pot, 'icon'>[]) => void;
   toggleTheme: () => void;
-  setLanguage: (language: Language) => void;
+  setLanguage: (language: LanguageKey) => void;
   getPotBalance: (potId: string) => number;
   totalIncome: number;
   totalExpenses: number;
@@ -39,7 +37,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
   const [pots, setPots] = useState<Pot[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
-  const [language, setLanguageState] = useState<Language>('ar');
+  const [language, setLanguageState] = useState<AppLanguage>(getLanguagePack('ar'));
   const isMounted = useIsMounted();
 
   useEffect(() => {
@@ -48,36 +46,22 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
       const storedPots = localStorage.getItem('al-mawazin-pots');
       const storedTransactions = localStorage.getItem('al-mawazin-transactions');
       const storedTheme = localStorage.getItem('al-mawazin-theme') as 'light' | 'dark' | null;
-      const storedLanguage = localStorage.getItem('al-mawazin-language') as Language | null;
+      const storedLanguage = localStorage.getItem('al-mawazin-language') as LanguageKey | null;
 
       if (storedUser) setUserState(JSON.parse(storedUser));
       
       if (storedPots) {
-        let needsMigration = false;
         const parsedPots = JSON.parse(storedPots);
-        
-        const migratedPotsData = parsedPots.map(p => {
-            let pot = { ...p };
-            if (typeof p.name === 'string') {
-                needsMigration = true;
-                const defaultPotData = DEFAULT_POTS.find(dp => dp.id === p.id);
-                const newName = defaultPotData ? defaultPotData.name : { ar: p.name, en: p.name };
-                pot.name = newName;
-            }
-            if (!p.iconKey) {
-                needsMigration = true;
-                pot.iconKey = p.id.startsWith('custom-') ? 'custom' : p.id;
-            }
-            return pot;
-        });
-        
-        setPots(addDynamicPotData(migratedPotsData));
-
-        if (needsMigration) {
-            localStorage.setItem('al-mawazin-pots', JSON.stringify(migratedPotsData));
-        }
+        setPots(addDynamicPotData(parsedPots));
       } else {
-        setPots(addDynamicPotData(DEFAULT_POTS));
+        const defaultPotsWithEnglishNames = DEFAULT_POTS.map(p => ({
+            ...p,
+            name: {
+                ar: p.name.ar,
+                en: p.name.en,
+            }
+        }));
+        setPots(addDynamicPotData(defaultPotsWithEnglishNames));
       }
 
       if (storedTransactions) setTransactions(JSON.parse(storedTransactions));
@@ -89,10 +73,11 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
         document.documentElement.classList.add('dark');
       }
 
-      const effectiveLanguage = storedLanguage || 'ar';
-      setLanguageState(effectiveLanguage);
-      document.documentElement.lang = effectiveLanguage;
-      document.documentElement.dir = effectiveLanguage === 'ar' ? 'rtl' : 'ltr';
+      const effectiveLanguageKey = storedLanguage || 'ar';
+      const langPack = getLanguagePack(effectiveLanguageKey);
+      setLanguageState(langPack);
+      document.documentElement.lang = langPack.key;
+      document.documentElement.dir = langPack.dir;
 
     }
   }, [isMounted]);
@@ -125,7 +110,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
-  const getPotBalance = (potId: string) => {
+  const getPotBalance = useCallback((potId: string) => {
     const pot = pots.find(p => p.id === potId);
     if (!pot) return 0;
 
@@ -138,10 +123,10 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
         .reduce((sum, t) => sum + t.amount, 0);
 
     return incomeForPot - expensesForPot;
-  };
+  }, [pots, transactions]);
 
-  const totalIncome = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
-  const totalExpenses = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+  const totalIncome = useMemo(() => transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0), [transactions]);
+  const totalExpenses = useMemo(() => transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0), [transactions]);
 
 
   const toggleTheme = () => {
@@ -153,11 +138,12 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
-  const setLanguage = (lang: Language) => {
-    setLanguageState(lang);
-    localStorage.setItem('al-mawazin-language', lang);
-    document.documentElement.lang = lang;
-    document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+  const setLanguage = (langKey: LanguageKey) => {
+    const langPack = getLanguagePack(langKey);
+    setLanguageState(langPack);
+    localStorage.setItem('al-mawazin-language', langKey);
+    document.documentElement.lang = langPack.key;
+    document.documentElement.dir = langPack.dir;
   };
 
   const value = {

@@ -15,10 +15,10 @@ import { ChatInterface } from '@/components/ai/ChatInterface';
 
 export default function DashboardPage() {
   const { pots, user, getPotBalance, totalIncome, totalExpenses, language, transactions } = useApp();
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [isIncomeDialogOpen, setIncomeDialogOpen] = useState(false);
+  const [isExpenseDialogOpen, setExpenseDialogOpen] = useState(false);
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [isChatOpen, setChatOpen] = useState(false);
-  const [dialogInitialTab, setDialogInitialTab] = useState<'income' | 'expense'>('expense');
   const currency = user?.currency || 'YER';
 
   const potDetails = useMemo(() => {
@@ -30,9 +30,13 @@ export default function DashboardPage() {
 
   const netBalance = totalIncome - totalExpenses;
 
-  const openDialog = (tab: 'income' | 'expense') => {
-    setDialogInitialTab(tab);
-    setDialogOpen(true);
+  const openIncomeDialog = () => {
+    setIncomeDialogOpen(true);
+    setPopoverOpen(false);
+  }
+
+  const openExpenseDialog = () => {
+    setExpenseDialogOpen(true);
     setPopoverOpen(false);
   }
 
@@ -41,29 +45,29 @@ export default function DashboardPage() {
        <Card>
             <CardHeader>
                 <div className="flex items-center justify-between">
-                    <CardTitle className="text-sm font-medium">{language === 'ar' ? 'الصافي الحالي' : 'Net Balance'}</CardTitle>
+                    <CardTitle className="text-sm font-medium">{language.dashboard.netBalance}</CardTitle>
                     <Wallet className="h-5 w-5 text-muted-foreground" />
                 </div>
             </CardHeader>
             <CardContent>
                 <div className="text-3xl font-bold">
-                    {new Intl.NumberFormat(language === 'ar' ? 'ar-EG' : 'en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(netBalance)}
+                    {new Intl.NumberFormat(language.code, { style: 'currency', currency, minimumFractionDigits: 0 }).format(netBalance)}
                 </div>
                 <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
                     <div className="flex items-center gap-1">
                         <TrendingUp className="h-4 w-4 text-green-500" />
-                        <span>{new Intl.NumberFormat(language === 'ar' ? 'ar-EG' : 'en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(totalIncome)}</span>
+                        <span>{new Intl.NumberFormat(language.code, { style: 'currency', currency, minimumFractionDigits: 0 }).format(totalIncome)}</span>
                     </div>
                     <div className="flex items-center gap-1">
                         <TrendingDown className="h-4 w-4 text-destructive" />
-                         <span>{new Intl.NumberFormat(language === 'ar' ? 'ar-EG' : 'en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(totalExpenses)}</span>
+                         <span>{new Intl.NumberFormat(language.code, { style: 'currency', currency, minimumFractionDigits: 0 }).format(totalExpenses)}</span>
                     </div>
                 </div>
             </CardContent>
         </Card>
 
       <div className="space-y-4">
-        <h2 className={`font-headline text-xl font-bold ${language === 'ar' ? 'text-right' : 'text-left'}`}>{language === 'ar' ? 'الأوعية المالية' : 'Financial Pots'}</h2>
+        <h2 className={`font-headline text-xl font-bold ${language.dir === 'rtl' ? 'text-right' : 'text-left'}`}>{language.dashboard.financialPots}</h2>
         <div className="grid grid-cols-1 gap-4">
           {potDetails.map(pot => {
             const PotIcon = pot.icon;
@@ -83,9 +87,9 @@ export default function DashboardPage() {
                         </div>
                         <div className="flex-1">
                             <div className="flex w-full items-center justify-between">
-                                <p className="font-semibold text-base">{pot.name[language]}</p>
+                                <p className="font-semibold text-base">{pot.name[language.key]}</p>
                                 <p className="text-sm font-bold" style={{ color: pot.color }}>
-                                  {new Intl.NumberFormat(language === 'ar' ? 'ar-EG' : 'en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(pot.balance)}
+                                  {new Intl.NumberFormat(language.code, { style: 'currency', currency, minimumFractionDigits: 0 }).format(pot.balance)}
                                 </p>
                             </div>
                             <div className="mt-2 flex items-center gap-2">
@@ -103,47 +107,52 @@ export default function DashboardPage() {
 
       <Button
         variant="outline"
-        className={`fixed bottom-40 ${language === 'ar' ? 'left-4' : 'right-4'} z-20 h-14 w-14 rounded-full shadow-lg lg:bottom-28 ${language === 'ar' ? 'lg:left-8' : 'lg:right-8'}`}
+        className={`fixed bottom-40 ${language.dir === 'rtl' ? 'left-4' : 'right-4'} z-20 h-14 w-14 rounded-full shadow-lg lg:bottom-28 ${language.dir === 'rtl' ? 'lg:left-8' : 'lg:right-8'}`}
         size="icon"
         onClick={() => setChatOpen(true)}
       >
         <Bot className="h-8 w-8" />
-        <span className="sr-only">{language === 'ar' ? 'مرشد الموازين' : 'Al-Mawazin Guide'}</span>
+        <span className="sr-only">{language.dashboard.guide}</span>
       </Button>
       
       <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
         <PopoverTrigger asChild>
           <Button
-            className={`fixed bottom-20 ${language === 'ar' ? 'left-4' : 'right-4'} z-20 h-16 w-16 rounded-full shadow-lg ${language === 'ar' ? 'lg:bottom-8 lg:left-8' : 'lg:bottom-8 lg:right-8'} bg-primary hover:bg-primary/90`}
+            className={`fixed bottom-20 ${language.dir === 'rtl' ? 'left-4' : 'right-4'} z-20 h-16 w-16 rounded-full shadow-lg ${language.dir === 'rtl' ? 'lg:bottom-8 lg:left-8' : 'lg:bottom-8 lg:right-8'} bg-primary hover:bg-primary/90`}
             size="icon"
           >
             <Plus className="h-8 w-8" />
-            <span className="sr-only">{language === 'ar' ? 'إضافة معاملة' : 'Add Transaction'}</span>
+            <span className="sr-only">{language.dashboard.addTransaction}</span>
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0 border-none bg-transparent shadow-none" side="top" align={language === 'ar' ? 'start' : 'end'} sideOffset={15}>
+        <PopoverContent className="w-auto p-0 border-none bg-transparent shadow-none" side="top" align={language.dir === 'rtl' ? 'start' : 'end'} sideOffset={15}>
             <div className="flex flex-col items-end gap-3">
-                 <Button onClick={() => openDialog('income')} className="justify-center rounded-full bg-green-500 text-white hover:bg-green-600 h-11 px-6 shadow-lg">
-                    <Plus className={`${language === 'ar' ? 'ml-2' : 'mr-2'} h-4 w-4`} />
-                    {language === 'ar' ? 'إضافة دخل' : 'Add Income'}
+                 <Button onClick={openIncomeDialog} className="justify-center rounded-full bg-green-500 text-white hover:bg-green-600 h-11 px-6 shadow-lg">
+                    <Plus className={`${language.dir === 'rtl' ? 'ml-2' : 'mr-2'} h-4 w-4`} />
+                    {language.dashboard.addIncome}
                 </Button>
-                <Button onClick={() => openDialog('expense')} className="justify-center rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/90 h-11 px-6 shadow-lg">
-                    <span className={`font-bold text-xl ${language === 'ar' ? 'ml-2' : 'mr-2'}`}>−</span>
-                    {language === 'ar' ? 'إضافة مصروف' : 'Add Expense'}
+                <Button onClick={openExpenseDialog} className="justify-center rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/90 h-11 px-6 shadow-lg">
+                    <span className={`font-bold text-xl ${language.dir === 'rtl' ? 'ml-2' : 'mr-2'}`}>−</span>
+                    {language.dashboard.addExpense}
                 </Button>
             </div>
         </PopoverContent>
       </Popover>
 
       <AddTransactionDialog 
-        open={dialogOpen} 
-        onOpenChange={setDialogOpen}
-        initialTab={dialogInitialTab}
+        open={isIncomeDialogOpen} 
+        onOpenChange={setIncomeDialogOpen}
+        type="income"
+      />
+      <AddTransactionDialog 
+        open={isExpenseDialogOpen} 
+        onOpenChange={setExpenseDialogOpen}
+        type="expense"
       />
 
       <Dialog open={isChatOpen} onOpenChange={setChatOpen}>
         <DialogContent className="p-0 bg-transparent border-none shadow-none sm:max-w-lg w-full">
-          <DialogTitle className="sr-only">{language === 'ar' ? 'مرشد الموازين' : 'Al-Mawazin Guide'}</DialogTitle>
+          <DialogTitle className="sr-only">{language.dashboard.guide}</DialogTitle>
           <ChatInterface />
         </DialogContent>
       </Dialog>
