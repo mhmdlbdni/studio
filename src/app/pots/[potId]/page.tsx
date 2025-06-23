@@ -37,7 +37,7 @@ export default function PotDetailPage() {
     );
   }
   
-  const dateLocale = language.key === 'ar' ? language.code : 'en-US';
+  const dateLocale = 'en-US';
 
   return (
     <div className="space-y-6">

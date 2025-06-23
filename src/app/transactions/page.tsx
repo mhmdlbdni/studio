@@ -61,7 +61,7 @@ export default function TransactionsPage() {
   }, [filteredTransactions]);
 
   const t = language.translations.transactionsPage;
-  const dateLocale = language.key === 'ar' ? language.code : 'en-US';
+  const dateLocale = 'en-US';
 
   return (
     <div className="space-y-6">
@@ -84,7 +84,7 @@ export default function TransactionsPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>{t.table.description}</TableHead>
-                  <TableHead className="text-center">{t.table.pot}</TableHead>
+                  <TableHead className="text-right">{t.table.pot}</TableHead>
                   <TableHead className="text-right">{t.table.amount}</TableHead>
                 </TableRow>
               </TableHeader>
@@ -102,7 +102,7 @@ export default function TransactionsPage() {
                             {new Date(transaction.date).toLocaleDateString(dateLocale, { year: 'numeric', month: 'short', day: 'numeric' })}
                           </div>
                         </TableCell>
-                        <TableCell className="text-center">{potName}</TableCell>
+                        <TableCell className="text-right">{potName}</TableCell>
                         <TableCell className={`text-right font-medium ${isExpense ? 'text-destructive' : 'text-green-500'}`}>
                           <div className="flex items-center justify-end gap-1">
                              <span>
