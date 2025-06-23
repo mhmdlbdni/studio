@@ -13,9 +13,9 @@ interface Message {
   text: string;
 }
 
-const getInitialMessages = (language: 'ar' | 'en'): Message[] => [
-    { sender: 'ai', text: language === 'ar' ? 'أهلاً بك، أنا مرشد الموازين. مساعدك المالي الذكي. كيف يمكنني أن أخدمك اليوم؟' : 'Hello, I am the Al-Mawazin Guide, your smart financial assistant. How can I help you today?' },
-    { sender: 'ai', text: language === 'ar' ? 'يمكنك سؤالي عن أي شيء يتعلق بفلسفة الموازين أو كيفية استخدام التطبيق.' : 'You can ask me anything about the Al-Mawazin philosophy or how to use the app.' },
+const getInitialMessages = (languageKey: 'ar' | 'en'): Message[] => [
+    { sender: 'ai', text: languageKey === 'ar' ? 'أهلاً بك، أنا مرشد الموازين. مساعدك المالي الذكي. كيف يمكنني أن أخدمك اليوم؟' : 'Hello, I am the Al-Mawazin Guide, your smart financial assistant. How can I help you today?' },
+    { sender: 'ai', text: languageKey === 'ar' ? 'يمكنك سؤالي عن أي شيء يتعلق بفلسفة الموازين أو كيفية استخدام التطبيق.' : 'You can ask me anything about the Al-Mawazin philosophy or how to use the app.' },
 ];
 
 const questionPool = {
@@ -38,7 +38,7 @@ const questionPool = {
 };
 
 const shuffleArray = (array: string[]) => {
-    if (typeof window === 'undefined') return array;
+    if (typeof window === 'undefined' || !array) return array || [];
     const newArray = [...array];
     for (let i = newArray.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -50,7 +50,7 @@ const shuffleArray = (array: string[]) => {
 
 export function ChatInterface() {
   const { language } = useApp();
-  const [messages, setMessages] = useState<Message[]>(getInitialMessages(language));
+  const [messages, setMessages] = useState<Message[]>(() => getInitialMessages(language.key));
   const [suggestedQuestions, setSuggestedQuestions] = useState<string[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -62,8 +62,8 @@ export function ChatInterface() {
   }, [messages, isLoading]);
   
   const generateSuggestions = () => {
-      const staticQuestion = language === 'ar' ? 'ما هو نظام الموازين؟' : 'What is the Al-Mawazin system?';
-      const randomQuestions = shuffleArray(questionPool[language]).slice(0, 2);
+      const staticQuestion = language.key === 'ar' ? 'ما هو نظام الموازين؟' : 'What is the Al-Mawazin system?';
+      const randomQuestions = shuffleArray(questionPool[language.key]).slice(0, 2);
       setSuggestedQuestions([staticQuestion, ...randomQuestions]);
   }
 
@@ -91,7 +91,7 @@ export function ChatInterface() {
       const aiMessage: Message = { sender: 'ai', text: response.advice };
       setMessages(prev => [...prev, aiMessage]);
     } catch (error) {
-      const errorMessage: Message = { sender: 'ai', text: language === 'ar' ? 'عذراً، حدث خطأ ما. يرجى المحاولة مرة أخرى.' : 'Sorry, something went wrong. Please try again.' };
+      const errorMessage: Message = { sender: 'ai', text: language.key === 'ar' ? 'عذراً، حدث خطأ ما. يرجى المحاولة مرة أخرى.' : 'Sorry, something went wrong. Please try again.' };
       setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
@@ -105,7 +105,7 @@ export function ChatInterface() {
   }
 
   const handleReset = () => {
-    setMessages(getInitialMessages(language));
+    setMessages(getInitialMessages(language.key));
     setShowSuggestions(true);
     setIsLoading(false);
     generateSuggestions();
@@ -116,7 +116,7 @@ export function ChatInterface() {
       <div className="flex shrink-0 items-center justify-between bg-primary p-3 text-primary-foreground">
         <div className="flex items-center gap-3">
             <Bot className="h-6 w-6"/>
-            <h2 className="font-bold">{language === 'ar' ? 'مرشد الموازين' : 'Al-Mawazin Guide'}</h2>
+            <h2 className="font-bold">{language.key === 'ar' ? 'مرشد الموازين' : 'Al-Mawazin Guide'}</h2>
         </div>
         <Button variant="ghost" size="icon" onClick={handleReset} className="h-8 w-8 hover:bg-primary/80">
             <RefreshCw className="h-5 w-5" />
@@ -132,7 +132,7 @@ export function ChatInterface() {
                 message.sender === 'user' ? 'justify-end' : 'justify-start'
               }`}
             >
-              {message.sender === 'ai' && language === 'en' && (
+              {message.sender === 'ai' && language.key === 'en' && (
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/20 text-primary">
                       <Bot className="h-5 w-5" />
                   </div>
@@ -144,7 +144,7 @@ export function ChatInterface() {
               }`}>
                 <p className="whitespace-pre-wrap">{message.text}</p>
               </div>
-               {message.sender === 'ai' && language === 'ar' && (
+               {message.sender === 'ai' && language.key === 'ar' && (
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/20 text-primary">
                       <Bot className="h-5 w-5" />
                   </div>
@@ -153,25 +153,25 @@ export function ChatInterface() {
           ))}
            {isLoading && (
             <div className="flex items-start gap-2 justify-start">
-                {language === 'en' && <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/20 text-primary">
+                {language.key === 'en' && <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/20 text-primary">
                     <Bot className="h-5 w-5" />
                 </div>}
                 <div className="rounded-lg bg-secondary p-3 text-sm">
                    <Loader2 className="h-5 w-5 animate-spin" />
                 </div>
-                {language === 'ar' && <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/20 text-primary">
+                {language.key === 'ar' && <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/20 text-primary">
                     <Bot className="h-5 w-5" />
                 </div>}
             </div>
           )}
           {showSuggestions && (
-            <div className={`flex flex-col gap-2 pt-4 ${language === 'ar' ? 'items-end' : 'items-start'}`}>
+            <div className={`flex flex-col gap-2 pt-4 ${language.key === 'ar' ? 'items-end' : 'items-start'}`}>
                 {suggestedQuestions.map((q) => (
                     <Button 
                         key={q} 
                         variant="outline"
                         onClick={() => handleSend(q)}
-                        className={`h-auto max-w-xs whitespace-normal rounded-full border-primary/50 bg-transparent text-primary hover:bg-primary/10 hover:text-primary ${language === 'ar' ? 'self-end text-right' : 'self-start text-left'}`}
+                        className="h-auto max-w-xs whitespace-normal rounded-full border-primary/50 bg-transparent px-4 py-2 text-primary hover:bg-primary/10 hover:text-primary"
                     >
                         {q}
                     </Button>
@@ -183,14 +183,14 @@ export function ChatInterface() {
       </ScrollArea>
       <div className="flex shrink-0 items-center gap-2 border-t p-2">
         <div className="relative flex-1">
-            <Scale className={`pointer-events-none absolute ${language === 'ar' ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground`}/>
+            <Scale className={`pointer-events-none absolute ${language.key === 'ar' ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground`}/>
             <Input
                 value={input}
                 onChange={e => setInput(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder={language === 'ar' ? 'اسأل مرشدك المالي هنا..' : 'Ask your financial guide here..'}
+                placeholder={language.key === 'ar' ? 'اسأل مرشدك المالي هنا..' : 'Ask your financial guide here..'}
                 disabled={isLoading}
-                className={`h-10 rounded-full bg-secondary ${language === 'ar' ? 'pr-10' : 'pl-10'}`}
+                className={`h-10 rounded-full bg-secondary ${language.key === 'ar' ? 'pr-10' : 'pl-10'}`}
             />
         </div>
         <Button onClick={() => handleSend()} disabled={isLoading || input.trim() === ''} size="icon" className="rounded-full">
