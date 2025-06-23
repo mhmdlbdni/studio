@@ -1,11 +1,11 @@
+
 'use client';
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { SendHorizonal, Loader2, RefreshCw, Scale } from 'lucide-react';
+import { SendHorizonal, Loader2, RefreshCw, Scale, Bot } from 'lucide-react';
 import { getFinancialAdvice } from '@/ai/flows/financial-advice';
 import { ScrollArea } from '../ui/scroll-area';
-import { Logo } from '@/components/icons/Logo';
 import { useApp } from '@/contexts/AppContext';
 
 interface Message {
@@ -15,25 +15,42 @@ interface Message {
 
 const getInitialMessages = (language: 'ar' | 'en'): Message[] => [
     { sender: 'ai', text: language === 'ar' ? 'أهلاً بك، أنا مرشد الموازين. مساعدك المالي الذكي. كيف يمكنني أن أخدمك اليوم؟' : 'Hello, I am the Al-Mawazin Guide, your smart financial assistant. How can I help you today?' },
-    { sender: 'ai', text: language === 'ar' ? 'يمكنك سؤال عن أي شيء يتعلق بالموازين بشكل كامل أو عن كيفية استخدام التطبيق' : 'You can ask about anything related to the Al-Mawazin system or how to use the app.' },
+    { sender: 'ai', text: language === 'ar' ? 'يمكنك سؤالي عن أي شيء يتعلق بفلسفة الموازين أو كيفية استخدام التطبيق.' : 'You can ask me anything about the Al-Mawazin philosophy or how to use the app.' },
 ];
 
-const getSuggestedQuestions = (language: 'ar' | 'en'): string[] => language === 'ar' ? [
-    'ما هو نظام الموازين؟',
-    'ما هو أهم يجب أن أركز عليه؟',
-    'لقد دخلت بشكل غير منتظم، كيف أبدأ؟',
-    'ما الفائدة من الاشتراك برو؟',
-] : [
-    'What is the Al-Mawazin system?',
-    'What is the most important thing to focus on?',
-    'My income is irregular, how do I start?',
-    'What is the benefit of the Pro subscription?',
-];
+const questionPool = {
+    ar: [
+        'ما هو أهم ما يجب أن أركز عليه؟',
+        'دخولي غير منتظمة، كيف أبدأ؟',
+        'كيف أتعامل مع ديوني؟',
+        'ما هو وعاء الحرية المالية؟',
+        'كيف أستخدم وعاء المرح والترفيه؟',
+        'لدي أهداف خاصة، كيف أخصص لها وعاء؟'
+    ],
+    en: [
+        'What is the most important thing to focus on?',
+        'My income is irregular, how do I start?',
+        'How do I deal with my debts?',
+        'What is the Financial Freedom pot?',
+        'How should I use the Play & Fun pot?',
+        'I have special goals, how do I create a pot for them?'
+    ]
+};
+
+const shuffleArray = (array: string[]) => {
+    const newArray = [...array];
+    for (let i = newArray.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+    }
+    return newArray;
+};
 
 
 export function ChatInterface() {
   const { language } = useApp();
   const [messages, setMessages] = useState<Message[]>(getInitialMessages(language));
+  const [suggestedQuestions, setSuggestedQuestions] = useState<string[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(true);
@@ -43,6 +60,14 @@ export function ChatInterface() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isLoading]);
   
+  const generateSuggestions = () => {
+    if (typeof window !== 'undefined') {
+      const staticQuestion = language === 'ar' ? 'ما هو نظام الموازين؟' : 'What is the Al-Mawazin system?';
+      const randomQuestions = shuffleArray(questionPool[language]).slice(0, 2);
+      setSuggestedQuestions([staticQuestion, ...randomQuestions]);
+    }
+  }
+
   useEffect(() => {
     handleReset();
   }, [language]);
@@ -84,15 +109,14 @@ export function ChatInterface() {
     setMessages(getInitialMessages(language));
     setShowSuggestions(true);
     setIsLoading(false);
+    generateSuggestions();
   }
 
-  const suggestedQuestions = getSuggestedQuestions(language);
-
   return (
-    <div className="flex h-[600px] flex-col overflow-hidden rounded-lg border bg-card">
+    <div className="flex h-[70vh] min-h-[400px] max-h-[700px] flex-col overflow-hidden rounded-lg border bg-card shadow-xl">
       <div className="flex shrink-0 items-center justify-between bg-primary p-3 text-primary-foreground">
         <div className="flex items-center gap-3">
-            <Logo className="h-6 w-6"/>
+            <Bot className="h-6 w-6"/>
             <h2 className="font-bold">{language === 'ar' ? 'مرشد الموازين' : 'Al-Mawazin Guide'}</h2>
         </div>
         <Button variant="ghost" size="icon" onClick={handleReset} className="h-8 w-8 hover:bg-primary/80">
@@ -105,34 +129,40 @@ export function ChatInterface() {
           {messages.map((message, index) => (
             <div
               key={index}
-              className={`flex w-full items-start gap-3 ${
-                message.sender === 'user' 
-                ? (language === 'ar' ? 'flex-row-reverse' : 'flex-row-reverse') 
-                : (language === 'ar' ? 'flex-row' : 'flex-row')
+              className={`flex w-full items-end gap-2 ${
+                message.sender === 'user' ? 'justify-end' : 'justify-start'
               }`}
             >
-              {message.sender === 'ai' && (
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/20 text-primary">
-                    <Logo className="h-5 w-5" />
-                </div>
+              {message.sender === 'ai' && language === 'en' && (
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/20 text-primary">
+                      <Bot className="h-5 w-5" />
+                  </div>
               )}
-              <div className={`max-w-[80%] rounded-lg p-3 text-sm ${
+              <div className={`max-w-[85%] rounded-lg p-3 text-sm ${
                 message.sender === 'user'
-                  ? 'rounded-br-none bg-primary text-primary-foreground'
-                  : 'rounded-bl-none bg-secondary'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-secondary'
               }`}>
-                <p>{message.text}</p>
+                <p className="whitespace-pre-wrap">{message.text}</p>
               </div>
+               {message.sender === 'ai' && language === 'ar' && (
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/20 text-primary">
+                      <Bot className="h-5 w-5" />
+                  </div>
+              )}
             </div>
           ))}
            {isLoading && (
-            <div className={`flex items-start gap-3 ${language === 'ar' ? 'flex-row' : 'flex-row'}`}>
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/20 text-primary">
-                    <Logo className="h-5 w-5" />
-                </div>
+            <div className="flex items-start gap-2 justify-start">
+                {language === 'en' && <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/20 text-primary">
+                    <Bot className="h-5 w-5" />
+                </div>}
                 <div className="rounded-lg bg-secondary p-3 text-sm">
                    <Loader2 className="h-5 w-5 animate-spin" />
                 </div>
+                {language === 'ar' && <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/20 text-primary">
+                    <Bot className="h-5 w-5" />
+                </div>}
             </div>
           )}
           {showSuggestions && (
@@ -143,7 +173,7 @@ export function ChatInterface() {
                         variant="outline" 
                         size="sm"
                         onClick={() => handleSend(q)}
-                        className={`h-auto max-w-xs whitespace-normal rounded-full border-primary/50 bg-transparent text-primary hover:bg-primary/10 hover:text-primary ${language === 'ar' ? 'self-end' : 'self-start'}`}
+                        className={`h-auto max-w-xs whitespace-normal rounded-full border-primary/50 bg-transparent text-primary hover:bg-primary/10 hover:text-primary ${language === 'ar' ? 'self-end text-right' : 'self-start text-left'}`}
                     >
                         {q}
                     </Button>
