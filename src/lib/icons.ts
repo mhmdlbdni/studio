@@ -1,7 +1,7 @@
 
 import React from 'react';
 import {
-  Home, TrendingUp, PiggyBank, BookOpen, Gamepad2, Gift, DollarSign,
+  Home, TrendingUp, PiggyBank, BookOpen, Gamepad2, Gift,
   Briefcase, Car, Plane, GraduationCap, Heart, Wrench, Shirt,
   Utensils, ShoppingCart, Building, Leaf, PawPrint, Music, Clapperboard,
   Palette, Droplets, Landmark, Pizza, Sprout, Dumbbell, Baby,
@@ -37,7 +37,6 @@ export const potIcons = {
   play: Gamepad2,
   giving: Gift,
   custom: customIcon,
-  dollar: DollarSign,
   briefcase: Briefcase,
   car: Car,
   plane: Plane,
@@ -93,7 +92,6 @@ export const iconList: { key: PotIconKey; name: {ar: string, en: string}; icon: 
   { key: 'play', name: {ar: 'لعب', en: 'Play'}, icon: Gamepad2 },
   { key: 'giving', name: {ar: 'هدية', en: 'Gift'}, icon: Gift },
   { key: 'custom', name: {ar: 'مخصص', en: 'Custom'}, icon: customIcon },
-  { key: 'dollar', name: {ar: 'دولار', en: 'Dollar'}, icon: DollarSign },
   { key: 'briefcase', name: {ar: 'عمل', en: 'Work'}, icon: Briefcase },
   { key: 'car', name: {ar: 'سيارة', en: 'Car'}, icon: Car },
   { key: 'plane', name: {ar: 'سفر', en: 'Travel'}, icon: Plane },
