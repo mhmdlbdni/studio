@@ -3,26 +3,11 @@
 
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
-import { Plus } from 'lucide-react';
+import { Plus, Bot } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AddTransactionDialog } from '@/components/dashboard/AddTransactionDialog';
-import { potIcons } from '@/lib/icons';
-
-const SummaryCard = ({ title, amount, currency, colorClass, icon: Icon }) => (
-  <Card className="flex-1">
-    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-      <CardTitle className="text-sm font-medium">{title}</CardTitle>
-      <Icon className={`h-5 w-5 ${colorClass}`} />
-    </CardHeader>
-    <CardContent>
-      <div className={`text-2xl font-bold ${colorClass}`}>
-        {new Intl.NumberFormat('ar-EG', { style: 'currency', currency, minimumFractionDigits: 0 }).format(amount)}
-      </div>
-    </CardContent>
-  </Card>
-);
 
 export default function DashboardPage() {
   const { pots, user, getPotBalance, totalIncome, totalExpenses } = useApp();
@@ -98,6 +83,17 @@ export default function DashboardPage() {
         </div>
       </div>
 
+      <Button
+        asChild
+        className="fixed bottom-40 right-4 z-20 h-14 w-14 rounded-full shadow-lg lg:bottom-28 lg:right-8"
+        size="icon"
+      >
+        <Link href="/support">
+          <Bot className="h-8 w-8" />
+          <span className="sr-only">مرشد الموازين</span>
+        </Link>
+      </Button>
+      
       <Button
         onClick={() => setDialogOpen(true)}
         className="fixed bottom-20 right-4 z-20 h-16 w-16 rounded-full shadow-lg lg:bottom-8 lg:right-8"
