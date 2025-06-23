@@ -3,6 +3,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -35,6 +36,16 @@ export default function OnboardingPage() {
         {step === 1 && (
           <>
             <CardHeader className="text-center">
+              <div className="mb-4 flex justify-center">
+                <Image
+                  src="https://placehold.co/80x80.png"
+                  width={80}
+                  height={80}
+                  alt="شعار الموازين"
+                  data-ai-hint="logo balance"
+                  className="rounded-full"
+                />
+              </div>
               <CardTitle className="font-headline text-2xl font-bold">أهلاً بك في الموازين</CardTitle>
               <CardDescription className="text-base">
                 غيّر علاقتك بالمال إلى الأبد. نحن هنا لنبني لك نظاماً مالياً ذكياً، مع مرشد ذكي يدعمك في كل خطوة.
