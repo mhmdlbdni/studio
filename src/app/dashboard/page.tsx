@@ -155,7 +155,11 @@ export default function DashboardPage() {
       <Dialog open={isChatOpen} onOpenChange={setChatOpen}>
         <DialogContent className="p-0 bg-transparent border-none shadow-none sm:max-w-lg w-full">
           <DialogTitle className="sr-only">{t.guide}</DialogTitle>
-          <ChatInterface />
+          <ChatInterface 
+            requestOpenIncomeDialog={openIncomeDialog}
+            requestOpenExpenseDialog={openExpenseDialog}
+            closeChat={() => setChatOpen(false)}
+          />
         </DialogContent>
       </Dialog>
     </div>

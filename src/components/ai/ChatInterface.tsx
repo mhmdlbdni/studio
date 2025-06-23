@@ -1,6 +1,7 @@
 
 'use client';
 import { useState, useRef, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { SendHorizonal, Loader2, RefreshCw, Scale, Bot } from 'lucide-react';
@@ -13,27 +14,32 @@ interface Message {
   text: string;
 }
 
+interface ChatInterfaceProps {
+    requestOpenIncomeDialog?: () => void;
+    requestOpenExpenseDialog?: () => void;
+    closeChat?: () => void;
+}
+
 const getInitialMessages = (languageKey: 'ar' | 'en'): Message[] => [
     { sender: 'ai', text: languageKey === 'ar' ? 'أهلاً بك، أنا مرشد الموازين. مساعدك المالي الذكي. كيف يمكنني أن أخدمك اليوم؟' : 'Hello, I am the Al-Mawazin Guide, your smart financial assistant. How can I help you today?' },
-    { sender: 'ai', text: languageKey === 'ar' ? 'يمكنك سؤالي عن أي شيء يتعلق بفلسفة الموازين أو كيفية استخدام التطبيق.' : 'You can ask me anything about the Al-Mawazin philosophy or how to use the app.' },
 ];
 
 const questionPool = {
     ar: [
-        'ما هو أهم ما يجب أن أركز عليه؟',
-        'دخولي غير منتظمة، كيف أبدأ؟',
-        'كيف أتعامل مع ديوني؟',
-        'ما هو وعاء الحرية المالية؟',
-        'كيف أستخدم وعاء المرح والترفيه؟',
-        'لدي أهداف خاصة، كيف أخصص لها وعاء؟'
+        'حلل وضعي المالي الحالي',
+        'كيف يمكنني تحسين ميزانيتي؟',
+        'ما هي أكبر مصاريفي؟',
+        'أريد إضافة راتبي الجديد',
+        'ساعدني في تسجيل مصروف',
+        'كيف أعدل نسب الموازين؟'
     ],
     en: [
-        'What is the most important thing to focus on?',
-        'My income is irregular, how do I start?',
-        'How do I deal with my debts?',
-        'What is the Financial Freedom pot?',
-        'How should I use the Play & Fun pot?',
-        'I have special goals, how do I create a pot for them?'
+        'Analyze my current financial situation',
+        'How can I improve my budget?',
+        'What are my biggest expenses?',
+        'I want to add my new salary',
+        'Help me record an expense',
+        'How do I adjust the pot percentages?'
     ]
 };
 
@@ -48,8 +54,9 @@ const shuffleArray = (array: string[]) => {
 };
 
 
-export function ChatInterface() {
-  const { language } = useApp();
+export function ChatInterface({ requestOpenIncomeDialog, requestOpenExpenseDialog, closeChat }: ChatInterfaceProps) {
+  const { language, user, pots, getPotBalance, totalIncome, totalExpenses } = useApp();
+  const router = useRouter();
   const [messages, setMessages] = useState<Message[]>(() => getInitialMessages(language.key));
   const [suggestedQuestions, setSuggestedQuestions] = useState<string[]>([]);
   const [input, setInput] = useState('');
@@ -69,7 +76,8 @@ export function ChatInterface() {
 
   useEffect(() => {
     handleReset();
-  }, [language]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [language.key]);
 
 
   const handleSend = async (query?: string) => {
@@ -87,10 +95,49 @@ export function ChatInterface() {
     setIsLoading(true);
 
     try {
-      const response = await getFinancialAdvice({ query: textToSend });
-      const aiMessage: Message = { sender: 'ai', text: response.advice };
-      setMessages(prev => [...prev, aiMessage]);
+      const potDetails = pots.map(pot => ({
+        name: pot.name[language.key],
+        percentage: pot.percentage,
+        balance: getPotBalance(pot.id)
+      }));
+
+      const response = await getFinancialAdvice({
+        query: textToSend,
+        financials: {
+          totalIncome,
+          totalExpenses,
+          pots: potDetails
+        }
+      });
+      
+      if (response.text) {
+        const aiMessage: Message = { sender: 'ai', text: response.text };
+        setMessages(prev => [...prev, aiMessage]);
+      }
+
+      if (response.toolRequests) {
+        // If the AI wants to use a tool, handle it client-side.
+        for (const toolRequest of response.toolRequests) {
+            switch (toolRequest.name) {
+                case 'addIncome':
+                    requestOpenIncomeDialog?.();
+                    closeChat?.();
+                    break;
+                case 'addExpense':
+                    requestOpenExpenseDialog?.();
+                    closeChat?.();
+                    break;
+                case 'navigateTo':
+                    const page = toolRequest.input.page;
+                    router.push(`/${page}`);
+                    closeChat?.();
+                    break;
+            }
+        }
+      }
+
     } catch (error) {
+      console.error("Error calling financial advice flow:", error);
       const errorMessage: Message = { sender: 'ai', text: language.key === 'ar' ? 'عذراً، حدث خطأ ما. يرجى المحاولة مرة أخرى.' : 'Sorry, something went wrong. Please try again.' };
       setMessages(prev => [...prev, errorMessage]);
     } finally {
