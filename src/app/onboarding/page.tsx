@@ -25,7 +25,14 @@ export default function OnboardingPage() {
   const handleFinish = () => {
     if (name.trim()) {
       setUser({ name, currency });
-      updatePots(DEFAULT_POTS);
+      const potsWithEnglishNames = DEFAULT_POTS.map(p => ({
+            ...p,
+            name: {
+                ar: p.name.ar,
+                en: p.name.en,
+            }
+        }));
+      updatePots(potsWithEnglishNames);
       router.push('/dashboard');
     }
   };
@@ -37,7 +44,7 @@ export default function OnboardingPage() {
           <>
             <CardHeader className="text-center">
               <div className="mb-4 flex justify-center">
-                <Logo className="h-20 w-20" />
+                <Logo className="h-20 w-20 text-primary" />
               </div>
               <CardTitle className="font-headline text-2xl font-bold">أهلاً بك في الموازين</CardTitle>
               <CardDescription className="text-base">
