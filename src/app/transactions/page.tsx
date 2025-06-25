@@ -68,38 +68,113 @@ export default function TransactionsPage() {
   
   const handleDownloadPDF = () => {
     const doc = new jsPDF();
-    
-    // Note: jsPDF does not support Arabic characters by default. 
-    // A custom font supporting Arabic would need to be embedded for them to render correctly.
-    // We are using English headers to ensure readability.
-    doc.text("Transaction Report", 14, 15);
+    const pageWidth = doc.internal.pageSize.width || doc.internal.pageSize.getWidth();
 
+    // Define Theme Colors (using light theme for PDF)
+    const primaryColor = '#47abff';
+    const headerTextColor = '#ffffff';
+    const greenColor = '#28a745';
+    const redColor = '#dc3545';
+    const mutedTextColor = '#6c757d';
+
+    // -- Header --
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(20);
+    doc.setTextColor(primaryColor);
+    doc.text('Al-Mawazin', 14, 22);
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(12);
+    doc.setTextColor(mutedTextColor);
+    doc.text('Transaction Report', 14, 30);
+    doc.text(`Generated on: ${new Date().toLocaleDateString('en-US')}`, pageWidth - 14, 22, { align: 'right' });
+
+    // -- Summary Cards --
+    const netBalance = totalIncome - totalExpenses;
+    const summaryStartY = 45;
+
+    // Total Income Card
+    doc.setFillColor(230, 245, 233); // Light green
+    doc.setDrawColor(greenColor);
+    doc.roundedRect(14, summaryStartY, 58, 25, 3, 3, 'FD');
+    doc.setFontSize(10);
+    doc.setTextColor(mutedTextColor);
+    doc.text('Total Income', 20, summaryStartY + 7);
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(greenColor);
+    doc.text(new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(totalIncome), 20, summaryStartY + 17);
+
+    // Total Expenses Card
+    doc.setFillColor(253, 235, 237); // Light red
+    doc.setDrawColor(redColor);
+    doc.roundedRect(77, summaryStartY, 58, 25, 3, 3, 'FD');
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(mutedTextColor);
+    doc.text('Total Expenses', 83, summaryStartY + 7);
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(redColor);
+    doc.text(`- ${new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(totalExpenses)}`, 83, summaryStartY + 17);
+    
+    // Net Balance Card
+    doc.setFillColor(232, 244, 255); // Light blue
+    doc.setDrawColor(primaryColor);
+    doc.roundedRect(140, summaryStartY, 58, 25, 3, 3, 'FD');
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(mutedTextColor);
+    doc.text('Net Balance', 146, summaryStartY + 7);
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(primaryColor);
+    doc.text(new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(netBalance), 146, summaryStartY + 17);
+
+    // -- Table --
+    const tableHeaders = [['Date', 'Description', 'Pot', 'Amount']];
     const tableRows = filteredTransactions.map(transaction => {
         const isExpense = transaction.type === 'expense';
-        const potName = isExpense && transaction.potId ? potMap.get(transaction.potId)?.name[language.key] : '—';
+        // Use English pot name to avoid font issues with Arabic
+        const potName = isExpense && transaction.potId ? (potMap.get(transaction.potId)?.name['en'] || 'N/A') : '—';
         const amount = `${isExpense ? '-' : '+'} ${new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(transaction.amount)}`;
         return [
+            new Date(transaction.date).toLocaleDateString(dateLocale, { year: 'numeric', month: 'short', day: 'numeric' }),
             transaction.description,
             potName,
-            new Date(transaction.date).toLocaleDateString(dateLocale, { year: 'numeric', month: 'short', day: 'numeric' }),
-            amount
+            { content: amount, styles: { textColor: isExpense ? redColor : greenColor, halign: 'right' } }
         ];
     });
 
     autoTable(doc, {
-        head: [['Description', 'Pot', 'Date', 'Amount']],
+        head: tableHeaders,
         body: tableRows,
-        startY: 20,
+        startY: summaryStartY + 35,
+        theme: 'grid',
+        headStyles: {
+            fillColor: primaryColor,
+            textColor: headerTextColor,
+            fontStyle: 'bold',
+        },
+        columnStyles: {
+            3: { halign: 'right' },
+        },
+        didParseCell: function(data) {
+            if (data.section === 'head' && data.column.index === 3) {
+                data.cell.styles.halign = 'right';
+            }
+        },
+        foot: [
+          [{ content: 'Total Income', colSpan: 3, styles: { halign: 'right', fontStyle: 'bold' } }, { content: new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(totalIncome), styles: { halign: 'right', textColor: greenColor, fontStyle: 'bold' } }],
+          [{ content: 'Total Expenses', colSpan: 3, styles: { halign: 'right', fontStyle: 'bold' } }, { content: `- ${new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(totalExpenses)}`, styles: { halign: 'right', textColor: redColor, fontStyle: 'bold' } }],
+          [{ content: 'Net Balance', colSpan: 3, styles: { halign: 'right', fontStyle: 'bold', fillColor: [232, 244, 255] } }, { content: new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(netBalance), styles: { halign: 'right', textColor: primaryColor, fontStyle: 'bold', fillColor: [232, 244, 255] } }],
+        ],
+        footStyles: {
+            fontStyle: 'bold'
+        }
     });
 
-    const finalY = (doc as any).lastAutoTable.finalY;
-    const summaryY = finalY + 10;
-    
-    doc.setFontSize(10);
-    doc.text(`Total Income: ${new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(totalIncome)}`, 14, summaryY);
-    doc.text(`Total Expenses: - ${new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(totalExpenses)}`, 14, summaryY + 5);
-
-    doc.save('transactions_report.pdf');
+    doc.save('Mawazin_Report.pdf');
   };
 
   return (
