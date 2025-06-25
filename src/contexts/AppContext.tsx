@@ -21,6 +21,7 @@ interface AppState {
   getPotBalance: (potId: string) => number;
   totalIncome: number;
   totalExpenses: number;
+  logout: () => void;
 }
 
 const AppContext = createContext<AppState | undefined>(undefined);
@@ -31,6 +32,14 @@ const addDynamicPotData = (pots: Omit<Pot, 'icon'>[]): Pot[] => {
         icon: potIcons[pot.iconKey as PotIconKey] || potIcons.custom
     }));
 };
+
+const getDefaultPots = () => addDynamicPotData(DEFAULT_POTS.map(p => ({
+    ...p,
+    name: {
+        ar: p.name.ar,
+        en: p.name.en,
+    }
+})));
 
 export const AppContextProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUserState] = useState<User | null>(null);
@@ -54,14 +63,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
         const parsedPots = JSON.parse(storedPots);
         setPots(addDynamicPotData(parsedPots));
       } else {
-        const defaultPotsWithEnglishNames = DEFAULT_POTS.map(p => ({
-            ...p,
-            name: {
-                ar: p.name.ar,
-                en: p.name.en,
-            }
-        }));
-        setPots(addDynamicPotData(defaultPotsWithEnglishNames));
+        setPots(getDefaultPots());
       }
 
       if (storedTransactions) setTransactions(JSON.parse(storedTransactions));
@@ -146,6 +148,24 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
     document.documentElement.dir = langPack.dir;
   };
 
+  const logout = useCallback(() => {
+    localStorage.clear();
+
+    setUserState(null);
+    setPots(getDefaultPots());
+    setTransactions([]);
+    
+    const defaultTheme = 'dark';
+    setTheme(defaultTheme);
+    document.documentElement.classList.toggle('dark', true);
+
+    const defaultLangKey = 'ar';
+    const langPack = getLanguagePack(defaultLangKey);
+    setLanguageState(langPack);
+    document.documentElement.lang = langPack.key;
+    document.documentElement.dir = langPack.dir;
+  }, []);
+
   const value = {
     user,
     pots,
@@ -159,7 +179,8 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
     setLanguage,
     getPotBalance,
     totalIncome,
-    totalExpenses
+    totalExpenses,
+    logout,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

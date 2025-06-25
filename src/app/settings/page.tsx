@@ -14,11 +14,10 @@ type Language = 'ar' | 'en';
 
 export default function SettingsPage() {
   const router = useRouter();
-  const { user, setUser, language, setLanguage } = useApp();
+  const { user, setUser, language, setLanguage, logout } = useApp();
 
   const handleLogout = () => {
-    localStorage.clear();
-    setUser(null);
+    logout();
     router.push('/onboarding');
   };
 
