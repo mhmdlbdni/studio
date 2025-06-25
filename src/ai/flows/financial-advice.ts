@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview An AI agent that provides financial advice to users and can interact with the app.
@@ -13,17 +14,25 @@ import {z} from 'genkit';
 
 const addIncomeTool = ai.defineTool({
     name: 'addIncome',
-    description: 'Opens the dialog for the user to add a new income source.',
-    inputSchema: z.object({}),
+    description: 'Records a new source of income. If the description or amount is missing from the user query, you must ask the user for the missing information before calling this tool.',
+    inputSchema: z.object({
+        description: z.string().describe('A brief description of the income source.'),
+        amount: z.number().describe('The amount of income.'),
+    }),
     outputSchema: z.object({ success: z.boolean() }),
 }, async () => ({ success: true }));
 
 const addExpenseTool = ai.defineTool({
     name: 'addExpense',
-    description: 'Opens the dialog for the user to record a new expense.',
-    inputSchema: z.object({}),
+    description: 'Records a new expense. If the description, amount, or which pot to use are missing, you must ask the user for the missing details. The user must choose from the available pots listed in their financial summary. When calling the tool, you must use the corresponding pot ID from the financial summary data, not the pot name.',
+    inputSchema: z.object({
+        description: z.string().describe('A brief description of the expense.'),
+        amount: z.number().describe('The amount of the expense.'),
+        potId: z.string().describe("The ID of the pot from which the expense is paid."),
+    }),
     outputSchema: z.object({ success: z.boolean() }),
 }, async () => ({ success: true }));
+
 
 const navigateToTool = ai.defineTool({
     name: 'navigateTo',
@@ -40,6 +49,7 @@ const FinancialAdviceInputSchema = z.object({
     totalIncome: z.number().describe("The user's total income."),
     totalExpenses: z.number().describe("The user's total expenses."),
     pots: z.array(z.object({
+        id: z.string().describe("The unique identifier for the pot."),
         name: z.string().describe("The name of the financial pot."),
         percentage: z.number().describe("The allocated percentage for the pot."),
         balance: z.number().describe("The current balance of the pot."),
@@ -54,10 +64,11 @@ const financialAdvicePrompt = ai.definePrompt({
     input: { schema: FinancialAdviceInputSchema },
     model: 'googleai/gemini-2.0-flash',
     tools: [addIncomeTool, addExpenseTool, navigateToTool],
-    prompt: `You are "مرشد الموازين", an expert financial guide for the "الموازين" app.
+    prompt: `You are "مرشد الموازين", a friendly, encouraging, and expert financial guide for the "الموازين" app. Your main goal is to help users feel confident and in control of their finances.
 Your answers MUST be in Arabic.
-Your tone MUST be professional, concise, and direct. Get straight to the point.
-Provide clear, actionable guidance.
+Your tone should be professional yet warm and supportive. Keep your responses concise, direct, and easy to understand.
+When a user asks to perform an action like adding income or an expense, use the available tools. If you don't have all the information needed for a tool (like amount, description, or pot), ask the user for the missing details in a friendly way before calling the tool.
+After a tool is used successfully on the client, the client will send a confirmation message. Do not send a confirmation message yourself.
 
 Analyze the user's data and be proactive. Use the available tools when a user's request matches a tool's purpose.
 

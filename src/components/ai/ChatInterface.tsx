@@ -55,7 +55,7 @@ const shuffleArray = (array: string[]) => {
 
 
 export function ChatInterface({ requestOpenIncomeDialog, requestOpenExpenseDialog, closeChat }: ChatInterfaceProps) {
-  const { language, user, pots, getPotBalance, totalIncome, totalExpenses } = useApp();
+  const { language, user, pots, getPotBalance, totalIncome, totalExpenses, addTransaction } = useApp();
   const router = useRouter();
   const [messages, setMessages] = useState<Message[]>(() => getInitialMessages(language.key));
   const [suggestedQuestions, setSuggestedQuestions] = useState<string[]>([]);
@@ -96,6 +96,7 @@ export function ChatInterface({ requestOpenIncomeDialog, requestOpenExpenseDialo
 
     try {
       const potDetails = pots.map(pot => ({
+        id: pot.id,
         name: pot.name[language.key],
         percentage: pot.percentage,
         balance: getPotBalance(pot.id)
@@ -115,24 +116,39 @@ export function ChatInterface({ requestOpenIncomeDialog, requestOpenExpenseDialo
         setMessages(prev => [...prev, aiMessage]);
       }
 
-      if (response.toolRequests) {
-        // If the AI wants to use a tool, handle it client-side.
+      if (response.toolRequests && response.toolRequests.length > 0) {
+        let confirmationMessage: Message | null = null;
+        
         for (const toolRequest of response.toolRequests) {
-            switch (toolRequest.name) {
-                case 'addIncome':
-                    requestOpenIncomeDialog?.();
-                    closeChat?.();
-                    break;
-                case 'addExpense':
-                    requestOpenExpenseDialog?.();
-                    closeChat?.();
-                    break;
-                case 'navigateTo':
-                    const page = toolRequest.input.page;
-                    router.push(`/${page}`);
-                    closeChat?.();
-                    break;
+          switch (toolRequest.name) {
+            case 'addIncome': {
+              const { description, amount } = toolRequest.input;
+              addTransaction({ type: 'income', description, amount });
+              const formattedAmount = new Intl.NumberFormat('en-US', { style: 'currency', currency: user?.currency || 'YER', minimumFractionDigits: 0 }).format(amount);
+              confirmationMessage = { sender: 'ai', text: language.key === 'ar' ? `تم! لقد أضفت دخلاً بقيمة ${formattedAmount} بنجاح.` : `Done! I've successfully added an income of ${formattedAmount}.` };
+              break;
             }
+            case 'addExpense': {
+              const { description, amount, potId } = toolRequest.input;
+              addTransaction({ type: 'expense', description, amount, potId });
+              const potName = pots.find(p => p.id === potId)?.name[language.key] || '';
+              const formattedAmount = new Intl.NumberFormat('en-US', { style: 'currency', currency: user?.currency || 'YER', minimumFractionDigits: 0 }).format(amount);
+              confirmationMessage = { sender: 'ai', text: language.key === 'ar' ? `تمام! تم تسجيل مصروف بقيمة ${formattedAmount} من وعاء "${potName}".` : `Got it! An expense of ${formattedAmount} from the "${potName}" pot has been recorded.` };
+              break;
+            }
+            case 'navigateTo': {
+              const page = toolRequest.input.page;
+              if (page === 'manage-pots' || page === 'settings') {
+                  router.push(`/${page}`);
+                  closeChat?.();
+              }
+              break;
+            }
+          }
+        }
+
+        if (confirmationMessage) {
+            setMessages(prev => [...prev, confirmationMessage!]);
         }
       }
 
@@ -179,7 +195,7 @@ export function ChatInterface({ requestOpenIncomeDialog, requestOpenExpenseDialo
                 message.sender === 'user' ? 'justify-end' : 'justify-start'
               }`}
             >
-              {message.sender === 'ai' && language.key === 'en' && (
+              {message.sender === 'ai' && language.dir === 'ltr' && (
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/20 text-primary">
                       <Bot className="h-5 w-5" />
                   </div>
@@ -191,7 +207,7 @@ export function ChatInterface({ requestOpenIncomeDialog, requestOpenExpenseDialo
               }`}>
                 <p className="whitespace-pre-wrap">{message.text}</p>
               </div>
-               {message.sender === 'ai' && language.key === 'ar' && (
+               {message.sender === 'ai' && language.dir === 'rtl' && (
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/20 text-primary">
                       <Bot className="h-5 w-5" />
                   </div>
@@ -200,19 +216,19 @@ export function ChatInterface({ requestOpenIncomeDialog, requestOpenExpenseDialo
           ))}
            {isLoading && (
             <div className="flex items-start gap-2 justify-start">
-                {language.key === 'en' && <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/20 text-primary">
+                {language.dir === 'ltr' && <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/20 text-primary">
                     <Bot className="h-5 w-5" />
                 </div>}
                 <div className="rounded-lg bg-secondary p-3 text-sm">
                    <Loader2 className="h-5 w-5 animate-spin" />
                 </div>
-                {language.key === 'ar' && <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/20 text-primary">
+                {language.dir === 'rtl' && <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/20 text-primary">
                     <Bot className="h-5 w-5" />
                 </div>}
             </div>
           )}
           {showSuggestions && (
-            <div className={`flex flex-col gap-2 pt-4 ${language.key === 'ar' ? 'items-end' : 'items-start'}`}>
+            <div className={`flex flex-col gap-2 pt-4 ${language.dir === 'rtl' ? 'items-end' : 'items-start'}`}>
                 {suggestedQuestions.map((q) => (
                     <Button 
                         key={q} 
@@ -230,14 +246,14 @@ export function ChatInterface({ requestOpenIncomeDialog, requestOpenExpenseDialo
       </ScrollArea>
       <div className="flex shrink-0 items-center gap-2 border-t p-2">
         <div className="relative flex-1">
-            <Scale className={`pointer-events-none absolute ${language.key === 'ar' ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground`}/>
+            <Scale className={`pointer-events-none absolute ${language.dir === 'rtl' ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground`}/>
             <Input
                 value={input}
                 onChange={e => setInput(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder={language.key === 'ar' ? 'اسأل مرشدك المالي هنا..' : 'Ask your financial guide here..'}
                 disabled={isLoading}
-                className={`h-10 rounded-full bg-secondary ${language.key === 'ar' ? 'pr-10' : 'pl-10'}`}
+                className={`h-10 rounded-full bg-secondary ${language.dir === 'rtl' ? 'pr-10' : 'pl-10'}`}
             />
         </div>
         <Button onClick={() => handleSend()} disabled={isLoading || input.trim() === ''} size="icon" className="rounded-full">
