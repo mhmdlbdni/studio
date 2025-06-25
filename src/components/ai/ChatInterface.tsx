@@ -85,7 +85,9 @@ export function ChatInterface({ requestOpenIncomeDialog, requestOpenExpenseDialo
     if (textToSend.trim() === '' || isLoading) return;
 
     const userMessage: Message = { sender: 'user', text: textToSend };
-    setMessages(prev => [...prev, userMessage]);
+    const updatedMessages = [...messages, userMessage];
+    setMessages(updatedMessages);
+
     if (!query) {
         setInput('');
     }
@@ -102,8 +104,14 @@ export function ChatInterface({ requestOpenIncomeDialog, requestOpenExpenseDialo
         balance: getPotBalance(pot.id)
       }));
 
+      const historyForAI = updatedMessages.map(msg => ({
+        sender: msg.sender === 'user' ? (language.key === 'ar' ? 'المستخدم' : 'User') : (language.key === 'ar' ? 'المرشد' : 'Guide'),
+        text: msg.text
+      }));
+
       const response = await getFinancialAdvice({
         query: textToSend,
+        history: historyForAI,
         financials: {
           totalIncome,
           totalExpenses,
