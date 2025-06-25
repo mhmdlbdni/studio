@@ -55,7 +55,7 @@ const shuffleArray = (array: string[]) => {
 
 
 export function ChatInterface({ requestOpenIncomeDialog, requestOpenExpenseDialog, closeChat }: ChatInterfaceProps) {
-  const { language, user, pots, getPotBalance, totalIncome, totalExpenses, addTransaction } = useApp();
+  const { language, user, pots, getPotBalance, totalIncome, totalExpenses, addTransaction, transactions } = useApp();
   const router = useRouter();
   const [messages, setMessages] = useState<Message[]>(() => getInitialMessages(language.key));
   const [suggestedQuestions, setSuggestedQuestions] = useState<string[]>([]);
@@ -115,7 +115,8 @@ export function ChatInterface({ requestOpenIncomeDialog, requestOpenExpenseDialo
         financials: {
           totalIncome,
           totalExpenses,
-          pots: potDetails
+          pots: potDetails,
+          transactions,
         }
       });
       

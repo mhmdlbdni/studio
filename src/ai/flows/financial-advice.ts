@@ -24,7 +24,15 @@ const FinancialAdviceInputSchema = z.object({
         name: z.string().describe("The name of the financial pot."),
         percentage: z.number().describe("The allocated percentage for the pot."),
         balance: z.number().describe("The current balance of the pot."),
-    })).describe("A list of the user's financial pots.")
+    })).describe("A list of the user's financial pots."),
+    transactions: z.array(z.object({
+        id: z.string(),
+        type: z.enum(['income', 'expense']),
+        description: z.string(),
+        amount: z.number(),
+        date: z.string(),
+        potId: z.string().optional(),
+    })).optional().describe("A list of the user's recent transactions. Use this to answer questions about spending details.")
   }),
 });
 type FinancialAdviceInput = z.infer<typeof FinancialAdviceInputSchema>;
@@ -37,7 +45,7 @@ const financialAdvicePrompt = ai.definePrompt({
     prompt: `أنت "مرشد الموازين"، خبير مالي ذكي ومساعد شخصي في تطبيق "الموازين". مهمتك هي تمكين المستخدمين من تحقيق أهدافهم المالية من خلال التحليل الذكي والإرشاد الفعال.
 
 **قدراتك الأساسية:**
-- **التحليل المالي:** يمكنك تحليل الوضع المالي للمستخدم (الدخل، المصروفات، الأوعية) وتقديم رؤى واضحة وموجزة حوله. ابحث عن الأنماط، سلط الضوء على نقاط القوة والضعف، وقدم نصائح عملية.
+- **التحليل المالي الشامل:** يمكنك تحليل الوضع المالي الكامل للمستخدم (الدخل، المصروفات، الأوعية، والمعاملات الفردية) وتقديم رؤى واضحة وموجزة حوله. ابحث عن الأنماط، سلط الضوء على نقاط القوة والضعف، وقدم نصائح عملية. عند سؤال المستخدم عن تفاصيل مصروفاته مثل "على ماذا صرفت؟"، استخدم قائمة المعاملات لتقديم إجابة مفصلة. يمكنك تجميع المصروفات حسب الوصف أو الوعاء لتقديم رؤى أفضل.
 - **الإرشاد التفاعلي:** إذا سأل المستخدم عن كيفية استخدام التطبيق (مثل "كيف أضيف مصروف؟")، قدم له إرشادات واضحة ومختصرة خطوة بخطوة.
 - **الشخصية:** كن محترفاً، ودوداً، ومشجعاً. استخدم لغة بسيطة وإيجابية. اجعل ردودك مختصرة ومباشرة.
 - **اللغة:** تواصل دائماً باللغة العربية الفصحى المبسطة والواضحة.
@@ -62,8 +70,16 @@ const financialAdvicePrompt = ai.definePrompt({
 *   إجمالي المصروفات: {{financials.totalExpenses}}
 *   الأوعية المالية (الموازين):
     {{#each financials.pots}}
-    *   **{{name}}**: الرصيد الحالي: {{balance}}، النسبة المخصصة من الدخل: {{percentage}}%
+    *   **{{name}}**: الرصيد الحالي: {{balance}}، النسبة المخصصة من الدخل: {{percentage}}% (المعرف: {{id}})
     {{/each}}
+*   قائمة المعاملات (لتحليل المصروفات والإجابة على أسئلة مثل "على ماذا صرفت؟"):
+    {{#if financials.transactions}}
+    {{#each financials.transactions}}
+    *   **{{type}}**: {{description}} - المبلغ: {{amount}} - التاريخ: {{date}} {{#if potId}}- معرف الوعاء: {{potId}}{{/if}}
+    {{/each}}
+    {{else}}
+    * لا توجد معاملات مسجلة بعد.
+    {{/if}}
 
 **سجل المحادثة (للسياق):**
 {{#if history}}
