@@ -6,7 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/componen
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { subDays, startOfWeek, startOfMonth, isWithinInterval } from 'date-fns';
-import { TrendingUp, TrendingDown } from 'lucide-react';
+import { TrendingUp, TrendingDown, FileDown } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 type FilterType = 'day' | 'week' | 'month' | 'all';
 
@@ -62,12 +65,54 @@ export default function TransactionsPage() {
 
   const t = language.translations.transactionsPage;
   const dateLocale = 'en-US';
+  
+  const handleDownloadPDF = () => {
+    const doc = new jsPDF();
+    
+    // Note: jsPDF does not support Arabic characters by default. 
+    // A custom font supporting Arabic would need to be embedded for them to render correctly.
+    // We are using English headers to ensure readability.
+    doc.text("Transaction Report", 14, 15);
+
+    const tableRows = filteredTransactions.map(transaction => {
+        const isExpense = transaction.type === 'expense';
+        const potName = isExpense && transaction.potId ? potMap.get(transaction.potId)?.name[language.key] : '—';
+        const amount = `${isExpense ? '-' : '+'} ${new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(transaction.amount)}`;
+        return [
+            transaction.description,
+            potName,
+            new Date(transaction.date).toLocaleDateString(dateLocale, { year: 'numeric', month: 'short', day: 'numeric' }),
+            amount
+        ];
+    });
+
+    autoTable(doc, {
+        head: [['Description', 'Pot', 'Date', 'Amount']],
+        body: tableRows,
+        startY: 20,
+    });
+
+    const finalY = (doc as any).lastAutoTable.finalY;
+    const summaryY = finalY + 10;
+    
+    doc.setFontSize(10);
+    doc.text(`Total Income: ${new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(totalIncome)}`, 14, summaryY);
+    doc.text(`Total Expenses: - ${new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(totalExpenses)}`, 14, summaryY + 5);
+
+    doc.save('transactions_report.pdf');
+  };
 
   return (
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>{t.title}</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle>{t.title}</CardTitle>
+            <Button variant="outline" size="icon" onClick={handleDownloadPDF}>
+              <FileDown className="h-4 w-4" />
+              <span className="sr-only">Download PDF</span>
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           <Tabs value={filter} onValueChange={(value) => setFilter(value as FilterType)}>
