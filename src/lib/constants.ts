@@ -116,7 +116,10 @@ const arTranslations = {
         amount: 'المبلغ',
         totalIncome: 'إجمالي الدخل',
         totalExpenses: 'إجمالي المصروفات',
-      }
+      },
+      download: 'تنزيل تقرير',
+      downloadPdf: 'تنزيل كـ PDF',
+      downloadExcel: 'تنزيل كـ Excel',
     }
 };
 
@@ -174,7 +177,10 @@ const enTranslations: typeof arTranslations = {
           amount: 'Amount',
           totalIncome: 'Total Income',
           totalExpenses: 'Total Expenses',
-        }
+        },
+        download: 'Download Report',
+        downloadPdf: 'Download as PDF',
+        downloadExcel: 'Download as Excel',
       }
 };
 

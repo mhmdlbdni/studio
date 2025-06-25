@@ -5,11 +5,20 @@ import { useApp } from '@/contexts/AppContext';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { subDays, startOfWeek, startOfMonth, isWithinInterval } from 'date-fns';
+import { subDays, startOfWeek, startOfMonth, isWithinInterval, format } from 'date-fns';
 import { TrendingUp, TrendingDown, FileDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import * as XLSX from 'xlsx';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { amiriFont } from '@/lib/amiri-font';
+
 
 type FilterType = 'day' | 'week' | 'month' | 'all';
 
@@ -24,29 +33,36 @@ export default function TransactionsPage() {
     return map;
   }, [pots]);
 
-  const filteredTransactions = useMemo(() => {
+  const {filteredTransactions, dateRange} = useMemo(() => {
     const now = new Date();
-    // Sort transactions once before filtering
     const sortedTransactions = [...transactions].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     
     let interval: Interval | null = null;
+    let range = {start: new Date(), end: new Date()};
     
     switch (filter) {
       case 'day':
-        interval = { start: subDays(now, 1), end: now };
+        range = { start: subDays(now, 1), end: now };
         break;
       case 'week':
-        interval = { start: startOfWeek(now), end: now };
+        range = { start: startOfWeek(now), end: now };
         break;
       case 'month':
-        interval = { start: startOfMonth(now), end: now };
+        range = { start: startOfMonth(now), end: now };
         break;
       case 'all':
       default:
-        return sortedTransactions;
+        const firstTransactionDate = sortedTransactions.length > 0 ? new Date(sortedTransactions[sortedTransactions.length-1].date) : now;
+        return { 
+          filteredTransactions: sortedTransactions,
+          dateRange: { start: firstTransactionDate, end: now }
+        };
     }
 
-    return sortedTransactions.filter(t => isWithinInterval(new Date(t.date), interval as Interval));
+    return {
+      filteredTransactions: sortedTransactions.filter(t => isWithinInterval(new Date(t.date), range as Interval)),
+      dateRange: range
+    }
   }, [transactions, filter]);
   
   const { totalIncome, totalExpenses } = useMemo(() => {
@@ -68,114 +84,160 @@ export default function TransactionsPage() {
   
   const handleDownloadPDF = () => {
     const doc = new jsPDF();
-    const pageWidth = doc.internal.pageSize.width || doc.internal.pageSize.getWidth();
-
-    // Define Theme Colors (using light theme for PDF)
-    const primaryColor = '#47abff';
-    const headerTextColor = '#ffffff';
-    const greenColor = '#28a745';
-    const redColor = '#dc3545';
-    const mutedTextColor = '#6c757d';
-
-    // -- Header --
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(20);
-    doc.setTextColor(primaryColor);
-    doc.text('Al-Mawazin', 14, 22);
-
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(12);
-    doc.setTextColor(mutedTextColor);
-    doc.text('Transaction Report', 14, 30);
-    doc.text(`Generated on: ${new Date().toLocaleDateString('en-US')}`, pageWidth - 14, 22, { align: 'right' });
-
-    // -- Summary Cards --
     const netBalance = totalIncome - totalExpenses;
-    const summaryStartY = 45;
 
-    // Total Income Card
-    doc.setFillColor(230, 245, 233); // Light green
-    doc.setDrawColor(greenColor);
-    doc.roundedRect(14, summaryStartY, 58, 25, 3, 3, 'FD');
-    doc.setFontSize(10);
-    doc.setTextColor(mutedTextColor);
-    doc.text('Total Income', 20, summaryStartY + 7);
-    doc.setFontSize(14);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(greenColor);
-    doc.text(new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(totalIncome), 20, summaryStartY + 17);
+    if (language.key === 'ar') {
+        doc.addFileToVFS('Amiri-Regular.ttf', amiriFont);
+        doc.addFont('Amiri-Regular.ttf', 'Amiri', 'normal');
+        doc.setFont('Amiri');
+        doc.setR2L(true);
 
-    // Total Expenses Card
-    doc.setFillColor(253, 235, 237); // Light red
-    doc.setDrawColor(redColor);
-    doc.roundedRect(77, summaryStartY, 58, 25, 3, 3, 'FD');
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(mutedTextColor);
-    doc.text('Total Expenses', 83, summaryStartY + 7);
-    doc.setFontSize(14);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(redColor);
-    doc.text(`- ${new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(totalExpenses)}`, 83, summaryStartY + 17);
-    
-    // Net Balance Card
-    doc.setFillColor(232, 244, 255); // Light blue
-    doc.setDrawColor(primaryColor);
-    doc.roundedRect(140, summaryStartY, 58, 25, 3, 3, 'FD');
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(mutedTextColor);
-    doc.text('Net Balance', 146, summaryStartY + 7);
-    doc.setFontSize(14);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(primaryColor);
-    doc.text(new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(netBalance), 146, summaryStartY + 17);
+        const pageWidth = doc.internal.pageSize.width || doc.internal.pageSize.getWidth();
 
-    // -- Table --
-    const tableHeaders = [['Date', 'Description', 'Pot', 'Amount']];
-    const tableRows = filteredTransactions.map(transaction => {
-        const isExpense = transaction.type === 'expense';
-        // Use English pot name to avoid font issues with Arabic
-        const potName = isExpense && transaction.potId ? (potMap.get(transaction.potId)?.name['en'] || 'N/A') : '—';
-        const amount = `${isExpense ? '-' : '+'} ${new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(transaction.amount)}`;
-        return [
-            new Date(transaction.date).toLocaleDateString(dateLocale, { year: 'numeric', month: 'short', day: 'numeric' }),
-            transaction.description,
-            potName,
-            { content: amount, styles: { textColor: isExpense ? redColor : greenColor, halign: 'right' } }
-        ];
-    });
+        // -- Header --
+        doc.setFontSize(20);
+        doc.text('الموازين', pageWidth - 14, 22, { align: 'right' });
+        doc.setFontSize(10);
+        doc.text(`اسم صاحب الحساب: ${user?.name || ''}`, pageWidth - 14, 30, { align: 'right' });
+        
+        const periodText = `الفترة: ${format(dateRange.start, 'yyyy/MM/dd')} - ${format(dateRange.end, 'yyyy/MM/dd')}`;
+        doc.text(periodText, 14, 22);
 
-    autoTable(doc, {
-        head: tableHeaders,
-        body: tableRows,
-        startY: summaryStartY + 35,
-        theme: 'grid',
-        headStyles: {
-            fillColor: primaryColor,
-            textColor: headerTextColor,
-            fontStyle: 'bold',
-        },
-        columnStyles: {
-            3: { halign: 'right' },
-        },
-        didParseCell: function(data) {
-            if (data.section === 'head' && data.column.index === 3) {
-                data.cell.styles.halign = 'right';
-            }
-        },
-        foot: [
-          [{ content: 'Total Income', colSpan: 3, styles: { halign: 'right', fontStyle: 'bold' } }, { content: new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(totalIncome), styles: { halign: 'right', textColor: greenColor, fontStyle: 'bold' } }],
-          [{ content: 'Total Expenses', colSpan: 3, styles: { halign: 'right', fontStyle: 'bold' } }, { content: `- ${new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(totalExpenses)}`, styles: { halign: 'right', textColor: redColor, fontStyle: 'bold' } }],
-          [{ content: 'Net Balance', colSpan: 3, styles: { halign: 'right', fontStyle: 'bold', fillColor: [232, 244, 255] } }, { content: new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(netBalance), styles: { halign: 'right', textColor: primaryColor, fontStyle: 'bold', fillColor: [232, 244, 255] } }],
-        ],
-        footStyles: {
-            fontStyle: 'bold'
-        }
-    });
+        // -- Table --
+        const tableHeaders = [['المبلغ', 'الوعاء', 'الوصف', 'التاريخ']];
+        const tableRows = filteredTransactions.map(transaction => {
+            const isExpense = transaction.type === 'expense';
+            const potName = isExpense && transaction.potId ? (potMap.get(transaction.potId)?.name['ar'] || 'غير محدد') : '—';
+            const amount = `${isExpense ? '-' : '+'} ${new Intl.NumberFormat('ar-EG', { style: 'currency', currency, minimumFractionDigits: 0 }).format(transaction.amount)}`;
+            return [
+                { content: amount, styles: { textColor: isExpense ? '#dc3545' : '#28a745' } },
+                potName,
+                transaction.description,
+                new Date(transaction.date).toLocaleDateString('ar-EG', { year: 'numeric', month: 'short', day: 'numeric' })
+            ];
+        });
+
+        autoTable(doc, {
+            head: tableHeaders,
+            body: tableRows,
+            startY: 40,
+            theme: 'grid',
+            styles: { font: 'Amiri', halign: 'right', cellPadding: 2 },
+            headStyles: {
+                fillColor: '#47abff',
+                textColor: '#ffffff',
+                fontStyle: 'bold',
+            },
+            foot: [
+              [{ content: new Intl.NumberFormat('ar-EG', { style: 'currency', currency, minimumFractionDigits: 0 }).format(totalIncome), styles: { textColor: '#28a745' } }, { content: 'إجمالي الدخل', colSpan: 3, styles: { fontStyle: 'bold' } }],
+              [{ content: `- ${new Intl.NumberFormat('ar-EG', { style: 'currency', currency, minimumFractionDigits: 0 }).format(totalExpenses)}`, styles: { textColor: '#dc3545' } }, { content: 'إجمالي المصروفات', colSpan: 3, styles: { fontStyle: 'bold' } }],
+              [{ content: new Intl.NumberFormat('ar-EG', { style: 'currency', currency, minimumFractionDigits: 0 }).format(netBalance), styles: { textColor: '#47abff' } }, { content: 'صافي الرصيد', colSpan: 3, styles: { fontStyle: 'bold', fillColor: [232, 244, 255] } }],
+            ],
+            footStyles: { fontStyle: 'bold' }
+        });
+
+    } else { // English PDF Logic
+        const pageWidth = doc.internal.pageSize.width || doc.internal.pageSize.getWidth();
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(20);
+        doc.setTextColor('#47abff');
+        doc.text('Al-Mawazin', 14, 22);
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(12);
+        doc.setTextColor('#6c757d');
+        doc.text('Transaction Report', 14, 30);
+        doc.text(`Generated on: ${new Date().toLocaleDateString('en-US')}`, pageWidth - 14, 22, { align: 'right' });
+        doc.text(`Account Holder: ${user?.name || ''}`, pageWidth - 14, 30, { align: 'right' });
+
+
+        const tableHeaders = [['Date', 'Description', 'Pot', 'Amount']];
+        const tableRows = filteredTransactions.map(transaction => {
+            const isExpense = transaction.type === 'expense';
+            const potName = isExpense && transaction.potId ? (potMap.get(transaction.potId)?.name['en'] || 'N/A') : '—';
+            const amount = `${isExpense ? '-' : '+'} ${new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(transaction.amount)}`;
+            return [
+                new Date(transaction.date).toLocaleDateString(dateLocale, { year: 'numeric', month: 'short', day: 'numeric' }),
+                transaction.description,
+                potName,
+                { content: amount, styles: { textColor: isExpense ? '#dc3545' : '#28a745', halign: 'right' } }
+            ];
+        });
+
+        autoTable(doc, {
+            head: tableHeaders,
+            body: tableRows,
+            startY: 45,
+            theme: 'grid',
+            headStyles: {
+                fillColor: '#47abff',
+                textColor: '#ffffff',
+                fontStyle: 'bold',
+            },
+            foot: [
+              [{ content: 'Total Income', colSpan: 3, styles: { halign: 'right', fontStyle: 'bold' } }, { content: new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(totalIncome), styles: { halign: 'right', textColor: '#28a745', fontStyle: 'bold' } }],
+              [{ content: 'Total Expenses', colSpan: 3, styles: { halign: 'right', fontStyle: 'bold' } }, { content: `- ${new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(totalExpenses)}`, styles: { halign: 'right', textColor: '#dc3545', fontStyle: 'bold' } }],
+              [{ content: 'Net Balance', colSpan: 3, styles: { halign: 'right', fontStyle: 'bold', fillColor: [232, 244, 255] } }, { content: new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(netBalance), styles: { halign: 'right', textColor: '#47abff', fontStyle: 'bold', fillColor: [232, 244, 255] } }],
+            ],
+            footStyles: { fontStyle: 'bold' }
+        });
+    }
 
     doc.save('Mawazin_Report.pdf');
   };
+
+  const handleDownloadXLSX = () => {
+    const isArabic = language.key === 'ar';
+    const netBalance = totalIncome - totalExpenses;
+
+    const data = filteredTransactions.map(t => {
+      const isExpense = t.type === 'expense';
+      const potName = isExpense && t.potId ? potMap.get(t.potId)?.name[language.key] : '—';
+      const formattedDate = new Date(t.date).toLocaleDateString(isArabic ? 'ar-SA' : 'en-CA');
+      
+      if (isArabic) {
+        return {
+          'التاريخ': formattedDate,
+          'الوصف': t.description,
+          'اسم الوعاء': potName,
+          'المبلغ': isExpense ? -t.amount : t.amount,
+        };
+      }
+      return {
+        'Date': formattedDate,
+        'Description': t.description,
+        'Pot Name': potName,
+        'Amount': isExpense ? -t.amount : t.amount,
+      };
+    });
+
+    const summaryRows = isArabic
+      ? [
+          {}, // Spacer row
+          { 'الوصف': 'إجمالي الدخل', 'المبلغ': totalIncome },
+          { 'الوصف': 'إجمالي المصروفات', 'المبلغ': -totalExpenses },
+          { 'الوصف': 'صافي الرصيد', 'المبلغ': netBalance },
+        ]
+      : [
+          {}, // Spacer row
+          { 'Description': 'Total Income', 'Amount': totalIncome },
+          { 'Description': 'Total Expenses', 'Amount': -totalExpenses },
+          { 'Description': 'Net Balance', 'Amount': netBalance },
+        ];
+    
+    const finalData = [...data, ...summaryRows];
+
+    const worksheet = XLSX.utils.json_to_sheet(finalData);
+
+    if (isArabic) {
+      worksheet['!RTL'] = true;
+    }
+    
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, t.title);
+    XLSX.writeFile(workbook, 'Mawazin_Report.xlsx');
+  };
+
 
   return (
     <div className="space-y-6">
@@ -183,10 +245,18 @@ export default function TransactionsPage() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>{t.title}</CardTitle>
-            <Button variant="outline" size="icon" onClick={handleDownloadPDF}>
-              <FileDown className="h-4 w-4" />
-              <span className="sr-only">Download PDF</span>
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="icon">
+                  <FileDown className="h-4 w-4" />
+                  <span className="sr-only">{t.download}</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={handleDownloadPDF}>{t.downloadPdf}</DropdownMenuItem>
+                <DropdownMenuItem onClick={handleDownloadXLSX}>{t.downloadExcel}</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </CardHeader>
         <CardContent>
