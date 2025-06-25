@@ -1,4 +1,3 @@
-
 'use client';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
@@ -27,14 +26,28 @@ interface AddTransactionDialogProps {
   type: 'income' | 'expense';
 }
 
+const formatNumber = (value: any) => {
+    if (value === null || value === undefined || value === '') return '';
+    const stringValue = String(value);
+    const numberValue = stringValue.replace(/[^0-9]/g, '');
+    if (numberValue === '') return '';
+    return new Intl.NumberFormat('en-US').format(parseInt(numberValue, 10));
+};
+
 const getValidationSchemas = (t: any) => ({
   incomeSchema: z.object({
     description: z.string().min(2, { message: t.validation.descTooShort }),
-    amount: z.coerce.number().positive({ message: t.validation.amountPositive }),
+    amount: z.preprocess(
+      (val) => String(val).replace(/,/g, ''),
+      z.coerce.number().positive({ message: t.validation.amountPositive })
+    ),
   }),
   expenseSchema: z.object({
     description: z.string().min(2, { message: t.validation.descTooShort }),
-    amount: z.coerce.number().positive({ message: t.validation.amountPositive }),
+    amount: z.preprocess(
+      (val) => String(val).replace(/,/g, ''),
+      z.coerce.number().positive({ message: t.validation.amountPositive })
+    ),
     potId: z.string({ required_error: t.validation.potRequired }),
   }),
 });
@@ -111,7 +124,15 @@ export function AddTransactionDialog({ open, onOpenChange, type }: AddTransactio
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>{t.income.amountLabel}</FormLabel>
-                    <FormControl><Input type="number" {...field} /></FormControl>
+                    <FormControl>
+                        <Input
+                            type="text"
+                            inputMode="numeric"
+                            {...field}
+                            value={formatNumber(field.value)}
+                            onChange={(e) => field.onChange(e.target.value.replace(/,/g, ''))}
+                        />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -149,7 +170,15 @@ export function AddTransactionDialog({ open, onOpenChange, type }: AddTransactio
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>{t.expense.amountLabel}</FormLabel>
-                    <FormControl><Input type="number" {...field} /></FormControl>
+                    <FormControl>
+                        <Input
+                            type="text"
+                            inputMode="numeric"
+                            {...field}
+                            value={formatNumber(field.value)}
+                            onChange={(e) => field.onChange(e.target.value.replace(/,/g, ''))}
+                        />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
