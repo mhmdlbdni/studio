@@ -54,14 +54,12 @@ const financialAdvicePrompt = ai.definePrompt({
     input: { schema: FinancialAdviceInputSchema },
     model: 'googleai/gemini-2.0-flash',
     tools: [addIncomeTool, addExpenseTool, navigateToTool],
-    prompt: `You are "مرشد الموازين", a professional and expert financial guide for the "الموازين" app. Your primary role is to help users achieve financial well-being.
-Your answers MUST be concise, professional, and delivered in Arabic. Be direct and get straight to the point, keeping responses to 1-2 sentences if possible. Provide clear, actionable guidance.
+    prompt: `You are "مرشد الموازين", an expert financial guide for the "الموازين" app.
+Your answers MUST be in Arabic.
+Your tone MUST be professional, concise, and direct. Get straight to the point.
+Provide clear, actionable guidance.
 
-You have access to the user's real-time financial data and a set of tools to help them manage their finances directly.
-
-- **Analyze their data:** Look at their income, expenses, and how their pots are balanced. Provide actionable, personalized advice based on what you see.
-- **Be proactive:** If they ask a question that can be solved by an action, suggest that action. For example, if they say "I got paid", suggest adding an income.
-- **Use tools when appropriate:** If the user's request matches a tool's description, use that tool. For example, if they say "أضف مصروفي" (add my expense), use the 'addExpense' tool. If they ask how to change pot percentages, use the 'navigateTo' tool to send them to 'manage-pots'.
+Analyze the user's data and be proactive. Use the available tools when a user's request matches a tool's purpose.
 
 User's Financial Summary:
 - Total Income: {{financials.totalIncome}}
@@ -70,8 +68,6 @@ User's Financial Summary:
 {{#each financials.pots}}
   - Pot: "{{name}}", Balance: {{balance}}, Allocation: {{percentage}}%
 {{/each}}
-
-Begin the conversation now.
 
 User's query: {{{query}}}`
 });
@@ -83,10 +79,26 @@ User's query: {{{query}}}`
  * The client is responsible for handling the tool request.
  */
 export async function getFinancialAdvice(input: FinancialAdviceInput) {
-    const response = await financialAdvicePrompt(input);
+    try {
+        const response = await financialAdvicePrompt(input);
 
-    return {
-        text: response.text,
-        toolRequests: response.toolRequests,
-    };
+        return {
+            text: response.text,
+            toolRequests: response.toolRequests,
+        };
+    } catch (e) {
+        const error = e as Error;
+        console.error("Error in getFinancialAdvice flow:", error);
+        
+        let message = 'عذراً، حدث خطأ ما. يرجى المحاولة مرة أخرى.';
+        // Check for common API key related error messages
+        if (error.message && (error.message.includes('API key') || error.message.includes('permission'))) {
+            message = 'عذراً، حدث خطأ في الاتصال بالمرشد الذكي. قد تكون هناك مشكلة في إعدادات الخدمة.';
+        }
+
+        return {
+            text: message,
+            toolRequests: [],
+        }
+    }
 }
