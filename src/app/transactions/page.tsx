@@ -8,17 +8,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { subDays, startOfWeek, startOfMonth, isWithinInterval, format } from 'date-fns';
 import { TrendingUp, TrendingDown, FileDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { amiriFont } from '@/lib/amiri-font';
-
 
 type FilterType = 'day' | 'week' | 'month' | 'all';
 
@@ -81,110 +71,6 @@ export default function TransactionsPage() {
 
   const t = language.translations.transactionsPage;
   const dateLocale = 'en-US';
-  
-  const handleDownloadPDF = () => {
-    const doc = new jsPDF();
-    const netBalance = totalIncome - totalExpenses;
-
-    if (language.key === 'ar') {
-        doc.addFileToVFS('Amiri-Regular.ttf', amiriFont);
-        doc.addFont('Amiri-Regular.ttf', 'Amiri', 'normal');
-        doc.setFont('Amiri');
-        doc.setR2L(true);
-
-        const pageWidth = doc.internal.pageSize.width || doc.internal.pageSize.getWidth();
-
-        // -- Header --
-        doc.setFontSize(20);
-        doc.text('الموازين', pageWidth - 14, 22, { align: 'right' });
-        doc.setFontSize(10);
-        doc.text(`اسم صاحب الحساب: ${user?.name || ''}`, pageWidth - 14, 30, { align: 'right' });
-        
-        const periodText = `الفترة: ${format(dateRange.start, 'yyyy/MM/dd')} - ${format(dateRange.end, 'yyyy/MM/dd')}`;
-        doc.text(periodText, 14, 22);
-
-        // -- Table --
-        const tableHeaders = [['المبلغ', 'الوعاء', 'الوصف', 'التاريخ']];
-        const tableRows = filteredTransactions.map(transaction => {
-            const isExpense = transaction.type === 'expense';
-            const potName = isExpense && transaction.potId ? (potMap.get(transaction.potId)?.name['ar'] || 'غير محدد') : '—';
-            const amount = `${isExpense ? '-' : '+'} ${new Intl.NumberFormat('ar-EG', { style: 'currency', currency, minimumFractionDigits: 0 }).format(transaction.amount)}`;
-            return [
-                { content: amount, styles: { textColor: isExpense ? '#dc3545' : '#28a745' } },
-                potName,
-                transaction.description,
-                new Date(transaction.date).toLocaleDateString('ar-EG', { year: 'numeric', month: 'short', day: 'numeric' })
-            ];
-        });
-
-        autoTable(doc, {
-            head: tableHeaders,
-            body: tableRows,
-            startY: 40,
-            theme: 'grid',
-            styles: { font: 'Amiri', halign: 'right', cellPadding: 2 },
-            headStyles: {
-                fillColor: '#47abff',
-                textColor: '#ffffff',
-                fontStyle: 'bold',
-            },
-            foot: [
-              [{ content: new Intl.NumberFormat('ar-EG', { style: 'currency', currency, minimumFractionDigits: 0 }).format(totalIncome), styles: { textColor: '#28a745' } }, { content: 'إجمالي الدخل', colSpan: 3, styles: { fontStyle: 'bold' } }],
-              [{ content: `- ${new Intl.NumberFormat('ar-EG', { style: 'currency', currency, minimumFractionDigits: 0 }).format(totalExpenses)}`, styles: { textColor: '#dc3545' } }, { content: 'إجمالي المصروفات', colSpan: 3, styles: { fontStyle: 'bold' } }],
-              [{ content: new Intl.NumberFormat('ar-EG', { style: 'currency', currency, minimumFractionDigits: 0 }).format(netBalance), styles: { textColor: '#47abff' } }, { content: 'صافي الرصيد', colSpan: 3, styles: { fontStyle: 'bold', fillColor: [232, 244, 255] } }],
-            ],
-            footStyles: { fontStyle: 'bold' }
-        });
-
-    } else { // English PDF Logic
-        const pageWidth = doc.internal.pageSize.width || doc.internal.pageSize.getWidth();
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(20);
-        doc.setTextColor('#47abff');
-        doc.text('Al-Mawazin', 14, 22);
-
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(12);
-        doc.setTextColor('#6c757d');
-        doc.text('Transaction Report', 14, 30);
-        doc.text(`Generated on: ${new Date().toLocaleDateString('en-US')}`, pageWidth - 14, 22, { align: 'right' });
-        doc.text(`Account Holder: ${user?.name || ''}`, pageWidth - 14, 30, { align: 'right' });
-
-
-        const tableHeaders = [['Date', 'Description', 'Pot', 'Amount']];
-        const tableRows = filteredTransactions.map(transaction => {
-            const isExpense = transaction.type === 'expense';
-            const potName = isExpense && transaction.potId ? (potMap.get(transaction.potId)?.name['en'] || 'N/A') : '—';
-            const amount = `${isExpense ? '-' : '+'} ${new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(transaction.amount)}`;
-            return [
-                new Date(transaction.date).toLocaleDateString(dateLocale, { year: 'numeric', month: 'short', day: 'numeric' }),
-                transaction.description,
-                potName,
-                { content: amount, styles: { textColor: isExpense ? '#dc3545' : '#28a745', halign: 'right' } }
-            ];
-        });
-
-        autoTable(doc, {
-            head: tableHeaders,
-            body: tableRows,
-            startY: 45,
-            theme: 'grid',
-            headStyles: {
-                fillColor: '#47abff',
-                textColor: '#ffffff',
-                fontStyle: 'bold',
-            },
-            foot: [
-              [{ content: 'Total Income', colSpan: 3, styles: { halign: 'right', fontStyle: 'bold' } }, { content: new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(totalIncome), styles: { halign: 'right', textColor: '#28a745', fontStyle: 'bold' } }],
-              [{ content: 'Total Expenses', colSpan: 3, styles: { halign: 'right', fontStyle: 'bold' } }, { content: `- ${new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(totalExpenses)}`, styles: { halign: 'right', textColor: '#dc3545', fontStyle: 'bold' } }],
-              [{ content: 'Net Balance', colSpan: 3, styles: { halign: 'right', fontStyle: 'bold', fillColor: [232, 244, 255] } }, { content: new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(netBalance), styles: { halign: 'right', textColor: '#47abff', fontStyle: 'bold', fillColor: [232, 244, 255] } }],
-            ],
-            footStyles: { fontStyle: 'bold' }
-        });
-    }
-
-    doc.save('Mawazin_Report.pdf');
-  };
 
   const handleDownloadXLSX = () => {
     const isArabic = language.key === 'ar';
@@ -245,18 +131,10 @@ export default function TransactionsPage() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>{t.title}</CardTitle>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="icon">
-                  <FileDown className="h-4 w-4" />
-                  <span className="sr-only">{t.download}</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={handleDownloadPDF}>{t.downloadPdf}</DropdownMenuItem>
-                <DropdownMenuItem onClick={handleDownloadXLSX}>{t.downloadExcel}</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <Button variant="outline" size="sm" onClick={handleDownloadXLSX}>
+              <FileDown className="h-4 w-4" />
+              {t.downloadExcel}
+            </Button>
           </div>
         </CardHeader>
         <CardContent>
