@@ -1,16 +1,16 @@
 'use client';
 
-import { useMemo } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useMemo, use } from 'react';
+import { useRouter } from 'next/navigation';
 import { useApp } from '@/contexts/AppContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, ArrowUp, ArrowDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-export default function PotDetailPage() {
+export default function PotDetailPage({ params }: { params: Promise<{ potId: string }> }) {
   const router = useRouter();
-  const params = useParams();
-  const potId = params.potId as string;
+  const resolvedParams = use(params);
+  const potId = resolvedParams.potId;
   const { pots, transactions, getPotBalance, user, language } = useApp();
   const currency = user?.currency || 'YER';
   const locale = language.code;
