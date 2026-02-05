@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview مرشد مالي ذكي يعتمد على Genkit لتحليل البيانات المالية للمستخدم.
@@ -22,7 +23,7 @@ const FinancialAdviceInputSchema = z.object({
         id: z.string().describe("معرف الوعاء."),
         name: z.string().describe("اسم الوعاء."),
         percentage: z.number().describe("النسبة المخصصة."),
-        balance: z.number().describe("الرصيد الحالي."),
+        balance: z.number().describe("رصيد الوعاء الحالي."),
     })).describe("قائمة الموازين المالية للمستخدم."),
     transactions: z.array(z.object({
         id: z.string(),
@@ -46,7 +47,7 @@ const addIncomeTool = ai.defineTool({
         amount: z.number().describe('المبلغ.'),
     }),
     outputSchema: z.string(),
-}, async () => "تم طلب إضافة الدخل.");
+}, async () => "تمت معالجة طلب إضافة الدخل.");
 
 const addExpenseTool = ai.defineTool({
     name: 'addExpense',
@@ -57,7 +58,7 @@ const addExpenseTool = ai.defineTool({
         potId: z.string().describe('معرف الوعاء المطلوب الخصم منه.'),
     }),
     outputSchema: z.string(),
-}, async () => "تم طلب إضافة المصروف.");
+}, async () => "تمت معالجة طلب إضافة المصروف.");
 
 const navigateToTool = ai.defineTool({
     name: 'navigateTo',
@@ -66,7 +67,7 @@ const navigateToTool = ai.defineTool({
         page: z.enum(['manage-pots', 'settings']).describe('الصفحة الهدف.'),
     }),
     outputSchema: z.string(),
-}, async () => "تم طلب التنقل.");
+}, async () => "تمت معالجة طلب التنقل.");
 
 // تعريف المطالبة (Prompt) الخاصة بالمرشد
 const financialAdvicePrompt = ai.definePrompt({
@@ -93,7 +94,7 @@ const financialAdvicePrompt = ai.definePrompt({
 لا توجد معاملات مسجلة.
 {{/if}}
 
-استخدم الأدوات المتاحة إذا طلب المستخدم تسجيل عملية مالية. كن ودوداً، مختصراً، ومحفزاً باللغة العربية.
+استخدم الأدوات المتاحة إذا طلب المستخدم تسجيل عملية مالية (إضافة دخل أو مصروف). كن ودوداً، مختصراً، ومحفزاً باللغة العربية. إذا قمت باستخدام أداة، أخبر المستخدم بذلك في ردك.
 
 سؤال المستخدم: {{{query}}}`,
 });
@@ -111,7 +112,7 @@ export async function getFinancialAdvice(input: FinancialAdviceInput) {
     } catch (e) {
         console.error("AI Flow Error:", e);
         return {
-            text: "عذراً، واجهت مشكلة في معالجة طلبك حالياً. يرجى التأكد من إضافة مفتاح GOOGLE_GENAI_API_KEY صالح في ملف .env وإعادة تشغيل التطبيق.",
+            text: "عذراً، واجهت مشكلة في الاتصال بالمرشد الذكي. يرجى التأكد من استقرار الإنترنت وتوفر صلاحيات الوصول للخدمة.",
         };
     }
 }
