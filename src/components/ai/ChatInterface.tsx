@@ -79,7 +79,7 @@ export function ChatInterface({ requestOpenIncomeDialog, requestOpenExpenseDialo
   }, [language.key]);
 
   const formatCurrency = (amount: number) => {
-    // Force English numerals
+    // Force English numerals by using 'en-US' locale
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: user?.currency || 'YER', minimumFractionDigits: 0 }).format(amount);
   };
 
@@ -167,7 +167,7 @@ export function ChatInterface({ requestOpenIncomeDialog, requestOpenExpenseDialo
 
     } catch (error) {
       console.error("Error calling financial advice flow:", error);
-      const errorMessage: Message = { sender: 'ai', text: language.key === 'ar' ? 'عذراً، حدث خطأ ما. يرجى المحاولة مرة أخرى.' : 'Sorry, something went wrong. Please try again.' };
+      const errorMessage: Message = { sender: 'ai', text: language.key === 'ar' ? 'عذراً، حدث خطأ ما في الاتصال. يرجى التأكد من استقرار الإنترنت.' : 'Sorry, something went wrong with the connection. Please ensure your internet is stable.' };
       setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
@@ -188,18 +188,20 @@ export function ChatInterface({ requestOpenIncomeDialog, requestOpenExpenseDialo
   }
 
   return (
-    <div className="flex h-[70vh] min-h-[400px] max-h-[700px] flex-col overflow-hidden rounded-lg border bg-card shadow-xl">
-      <div className="flex shrink-0 items-center justify-between bg-primary p-3 text-primary-foreground">
+    <div className="flex h-[70vh] min-h-[400px] max-h-[700px] flex-col overflow-hidden rounded-[2.5rem] border bg-card shadow-2xl">
+      <div className="flex shrink-0 items-center justify-between bg-primary p-4 text-primary-foreground">
         <div className="flex items-center gap-3">
-            <Bot className="h-6 w-6"/>
-            <h2 className="font-bold">{language.key === 'ar' ? 'مرشد الموازين' : 'Al-Mawazin Guide'}</h2>
+            <div className="p-2 bg-white/20 rounded-xl">
+                <Bot className="h-6 w-6"/>
+            </div>
+            <h2 className="font-black tracking-tight">{language.key === 'ar' ? 'مرشد الموازين' : 'Al-Mawazin Guide'}</h2>
         </div>
-        <Button variant="ghost" size="icon" onClick={handleReset} className="h-8 w-8 hover:bg-primary/80">
+        <Button variant="ghost" size="icon" onClick={handleReset} className="h-10 w-10 rounded-xl hover:bg-white/10 text-white">
             <RefreshCw className="h-5 w-5" />
         </Button>
       </div>
 
-      <ScrollArea className="flex-1 p-4">
+      <ScrollArea className="flex-1 p-4 bg-secondary/10">
         <div className="space-y-4">
           {messages.map((message, index) => (
             <div
@@ -213,12 +215,12 @@ export function ChatInterface({ requestOpenIncomeDialog, requestOpenExpenseDialo
                       <Bot className="h-5 w-5" />
                   </div>
               )}
-              <div className={`max-w-[85%] rounded-lg p-3 text-sm ${
+              <div className={`max-w-[85%] rounded-[1.5rem] p-4 text-sm font-medium shadow-sm ${
                 message.sender === 'user'
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-secondary'
+                  ? 'bg-primary text-primary-foreground rounded-br-none'
+                  : 'bg-card border border-border text-foreground rounded-bl-none'
               }`}>
-                <p className="whitespace-pre-wrap">{message.text}</p>
+                <p className="whitespace-pre-wrap leading-relaxed">{message.text}</p>
               </div>
                {message.sender === 'ai' && language.dir === 'rtl' && (
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/20 text-primary">
@@ -232,8 +234,8 @@ export function ChatInterface({ requestOpenIncomeDialog, requestOpenExpenseDialo
                 {language.dir === 'ltr' && <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/20 text-primary">
                     <Bot className="h-5 w-5" />
                 </div>}
-                <div className="rounded-lg bg-secondary p-3 text-sm">
-                   <Loader2 className="h-5 w-5 animate-spin" />
+                <div className="rounded-[1.5rem] bg-card border border-border p-4 shadow-sm">
+                   <Loader2 className="h-5 w-5 animate-spin text-primary" />
                 </div>
                 {language.dir === 'rtl' && <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/20 text-primary">
                     <Bot className="h-5 w-5" />
@@ -247,7 +249,7 @@ export function ChatInterface({ requestOpenIncomeDialog, requestOpenExpenseDialo
                         key={q} 
                         variant="outline"
                         onClick={() => handleSend(q)}
-                        className="h-auto max-w-xs whitespace-normal rounded-full border-primary/50 bg-transparent px-4 py-2 text-primary hover:bg-primary/10 hover:text-primary"
+                        className="h-auto max-w-xs whitespace-normal rounded-2xl border-primary/30 bg-card/50 backdrop-blur-sm px-5 py-2.5 text-primary hover:bg-primary/10 transition-all font-bold text-xs"
                     >
                         {q}
                     </Button>
@@ -257,20 +259,20 @@ export function ChatInterface({ requestOpenIncomeDialog, requestOpenExpenseDialo
         </div>
         <div ref={messagesEndRef} />
       </ScrollArea>
-      <div className="flex shrink-0 items-center gap-2 border-t p-2">
+      <div className="flex shrink-0 items-center gap-2 border-t p-3 bg-card">
         <div className="relative flex-1">
-            <Scale className={`pointer-events-none absolute ${language.dir === 'rtl' ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground`}/>
+            <Scale className={`pointer-events-none absolute ${language.dir === 'rtl' ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground`}/>
             <Input
                 value={input}
                 onChange={e => setInput(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder={language.key === 'ar' ? 'اسأل مرشدك المالي هنا..' : 'Ask your financial guide here..'}
                 disabled={isLoading}
-                className={`h-10 rounded-full bg-secondary ${language.dir === 'rtl' ? 'pr-10' : 'pl-10'}`}
+                className={`h-12 rounded-[1.2rem] bg-secondary/50 border-none font-medium focus:ring-2 focus:ring-primary/40 ${language.dir === 'rtl' ? 'pr-12' : 'pl-12'}`}
             />
         </div>
-        <Button onClick={() => handleSend()} disabled={isLoading || input.trim() === ''} size="icon" className="rounded-full">
-            <SendHorizonal className="h-5 w-5" />
+        <Button onClick={() => handleSend()} disabled={isLoading || input.trim() === ''} size="icon" className="h-12 w-12 rounded-[1.2rem] shadow-lg active:scale-95 transition-transform">
+            <SendHorizonal className="h-6 w-6" />
         </Button>
       </div>
     </div>

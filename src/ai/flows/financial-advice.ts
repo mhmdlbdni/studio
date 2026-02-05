@@ -1,4 +1,3 @@
-
 'use server';
 /**
  * @fileOverview مرشد مالي ذكي يعتمد على Genkit لتحليل البيانات المالية للمستخدم.
@@ -111,9 +110,8 @@ export async function getFinancialAdvice(input: FinancialAdviceInput) {
         };
     } catch (e) {
         console.error("AI Flow Error:", e);
-        // إرجاع رسالة خطأ واضحة في حال فشل الاتصال بالخدمة
         return {
-            text: "عذراً، واجهت مشكلة في الاتصال بالمرشد الذكي. يرجى التأكد من استقرار الإنترنت وتوفر صلاحيات الوصول للخدمة. (تأكد من صحة مفتاح GOOGLE_GENAI_API_KEY)",
+            text: "عذراً، واجهت مشكلة في الاتصال بالمرشد الذكي. يرجى التأكد من استقرار الإنترنت وصلاحية مفتاح الوصول للخدمة. (تأكد من وجود GOOGLE_GENAI_API_KEY في ملف .env)",
         };
     }
 }
