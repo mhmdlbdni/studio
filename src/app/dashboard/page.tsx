@@ -1,9 +1,9 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Plus, Bot, Wallet, TrendingUp, TrendingDown, Droplets, CircleDollarSign, Coins } from 'lucide-react';
+import { Plus, Bot, Wallet, TrendingUp, TrendingDown, Droplets, CircleDollarSign, Coins, ChevronUp, ChevronDown, Check } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,13 +14,15 @@ import { ChatInterface } from '@/components/ai/ChatInterface';
 import { cn } from '@/lib/utils';
 
 export default function DashboardPage() {
-  const { pots, user, getPotBalance, totalIncome, totalExpenses, language, transactions } = useApp();
+  const { pots, user, getPotBalance, totalIncome, totalExpenses, language, updatePots } = useApp();
   const [isIncomeDialogOpen, setIncomeDialogOpen] = useState(false);
   const [isExpenseDialogOpen, setExpenseDialogOpen] = useState(false);
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [isChatOpen, setChatOpen] = useState(false);
+  const [reorderingId, setReorderingId] = useState<string | null>(null);
+  const longPressTimer = useRef<NodeJS.Timeout | null>(null);
+  
   const currency = user?.currency || 'YER';
-
   const t = language.translations.dashboard;
 
   const potDetails = useMemo(() => {
@@ -43,11 +45,37 @@ export default function DashboardPage() {
     setPopoverOpen(false);
   }
 
+  // Long Press Handlers for Reordering
+  const handleTouchStart = (id: string) => {
+    if (reorderingId) return;
+    longPressTimer.current = setTimeout(() => {
+      setReorderingId(id);
+      if (window.navigator.vibrate) window.navigator.vibrate(50);
+    }, 600);
+  };
+
+  const handleTouchEnd = () => {
+    if (longPressTimer.current) clearTimeout(longPressTimer.current);
+  };
+
+  const movePot = (id: string, direction: 'up' | 'down') => {
+    const index = pots.findIndex(p => p.id === id);
+    if (index === -1) return;
+    
+    const newPots = [...pots];
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    
+    if (targetIndex >= 0 && targetIndex < newPots.length) {
+      const [movedItem] = newPots.splice(index, 1);
+      newPots.splice(targetIndex, 0, movedItem);
+      updatePots(newPots);
+    }
+  };
+
   return (
-    <div className="space-y-5 pb-28 md:space-y-10 md:pb-20 px-0.5">
-      {/* Futuristic Hero Section - Optimized for Mobile Dimensions */}
+    <div className="space-y-5 pb-28 md:space-y-10 md:pb-20 px-0.5 select-none">
+      {/* Futuristic Hero Section */}
       <Card className="relative overflow-hidden border-none shadow-2xl bg-black min-h-[220px] md:min-h-[300px] flex flex-col justify-center rounded-[2.8rem] md:rounded-[3.5rem] transition-all duration-500">
-        {/* Animated Bioluminescent Background */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           <div className="futuristic-card-glow opacity-40" />
           <div 
@@ -116,7 +144,7 @@ export default function DashboardPage() {
         </CardContent>
       </Card>
 
-      {/* Financial Pots Section - Re-imagined for Fluid Mobile Scrolling */}
+      {/* Financial Pots Section */}
       <div className="space-y-5 md:space-y-8 mt-4 md:mt-8">
         <div className="flex items-center justify-between px-5">
           <div className="flex flex-col">
@@ -125,67 +153,112 @@ export default function DashboardPage() {
             </h2>
             <div className="h-1.5 w-10 bg-primary mt-1 rounded-full shadow-lg" />
           </div>
-          <div className="p-2 rounded-2xl bg-secondary/50 backdrop-blur-md">
-            <Droplets className="h-5 w-5 text-primary/70 animate-bounce" />
-          </div>
+          {reorderingId && (
+            <Button 
+              variant="secondary" 
+              size="sm" 
+              className="rounded-full bg-primary/20 text-primary border border-primary/30 h-8 px-4 font-black"
+              onClick={() => setReorderingId(null)}
+            >
+              <Check className="h-4 w-4 ml-1" />
+              {language.key === 'ar' ? 'تم' : 'Done'}
+            </Button>
+          )}
         </div>
         
         <div className="grid grid-cols-1 gap-4 px-2">
-          {potDetails.map(pot => {
+          {potDetails.map((pot, index) => {
             const PotIcon = pot.icon;
             const totalAllocated = totalIncome * (pot.percentage / 100);
             const remainingBalance = getPotBalance(pot.id);
             const liquidLevel = totalAllocated > 0 ? (remainingBalance / totalAllocated) * 100 : 0;
             const safeLevel = Math.max(0, Math.min(liquidLevel, 100));
+            const isTarget = reorderingId === pot.id;
             
             return (
-              <Link href={`/pots/${pot.id}`} key={pot.id} className="block w-full">
-                <Card className="group relative overflow-hidden bg-card/60 backdrop-blur-3xl rounded-[2.5rem] border-white/10 hover:border-primary/50 active:scale-[0.97] transition-all duration-300 shadow-2xl">
-                  <CardContent className="p-5 md:p-8 flex flex-col gap-5">
-                    <div className="flex items-center justify-between w-full">
-                      <div className="flex items-center gap-4">
-                        <div className="relative">
-                          <div className="p-4 rounded-[1.8rem] bg-secondary/60 group-hover:bg-primary/20 transition-all duration-500 shadow-inner">
-                            <PotIcon className="h-6 w-6 md:h-8 md:w-8" style={{ color: pot.color }}/>
-                          </div>
-                          <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full border-2 border-background" style={{ backgroundColor: pot.color }} />
-                        </div>
-                        <div>
-                          <p className="font-black text-lg md:text-2xl tracking-tight text-foreground leading-none">{pot.name[language.key]}</p>
-                          <p className="text-[9px] md:text-[11px] font-black text-muted-foreground uppercase tracking-[0.2em] mt-2">{pot.percentage}% {language.key === 'ar' ? 'تخصيص' : 'Allocated'}</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-xl md:text-3xl font-black tabular-nums" style={{ color: pot.color }}>
-                          {new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(pot.balance)}
-                        </p>
-                        <p className="text-[8px] md:text-[9px] text-muted-foreground font-black uppercase tracking-widest mt-1">{language.key === 'ar' ? 'المتاح حالياً' : 'Available Now'}</p>
-                      </div>
-                    </div>
+              <div 
+                key={pot.id} 
+                className={cn(
+                  "relative transition-all duration-300",
+                  isTarget ? "scale-[1.05] z-20 shadow-2xl" : reorderingId ? "opacity-50 grayscale scale-[0.98]" : "hover:scale-[1.01]"
+                )}
+                onMouseDown={() => handleTouchStart(pot.id)}
+                onMouseUp={handleTouchEnd}
+                onTouchStart={() => handleTouchStart(pot.id)}
+                onTouchEnd={handleTouchEnd}
+              >
+                {/* Reorder Controls Overlay */}
+                {isTarget && (
+                  <div className="absolute -right-2 top-1/2 -translate-y-1/2 z-30 flex flex-col gap-2">
+                    <Button 
+                      size="icon" 
+                      className="rounded-full w-10 h-10 bg-white/20 backdrop-blur-3xl border border-white/30 text-white shadow-2xl active:scale-90"
+                      onClick={(e) => { e.preventDefault(); movePot(pot.id, 'up'); }}
+                      disabled={index === 0}
+                    >
+                      <ChevronUp className="h-6 w-6" />
+                    </Button>
+                    <Button 
+                      size="icon" 
+                      className="rounded-full w-10 h-10 bg-white/20 backdrop-blur-3xl border border-white/30 text-white shadow-2xl active:scale-90"
+                      onClick={(e) => { e.preventDefault(); movePot(pot.id, 'down'); }}
+                      disabled={index === pots.length - 1}
+                    >
+                      <ChevronDown className="h-6 w-6" />
+                    </Button>
+                  </div>
+                )}
 
-                    {/* Progress Bar Container - Fluid Fluid Animation */}
-                    <div className="relative w-full h-3.5 rounded-full bg-black/20 border border-white/5 overflow-hidden shadow-inner">
-                      <div 
-                        className="absolute bottom-0 left-0 top-0 transition-all duration-1000 ease-in-out"
-                        style={{ 
-                          width: `${safeLevel}%`, 
-                          backgroundColor: pot.color,
-                          boxShadow: `0 0 25px ${pot.color}80`
-                        }}
-                      >
-                        <div className="absolute inset-0 bg-gradient-to-r from-white/30 to-transparent" />
-                        <div className="absolute top-0 right-0 bottom-0 w-[300%] liquid-wave-futuristic opacity-40" />
+                <Link href={reorderingId ? "#" : `/pots/${pot.id}`} className={cn("block w-full", reorderingId && "cursor-default")}>
+                  <Card className={cn(
+                    "group relative overflow-hidden bg-card/60 backdrop-blur-3xl rounded-[2.5rem] border-white/10 transition-all duration-300 shadow-2xl",
+                    isTarget ? "border-primary/50 bg-primary/5" : "hover:border-primary/50 active:scale-[0.97]"
+                  )}>
+                    <CardContent className="p-5 md:p-8 flex flex-col gap-5">
+                      <div className="flex items-center justify-between w-full">
+                        <div className="flex items-center gap-4">
+                          <div className="relative">
+                            <div className="p-4 rounded-[1.8rem] bg-secondary/60 group-hover:bg-primary/20 transition-all duration-500 shadow-inner">
+                              <PotIcon className="h-6 w-6 md:h-8 md:w-8" style={{ color: pot.color }}/>
+                            </div>
+                            <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full border-2 border-background" style={{ backgroundColor: pot.color }} />
+                          </div>
+                          <div>
+                            <p className="font-black text-lg md:text-2xl tracking-tight text-foreground leading-none">{pot.name[language.key]}</p>
+                            <p className="text-[9px] md:text-[11px] font-black text-muted-foreground uppercase tracking-[0.2em] mt-2">{pot.percentage}% {language.key === 'ar' ? 'تخصيص' : 'Allocated'}</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xl md:text-3xl font-black tabular-nums" style={{ color: pot.color }}>
+                            {new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(pot.balance)}
+                          </p>
+                          <p className="text-[8px] md:text-[9px] text-muted-foreground font-black uppercase tracking-widest mt-1">{language.key === 'ar' ? 'المتاح حالياً' : 'Available Now'}</p>
+                        </div>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
+
+                      <div className="relative w-full h-3.5 rounded-full bg-black/20 border border-white/5 overflow-hidden shadow-inner">
+                        <div 
+                          className="absolute bottom-0 left-0 top-0 transition-all duration-1000 ease-in-out"
+                          style={{ 
+                            width: `${safeLevel}%`, 
+                            backgroundColor: pot.color,
+                            boxShadow: `0 0 25px ${pot.color}80`
+                          }}
+                        >
+                          <div className="absolute inset-0 bg-gradient-to-r from-white/30 to-transparent" />
+                          <div className="absolute top-0 right-0 bottom-0 w-[300%] liquid-wave-futuristic opacity-40" />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              </div>
             );
           })}
         </div>
       </div>
 
-      {/* Optimized Floating Action Buttons - Mobile Ergonomic Position */}
+      {/* Floating Action Buttons */}
       <div className={cn(
         "fixed bottom-10 z-30 flex flex-col gap-6",
         language.dir === 'rtl' ? 'left-6' : 'right-6'
