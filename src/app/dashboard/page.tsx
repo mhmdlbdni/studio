@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useMemo, useState } from 'react';
@@ -31,6 +30,7 @@ export default function DashboardPage() {
   }, [pots, getPotBalance]);
 
   const netBalance = totalIncome - totalExpenses;
+  const balanceRatio = totalIncome > 0 ? Math.max(0, Math.min(100, (netBalance / totalIncome) * 100)) : 0;
 
   const openIncomeDialog = () => {
     setIncomeDialogOpen(true);
@@ -44,8 +44,21 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8">
-       <Card className="overflow-hidden border-none shadow-2xl bg-gradient-to-br from-card to-card/50">
-            <CardHeader className="pb-2">
+       <Card className="overflow-hidden border-none shadow-2xl bg-gradient-to-br from-card to-card/50 relative">
+            {/* Background Bottle Liquid Visualization */}
+            <div className="absolute inset-y-0 left-0 w-32 opacity-20 pointer-events-none">
+              <div className="h-full w-full relative overflow-hidden bg-secondary/20 rounded-r-3xl border-r border-white/10">
+                <div 
+                  className="absolute bottom-0 left-0 right-0 bg-primary/40 transition-all duration-1000 ease-in-out"
+                  style={{ height: `${Math.max(10, balanceRatio)}%` }}
+                >
+                  <div className="absolute -top-10 left-0 w-[200%] h-20 bg-primary/30 liquid-wave opacity-50" />
+                  <div className="absolute -top-10 left-0 w-[200%] h-20 bg-primary/20 liquid-wave-slow opacity-30" />
+                </div>
+              </div>
+            </div>
+
+            <CardHeader className="pb-2 relative z-10">
                 <div className="flex items-center justify-between">
                     <CardTitle className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{t.netBalance}</CardTitle>
                     <Link href="/transactions">
@@ -55,10 +68,27 @@ export default function DashboardPage() {
                     </Link>
                 </div>
             </CardHeader>
-            <CardContent>
-                <div className="text-4xl font-black tracking-tighter">
-                    {new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(netBalance)}
+            <CardContent className="relative z-10">
+                <div className="flex items-center gap-6">
+                  <div className="flex-1">
+                    <div className="text-4xl font-black tracking-tighter">
+                        {new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(netBalance)}
+                    </div>
+                  </div>
+                  
+                  {/* Creative Bottle Icon */}
+                  <div className="w-12 h-20 relative rounded-b-xl rounded-t-sm border-2 border-primary/30 bg-secondary/10 overflow-hidden shadow-inner flex items-end">
+                    <div 
+                      className="w-full bg-primary/60 transition-all duration-1000 ease-in-out relative"
+                      style={{ height: `${balanceRatio}%` }}
+                    >
+                      <div className="absolute -top-2 left-0 w-[400%] h-4 bg-primary/40 liquid-wave" />
+                    </div>
+                    {/* Bottle Neck Detail */}
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-4 h-2 bg-primary/20 rounded-t-sm" />
+                  </div>
                 </div>
+
                 <div className="mt-6 grid grid-cols-2 gap-4">
                     <div className="flex items-center gap-3 p-3 rounded-2xl bg-green-500/5 border border-green-500/10">
                         <div className="p-2 rounded-xl bg-green-500/20 text-green-500">
@@ -94,12 +124,6 @@ export default function DashboardPage() {
           {potDetails.map(pot => {
             const PotIcon = pot.icon;
             const totalAllocated = totalIncome * (pot.percentage / 100);
-            const expensesForPot = transactions
-              .filter(t => t.type === 'expense' && t.potId === pot.id)
-              .reduce((sum, t) => sum + t.amount, 0);
-
-            // spentPercentage is how much of the "water" has been used. 
-            // We'll visualize the REMAINING balance as the liquid level.
             const remainingBalance = getPotBalance(pot.id);
             const liquidLevel = totalAllocated > 0 ? (remainingBalance / totalAllocated) * 100 : 0;
             const safeLevel = Math.max(0, Math.min(liquidLevel, 100));
@@ -126,9 +150,8 @@ export default function DashboardPage() {
                             </div>
                         </div>
 
-                        {/* Liquid Progress Bar */}
+                        {/* Liquid Progress Bar with Wave Animation */}
                         <div className="relative w-full h-4 rounded-full bg-secondary/30 border border-white/5 overflow-hidden">
-                            {/* The Water Fill */}
                             <div 
                                 className="absolute bottom-0 left-0 top-0 transition-all duration-1000 ease-in-out"
                                 style={{ 
@@ -137,9 +160,7 @@ export default function DashboardPage() {
                                     boxShadow: `0 0 20px ${pot.color}40, inset 0 2px 4px rgba(255,255,255,0.3)`
                                 }}
                             >
-                                {/* Liquid Surface Shimmer */}
-                                <div className="absolute top-0 right-0 bottom-0 w-12 bg-gradient-to-l from-white/30 to-transparent animate-pulse" />
-                                {/* Glow Effect */}
+                                <div className="absolute top-0 right-0 bottom-0 w-[200%] bg-white/20 liquid-wave" />
                                 <div className="absolute inset-0 bg-gradient-to-b from-white/10 to-transparent" />
                             </div>
                         </div>
