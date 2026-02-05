@@ -1,29 +1,29 @@
 'use server';
 /**
- * @fileOverview An AI agent that provides financial analysis and guidance.
+ * @fileOverview مرشد مالي ذكي يعتمد على Genkit لتحليل البيانات المالية للمستخدم.
  *
- * - getFinancialAdvice - A function that takes a user's query and returns analysis or instructional advice.
+ * - getFinancialAdvice - الوظيفة الرئيسية التي تستقبل استعلام المستخدم وبياناته المالية.
  */
 
-import {ai} from '@/ai/genkit';
-import {z} from 'zod';
+import { ai } from '@/ai/genkit';
+import { z } from 'zod';
 
-// Define the input schema for the flow
+// تعريف هيكل البيانات المدخلة للمرشد
 const FinancialAdviceInputSchema = z.object({
-  query: z.string().describe('The user query for financial advice.'),
+  query: z.string().describe('استعلام المستخدم المالي.'),
   history: z.array(z.object({
     sender: z.string(),
     text: z.string(),
-  })).optional().describe('The conversation history.'),
+  })).optional().describe('سجل المحادثة للحفاظ على السياق.'),
   financials: z.object({
-    totalIncome: z.number().describe("The user's total income."),
-    totalExpenses: z.number().describe("The user's total expenses."),
+    totalIncome: z.number().describe("إجمالي الدخل."),
+    totalExpenses: z.number().describe("إجمالي المصاريف."),
     pots: z.array(z.object({
-        id: z.string().describe("The unique identifier for the pot."),
-        name: z.string().describe("The name of the financial pot."),
-        percentage: z.number().describe("The allocated percentage for the pot."),
-        balance: z.number().describe("The current balance of the pot."),
-    })).describe("A list of the user's financial pots."),
+        id: z.string().describe("معرف الوعاء."),
+        name: z.string().describe("اسم الوعاء."),
+        percentage: z.number().describe("النسبة المخصصة."),
+        balance: z.number().describe("الرصيد الحالي."),
+    })).describe("قائمة الموازين المالية للمستخدم."),
     transactions: z.array(z.object({
         id: z.string(),
         type: z.enum(['income', 'expense']),
@@ -31,110 +31,87 @@ const FinancialAdviceInputSchema = z.object({
         amount: z.number(),
         date: z.string(),
         potId: z.string().optional(),
-    })).optional().describe("A list of the user's recent transactions. Use this to answer questions about spending details.")
+    })).optional().describe("قائمة المعاملات الأخيرة للتحليل.")
   }),
 });
+
 export type FinancialAdviceInput = z.infer<typeof FinancialAdviceInputSchema>;
 
-// Define tools for the AI to interact with the application
+// تعريف الأدوات (Tools) التي يمكن للذكاء الاصطناعي استخدامها
 const addIncomeTool = ai.defineTool({
     name: 'addIncome',
-    description: 'إضافة دخل جديد للمستخدم. استخدم هذا عندما يطلب المستخدم تسجيل راتب أو أي دخل مالي آخر بشكل صريح.',
+    description: 'تسجيل دخل جديد للمستخدم (مثل راتب أو مكافأة).',
     inputSchema: z.object({
-        description: z.string().describe('وصف الدخل (مثلاً: راتب يونيو)'),
-        amount: z.number().describe('المبلغ'),
+        description: z.string().describe('وصف الدخل.'),
+        amount: z.number().describe('المبلغ.'),
     }),
     outputSchema: z.string(),
-}, async () => "تم إرسال طلب إضافة الدخل للتطبيق.");
+}, async () => "تم طلب إضافة الدخل.");
 
 const addExpenseTool = ai.defineTool({
     name: 'addExpense',
-    description: 'إضافة مصروف جديد للمستخدم. استخدم هذا عندما يطلب المستخدم تسجيل نفقة أو شراء شيء ما بشكل صريح.',
+    description: 'تسجيل مصروف جديد والخصم من وعاء محدد.',
     inputSchema: z.object({
-        description: z.string().describe('وصف المصروف (مثلاً: فاتورة كهرباء)'),
-        amount: z.number().describe('المبلغ'),
-        potId: z.string().describe('معرف الوعاء (id) الذي سيتم الخصم منه. ابحث عن المعرف المناسب من قائمة الأوعية الموفرة لك.'),
+        description: z.string().describe('وصف المصروف.'),
+        amount: z.number().describe('المبلغ.'),
+        potId: z.string().describe('معرف الوعاء المطلوب الخصم منه.'),
     }),
     outputSchema: z.string(),
-}, async () => "تم إرسال طلب إضافة المصروف للتطبيق.");
+}, async () => "تم طلب إضافة المصروف.");
 
 const navigateToTool = ai.defineTool({
     name: 'navigateTo',
-    description: 'مساعدة المستخدم في التنقل لصفحة الإعدادات أو إدارة الموازين.',
+    description: 'مساعدة المستخدم في الانتقال لصفحات الإعدادات أو إدارة الأوعية.',
     inputSchema: z.object({
-        page: z.enum(['manage-pots', 'settings']).describe('اسم الصفحة المراد الانتقال إليها'),
+        page: z.enum(['manage-pots', 'settings']).describe('الصفحة الهدف.'),
     }),
     outputSchema: z.string(),
-}, async () => "تم إرسال طلب التنقل.");
+}, async () => "تم طلب التنقل.");
 
-
+// تعريف المطالبة (Prompt) الخاصة بالمرشد
 const financialAdvicePrompt = ai.definePrompt({
     name: 'financialAdvicePrompt',
     input: { schema: FinancialAdviceInputSchema },
-    model: 'googleai/gemini-2.0-flash',
+    model: 'googleai/gemini-1.5-flash',
     tools: [addIncomeTool, addExpenseTool, navigateToTool],
-    prompt: `أنت "مرشد الموازين"، خبير مالي ذكي ومساعد شخصي في تطبيق "الموازين". مهمتك هي تمكين المستخدمين من تحقيق أهدافهم المالية من خلال التحليل الذكي والإرشاد الفعال والقيام بالإجراءات البسيطة نيابة عنهم.
+    prompt: `أنت "مرشد الموازين"، خبير مالي ذكي. مهمتك هي تحليل البيانات المالية للمستخدم وتقديم نصائح عملية.
 
-**قدراتك الأساسية:**
-- **التحليل المالي الشامل:** يمكنك تحليل الوضع المالي الكامل للمستخدم (الدخل، المصروفات، الأوعية، والمعاملات الفردية) وتقديم رؤى واضحة وموجزة حوله. ابحث عن الأنماط، سلط الضوء على نقاط القوة والضعف، وقدم نصائح عملية. عند سؤال المستخدم عن تفاصيل مصروفاته مثل "على ماذا صرفت؟"، استخدم قائمة المعاملات لتقديم إجابة مفصلة. يمكنك تجميع المصروفات حسب الوصف أو الوعاء لتقديم رؤى أفضل.
-- **الإرشاد التفاعلي:** إذا سأل المستخدم عن كيفية استخدام التطبيق (مثل "كيف أضيف مصروف؟")، قدم له إرشادات واضحة ومختصرة خطوة بخطوة، أو عرض مساعدته للقيام بذلك باستخدام الأدوات المتاحة لك.
-- **تنفيذ الإجراءات:** يمكنك استخدام الأدوات (tools) المتاحة لك لإضافة دخل، إضافة مصروف، أو مساعدة المستخدم في التنقل لصفحات الإعدادات. لا تنفذ هذه الإجراءات إلا إذا طلب المستخدم ذلك أو وافق على عرضك للقيام بها.
-- **الشخصية:** كن محترفاً، ودوداً، ومشجعاً. استخدم لغة بسيطة وإيجابية. اجعل ردودك مختصرة ومباشرة.
-- **اللغة:** تواصل دائماً باللغة العربية الفصحى المبسطة والواضحة.
-
-**بيانات المستخدم المالية (لتحليلها وتقديم رؤى حولها):**
-*   إجمالي الدخل: {{financials.totalIncome}}
-*   إجمالي المصروفات: {{financials.totalExpenses}}
-*   الأوعية المالية (الموازين):
+**البيانات المالية الحالية:**
+*   الدخل الإجمالي: {{financials.totalIncome}}
+*   المصاريف الإجمالية: {{financials.totalExpenses}}
+*   الموازين (الأوعية):
     {{#each financials.pots}}
-    *   **{{name}}**: الرصيد الحالي: {{balance}}، النسبة المخصصة من الدخل: {{percentage}}% (المعرف: {{id}})
+    - {{name}}: الرصيد {{balance}} ({{percentage}}%)
     {{/each}}
-*   قائمة المعاملات (لتحليل المصروفات والإجابة على أسئلة مثل "على ماذا صرفت؟"):
-    {{#if financials.transactions}}
-    {{#each financials.transactions}}
-    *   **{{type}}**: {{description}} - المبلغ: {{amount}} - التاريخ: {{date}} {{#if potId}}- معرف الوعاء: {{potId}}{{/if}}
-    {{/each}}
-    {{else}}
-    * لا توجد معاملات مسجلة بعد.
-    {{/if}}
 
-**سجل المحادثة (للسياق):**
-{{#if history}}
-{{#each history}}
-*   **{{sender}}**: {{text}}
+**المعاملات الأخيرة:**
+{{#if financials.transactions}}
+{{#each financials.transactions}}
+* {{type}}: {{description}} - {{amount}} بتاريخ {{date}}
 {{/each}}
+{{else}}
+لا توجد معاملات مسجلة.
 {{/if}}
 
-**استعلام المستخدم الحالي:** {{{query}}}
----
-تذكر، مهمتك هي تحليل الوضع المالي وتقديم الإرشاد، واستخدام الأدوات لمساعدة المستخدم عند الحاجة.`,
+استخدم الأدوات المتاحة إذا طلب المستخدم تسجيل عملية مالية. كن ودوداً، مختصراً، ومحفزاً باللغة العربية.
+
+سؤال المستخدم: {{{query}}}`,
 });
 
-
 /**
- * This flow takes the user's query and financial data, calls the AI model,
- * and returns the response, which will contain analysis or instructional text.
+ * تنفيذ تدفق المرشد المالي.
  */
 export async function getFinancialAdvice(input: FinancialAdviceInput) {
     try {
         const response = await financialAdvicePrompt(input);
-
         return {
             text: response.text,
             toolRequests: response.toolRequests,
         };
     } catch (e) {
-        const error = e as Error;
-        console.error("Error in getFinancialAdvice flow:", error);
-        
-        let message = 'عذراً، حدث خطأ ما في الاتصال بالمرشد. يرجى التأكد من اتصال الإنترنت أو صلاحية مفتاح الخدمة.';
-        
-        if (error.message && (error.message.includes('API key') || error.message.includes('permission') || error.message.includes('403'))) {
-            message = 'عذراً، هناك مشكلة في صلاحيات مفتاح الخدمة (API Key). يرجى التحقق من صحته في إعدادات النظام.';
-        }
-
+        console.error("AI Flow Error:", e);
         return {
-            text: message,
-        }
+            text: "عذراً، واجهت مشكلة في معالجة طلبك حالياً. يرجى التأكد من اتصالك بالإنترنت وصلاحية مفتاح الخدمة في ملف .env",
+        };
     }
 }
