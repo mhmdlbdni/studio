@@ -27,7 +27,6 @@ export default function DashboardPage({ searchParams }: { searchParams: Promise<
 
   const currency = user?.currency || 'YER';
   const t = language.translations.dashboard;
-  const locale = language.code;
 
   const potDetails = useMemo(() => {
     return pots.map(pot => ({
@@ -77,12 +76,13 @@ export default function DashboardPage({ searchParams }: { searchParams: Promise<
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat(locale, { style: 'currency', currency, minimumFractionDigits: 0 }).format(amount);
+    // Force English (Latin) numerals by using 'en-US' locale
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(amount);
   };
 
   return (
     <div className="space-y-5 pb-28 md:space-y-10 md:pb-20 px-0.5 select-none">
-      {/* Futuristic Hero Section - Now theme-aware */}
+      {/* Futuristic Hero Section - Theme Aware */}
       <Card className="relative overflow-hidden border-none shadow-2xl bg-card dark:bg-black min-h-[220px] md:min-h-[300px] flex flex-col justify-center rounded-[2.8rem] md:rounded-[3.5rem] transition-all duration-500">
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           <div className="futuristic-card-glow opacity-40" />
@@ -285,7 +285,7 @@ export default function DashboardPage({ searchParams }: { searchParams: Promise<
         <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
           <PopoverTrigger asChild>
             <Button
-              className="h-16 w-16 md:h-18 md:w-18 rounded-[1.8rem] shadow-[0_15px_50px_rgba(var(--primary),0.5)] active:scale-95 bg-primary hover:bg-primary/90 transition-all group relative overflow-hidden"
+              className="h-16 w-16 md:h-16 md:w-16 rounded-[1.8rem] shadow-[0_15px_50px_rgba(var(--primary),0.5)] active:scale-95 bg-primary hover:bg-primary/90 transition-all group relative overflow-hidden"
               size="icon"
             >
               <Plus className="h-8 w-8 md:h-10 md:w-10 text-white group-hover:rotate-90 transition-transform duration-500" />

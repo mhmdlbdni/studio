@@ -62,7 +62,6 @@ export function ChatInterface({ requestOpenIncomeDialog, requestOpenExpenseDialo
   const [isLoading, setIsLoading] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const locale = language.code;
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -80,7 +79,8 @@ export function ChatInterface({ requestOpenIncomeDialog, requestOpenExpenseDialo
   }, [language.key]);
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat(locale, { style: 'currency', currency: user?.currency || 'YER', minimumFractionDigits: 0 }).format(amount);
+    // Force English numerals
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: user?.currency || 'YER', minimumFractionDigits: 0 }).format(amount);
   };
 
 

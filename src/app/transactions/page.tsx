@@ -15,7 +15,6 @@ export default function TransactionsPage() {
   const { transactions, user, language, pots } = useApp();
   const [filter, setFilter] = useState<FilterType>('all');
   const currency = user?.currency || 'YER';
-  const locale = language.code;
 
   const potMap = useMemo(() => {
     const map = new Map<string, {name: {ar: string, en: string}}>();
@@ -27,7 +26,6 @@ export default function TransactionsPage() {
     const now = new Date();
     const sortedTransactions = [...transactions].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     
-    let interval: Interval | null = null;
     let range = {start: new Date(), end: new Date()};
     
     switch (filter) {
@@ -70,11 +68,13 @@ export default function TransactionsPage() {
   }, [filteredTransactions]);
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat(locale, { style: 'currency', currency, minimumFractionDigits: 0 }).format(amount);
+    // Force English numerals
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(amount);
   };
 
   const t = language.translations.transactionsPage;
-  const dateLocale = language.key === 'ar' ? 'ar-SA' : 'en-US';
+  // Always use English numbers for dates
+  const dateLocale = 'en-US';
 
   const handleDownloadXLSX = () => {
     const isArabic = language.key === 'ar';
@@ -83,7 +83,8 @@ export default function TransactionsPage() {
     const data = filteredTransactions.map(t => {
       const isExpense = t.type === 'expense';
       const potName = isExpense && t.potId ? potMap.get(t.potId)?.name[language.key] : '—';
-      const formattedDate = new Date(t.date).toLocaleDateString(isArabic ? 'ar-SA' : 'en-CA');
+      // Excel dates are usually fine, but to be safe we use a standard numeric format
+      const formattedDate = new Date(t.date).toLocaleDateString('en-CA'); 
       
       if (isArabic) {
         return {
@@ -177,7 +178,7 @@ export default function TransactionsPage() {
                         <TableCell className="text-right">{potName}</TableCell>
                         <TableCell className={`text-right font-medium ${isExpense ? 'text-destructive' : 'text-green-500'}`}>
                           <div className="flex items-center justify-end gap-1">
-                             <span>
+                             <span className="tabular-nums">
                                 {isExpense ? '-' : '+'}
                                 {formatCurrency(transaction.amount)}
                              </span>
@@ -200,13 +201,13 @@ export default function TransactionsPage() {
               <TableFooter>
                 <TableRow className="bg-muted/50 font-medium">
                   <TableCell colSpan={2}>{t.table.totalIncome}</TableCell>
-                  <TableCell className="text-right text-green-500">
+                  <TableCell className="text-right text-green-500 tabular-nums">
                       {formatCurrency(totalIncome)}
                   </TableCell>
                 </TableRow>
                 <TableRow className="bg-muted/50 font-bold">
                   <TableCell colSpan={2}>{t.table.totalExpenses}</TableCell>
-                  <TableCell className="text-right text-destructive">
+                  <TableCell className="text-right text-destructive tabular-nums">
                     - {formatCurrency(totalExpenses)}
                   </TableCell>
                 </TableRow>

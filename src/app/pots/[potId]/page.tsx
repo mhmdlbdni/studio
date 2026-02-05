@@ -23,7 +23,6 @@ export default function PotDetailPage({ params, searchParams }: PotPageProps) {
   
   const { pots, transactions, getPotBalance, user, language, totalIncome } = useApp();
   const currency = user?.currency || 'YER';
-  const locale = language.code;
 
   const pot = useMemo(() => pots.find(p => p.id === potId), [pots, potId]);
   const potBalance = useMemo(() => getPotBalance(potId), [getPotBalance, potId]);
@@ -35,7 +34,8 @@ export default function PotDetailPage({ params, searchParams }: PotPageProps) {
   }, [transactions, potId]);
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat(locale, { style: 'currency', currency, minimumFractionDigits: 0 }).format(amount);
+    // Force English numerals
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(amount);
   };
 
   if (!pot) {
@@ -56,7 +56,8 @@ export default function PotDetailPage({ params, searchParams }: PotPageProps) {
 
   const totalAllocated = totalIncome * (pot.percentage / 100);
   const liquidLevel = totalAllocated > 0 ? Math.max(0, Math.min(100, (potBalance / totalAllocated) * 100)) : 0;
-  const dateLocale = language.key === 'ar' ? 'ar-SA' : 'en-US';
+  // Always use English numbers for dates too if desired
+  const dateLocale = 'en-US'; 
 
   return (
     <div className="space-y-6 pb-20 select-none">
