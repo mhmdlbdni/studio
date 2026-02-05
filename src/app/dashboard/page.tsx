@@ -79,8 +79,8 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-5 pb-28 md:space-y-10 md:pb-20 px-0.5 select-none">
-      {/* Futuristic Hero Section */}
-      <Card className="relative overflow-hidden border-none shadow-2xl bg-black min-h-[220px] md:min-h-[300px] flex flex-col justify-center rounded-[2.8rem] md:rounded-[3.5rem] transition-all duration-500">
+      {/* Futuristic Hero Section - Now theme-aware */}
+      <Card className="relative overflow-hidden border-none shadow-2xl bg-card dark:bg-black min-h-[220px] md:min-h-[300px] flex flex-col justify-center rounded-[2.8rem] md:rounded-[3.5rem] transition-all duration-500">
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           <div className="futuristic-card-glow opacity-40" />
           <div 
@@ -99,12 +99,12 @@ export default function DashboardPage() {
               <div className="p-1.5 rounded-full bg-primary/20 animate-pulse">
                 <CircleDollarSign className="h-4 w-4 text-primary" />
               </div>
-              <CardTitle className="text-[10px] md:text-[12px] font-black uppercase tracking-[0.2em] md:tracking-[0.4em] text-white/80">
+              <CardTitle className="text-[10px] md:text-[12px] font-black uppercase tracking-[0.2em] md:tracking-[0.4em] text-foreground/80 dark:text-white/80">
                 {t.netBalance}
               </CardTitle>
             </div>
             <Link href="/transactions">
-              <div className="p-3.5 rounded-2xl bg-white/10 border border-white/20 text-white hover:bg-primary transition-all backdrop-blur-3xl active:scale-90 shadow-2xl">
+              <div className="p-3.5 rounded-2xl bg-secondary/50 dark:bg-white/10 border border-border dark:border-white/20 text-foreground dark:text-white hover:bg-primary hover:text-white transition-all backdrop-blur-3xl active:scale-90 shadow-2xl">
                 <Wallet className="h-5 w-5" />
               </div>
             </Link>
@@ -113,12 +113,12 @@ export default function DashboardPage() {
 
         <CardContent className="relative z-10 pb-6 md:pb-10 px-6 md:px-10">
           <div className="flex flex-col gap-0.5">
-            <div className="text-4xl xs:text-5xl md:text-7xl font-black tracking-tighter text-white drop-shadow-2xl leading-tight">
+            <div className="text-4xl xs:text-5xl md:text-7xl font-black tracking-tighter text-foreground dark:text-white drop-shadow-2xl leading-tight">
               {formatCurrency(netBalance)}
             </div>
             <div className="flex items-center gap-2 mt-4">
               <div className="px-4 py-1.5 rounded-full bg-primary/25 border border-primary/40 backdrop-blur-md shadow-2xl">
-                <p className="text-[10px] md:text-[13px] font-black text-white uppercase tracking-wider flex items-center gap-2">
+                <p className="text-[10px] md:text-[13px] font-black text-foreground dark:text-white uppercase tracking-wider flex items-center gap-2">
                   <Coins className="h-3.5 w-3.5 fill-primary text-primary" />
                   {Math.round(balanceRatio)}% {language.key === 'ar' ? 'طاقة الرصيد' : 'Balance Energy'}
                 </p>
@@ -127,22 +127,22 @@ export default function DashboardPage() {
           </div>
 
           <div className="mt-8 grid grid-cols-2 gap-3 md:gap-6">
-            <div className="group relative overflow-hidden flex items-center gap-3 p-3.5 md:p-5 rounded-[2rem] bg-white/10 border border-white/10 backdrop-blur-3xl shadow-2xl transition-transform hover:scale-[1.02]">
+            <div className="group relative overflow-hidden flex items-center gap-3 p-3.5 md:p-5 rounded-[2rem] bg-secondary/30 dark:bg-white/10 border border-border dark:border-white/10 backdrop-blur-3xl shadow-2xl transition-transform hover:scale-[1.02]">
               <div className="p-2.5 md:p-3 rounded-2xl bg-green-500/30 text-green-300 shadow-xl">
                 <TrendingUp className="h-4 w-4 md:h-6 md:w-6" />
               </div>
               <div className="min-w-0">
-                <p className="text-[8px] md:text-[10px] text-slate-200 font-black uppercase tracking-widest truncate">{language.key === 'ar' ? 'الوارد' : 'Inflow'}</p>
-                <p className="text-sm md:text-xl font-black text-green-400 truncate">{formatCurrency(totalIncome)}</p>
+                <p className="text-[8px] md:text-[10px] text-muted-foreground dark:text-slate-200 font-black uppercase tracking-widest truncate">{language.key === 'ar' ? 'الوارد' : 'Inflow'}</p>
+                <p className="text-sm md:text-xl font-black text-green-500 truncate">{formatCurrency(totalIncome)}</p>
               </div>
             </div>
-            <div className="group relative overflow-hidden flex items-center gap-3 p-3.5 md:p-5 rounded-[2rem] bg-white/10 border border-white/10 backdrop-blur-3xl shadow-2xl transition-transform hover:scale-[1.02]">
+            <div className="group relative overflow-hidden flex items-center gap-3 p-3.5 md:p-5 rounded-[2rem] bg-secondary/30 dark:bg-white/10 border border-border dark:border-white/10 backdrop-blur-3xl shadow-2xl transition-transform hover:scale-[1.02]">
               <div className="p-2.5 md:p-3 rounded-2xl bg-destructive/30 text-destructive-foreground shadow-xl">
                 <TrendingDown className="h-4 w-4 md:h-6 md:w-6" />
               </div>
               <div className="min-w-0">
-                <p className="text-[8px] md:text-[10px] text-slate-200 font-black uppercase tracking-widest truncate">{language.key === 'ar' ? 'الصادر' : 'Outflow'}</p>
-                <p className="text-sm md:text-xl font-black text-red-400 truncate">{formatCurrency(totalExpenses)}</p>
+                <p className="text-[8px] md:text-[10px] text-muted-foreground dark:text-slate-200 font-black uppercase tracking-widest truncate">{language.key === 'ar' ? 'الصادر' : 'Outflow'}</p>
+                <p className="text-sm md:text-xl font-black text-red-500 truncate">{formatCurrency(totalExpenses)}</p>
               </div>
             </div>
           </div>

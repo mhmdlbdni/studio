@@ -53,8 +53,8 @@ export default function PotDetailPage(props: { params: Promise<{ potId: string }
 
   return (
     <div className="space-y-6 pb-20 select-none">
-        {/* Futuristic Liquid Header Card */}
-        <Card className="relative overflow-hidden border-none shadow-2xl bg-black min-h-[220px] flex flex-col justify-center rounded-[2.8rem] transition-all duration-500">
+        {/* Futuristic Liquid Header Card - Theme Aware */}
+        <Card className="relative overflow-hidden border-none shadow-2xl bg-card dark:bg-black min-h-[220px] flex flex-col justify-center rounded-[2.8rem] transition-all duration-500">
             <div className="absolute inset-0 pointer-events-none overflow-hidden">
                 <div 
                     className="absolute bottom-0 left-0 right-0 transition-all duration-1000 ease-in-out opacity-60"
@@ -67,18 +67,18 @@ export default function PotDetailPage(props: { params: Promise<{ potId: string }
                     <div className="absolute -top-32 left-0 w-[400%] h-64 liquid-wave-futuristic opacity-30" />
                     <div className="absolute -top-32 left-0 w-[400%] h-64 liquid-wave-futuristic-slow opacity-20" />
                 </div>
-                <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-white/5 to-transparent" />
+                <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-primary/5 to-transparent" />
             </div>
 
             <CardHeader className="relative z-10 pt-8 px-8">
                 <div className="flex items-center gap-4">
-                    <div className="p-4 rounded-[1.8rem] bg-white/10 backdrop-blur-3xl border border-white/10 shadow-2xl">
+                    <div className="p-4 rounded-[1.8rem] bg-secondary/50 dark:bg-white/10 backdrop-blur-3xl border border-border dark:border-white/10 shadow-2xl">
                         <pot.icon className="h-8 w-8" style={{ color: pot.color }} />
                     </div>
                     <div>
-                        <CardTitle className="text-2xl md:text-3xl font-black text-white tracking-tighter">{pot.name[language.key]}</CardTitle>
+                        <CardTitle className="text-2xl md:text-3xl font-black text-foreground dark:text-white tracking-tighter">{pot.name[language.key]}</CardTitle>
                         <div className="flex items-center gap-2 mt-1">
-                            <div className="px-3 py-0.5 rounded-full bg-white/10 border border-white/10 text-[10px] font-black text-white/80 uppercase tracking-widest">
+                            <div className="px-3 py-0.5 rounded-full bg-secondary/50 dark:bg-white/10 border border-border dark:border-white/10 text-[10px] font-black text-foreground/80 dark:text-white/80 uppercase tracking-widest">
                                 {pot.percentage}% {language.key === 'ar' ? 'تخصيص' : 'Allocated'}
                             </div>
                         </div>
@@ -87,10 +87,10 @@ export default function PotDetailPage(props: { params: Promise<{ potId: string }
             </CardHeader>
             <CardContent className="relative z-10 pb-8 px-8">
                 <div className="mt-4">
-                    <p className="text-4xl md:text-6xl font-black text-white tracking-tighter drop-shadow-2xl">
+                    <p className="text-4xl md:text-6xl font-black text-foreground dark:text-white tracking-tighter drop-shadow-2xl">
                         {formatCurrency(potBalance)}
                     </p>
-                    <p className="text-[10px] md:text-xs text-white/60 font-black uppercase tracking-[0.2em] mt-2">
+                    <p className="text-[10px] md:text-xs text-muted-foreground dark:text-white/60 font-black uppercase tracking-[0.2em] mt-2">
                         {language.key === 'ar' ? 'الرصيد المتاح حالياً' : 'Current Available Balance'}
                     </p>
                 </div>
