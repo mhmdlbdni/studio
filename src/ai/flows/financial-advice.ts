@@ -1,8 +1,11 @@
 'use server';
 /**
- * @fileOverview مرشد مالي ذكي يعتمد على Genkit لتحليل البيانات المالية للمستخدم.
- *
- * - getFinancialAdvice - الوظيفة الرئيسية التي تستقبل استعلام المستخدم وبياناته المالية.
+ * @fileOverview مرشد مالي ذكي مطور ومدرب على فلسفة نظام "الموازين" (الأوعية الستة).
+ * 
+ * الميزات:
+ * - تحليل عميق للنسب المالية بناءً على قواعد الموازين.
+ * - تقديم نصائح مخصصة لتحسين التوازن المالي.
+ * - دعم تسجيل العمليات والتنقل داخل التطبيق.
  */
 
 import { ai } from '@/ai/genkit';
@@ -37,16 +40,16 @@ const FinancialAdviceInputSchema = z.object({
 
 export type FinancialAdviceInput = z.infer<typeof FinancialAdviceInputSchema>;
 
-// تعريف الأدوات (Tools) التي يمكن للذكاء الاصطناعي استخدامها
+// تعريف الأدوات (Tools)
 const addIncomeTool = ai.defineTool({
     name: 'addIncome',
-    description: 'تسجيل دخل جديد للمستخدم (مثل راتب أو مكافأة).',
+    description: 'تسجيل دخل جديد للمستخدم وتوزيعه على الأوعية.',
     inputSchema: z.object({
-        description: z.string().describe('وصف الدخل.'),
-        amount: z.number().describe('المبلغ.'),
+        description: z.string().describe('وصف الدخل (مثلاً: راتب يناير).'),
+        amount: z.number().describe('مبلغ الدخل بالرقم فقط.'),
     }),
     outputSchema: z.string(),
-}, async () => "تمت معالجة طلب إضافة الدخل.");
+}, async () => "تم إرسال طلب تسجيل الدخل بنجاح.");
 
 const addExpenseTool = ai.defineTool({
     name: 'addExpense',
@@ -57,50 +60,61 @@ const addExpenseTool = ai.defineTool({
         potId: z.string().describe('معرف الوعاء المطلوب الخصم منه.'),
     }),
     outputSchema: z.string(),
-}, async () => "تمت معالجة طلب إضافة المصروف.");
+}, async () => "تم إرسال طلب تسجيل المصروف بنجاح.");
 
 const navigateToTool = ai.defineTool({
     name: 'navigateTo',
-    description: 'مساعدة المستخدم في الانتقال لصفحات الإعدادات أو إدارة الأوعية.',
+    description: 'الانتقال إلى صفحات الإعدادات أو إدارة الأوعية بناءً على طلب المستخدم.',
     inputSchema: z.object({
-        page: z.enum(['manage-pots', 'settings']).describe('الصفحة الهدف.'),
+        page: z.enum(['manage-pots', 'settings', 'transactions']).describe('الصفحة الهدف.'),
     }),
     outputSchema: z.string(),
-}, async () => "تمت معالجة طلب التنقل.");
+}, async () => "جاري توجيهك إلى الصفحة المطلوبة.");
 
-// تعريف المطالبة (Prompt) الخاصة بالمرشد
+// تعريف المطالبة (Prompt) المطورة والمدربة
 const financialAdvicePrompt = ai.definePrompt({
     name: 'financialAdvicePrompt',
     input: { schema: FinancialAdviceInputSchema },
     model: 'googleai/gemini-1.5-flash',
     tools: [addIncomeTool, addExpenseTool, navigateToTool],
-    prompt: `أنت "مرشد الموازين"، خبير مالي ذكي. مهمتك هي تحليل البيانات المالية للمستخدم وتقديم نصائح عملية.
+    prompt: `أنت "مرشد الموازين"، خبير مالي ذكي متخصص في نظام "الأوعية الستة" (6-Jars System). 
+مهمتك هي مساعدة المستخدم في إدارة ماله بذكاء وحكمة وفق الفلسفة التالية:
 
-**البيانات المالية الحالية:**
-*   الدخل الإجمالي: {{financials.totalIncome}}
-*   المصاريف الإجمالية: {{financials.totalExpenses}}
-*   الموازين (الأوعية):
-    {{#each financials.pots}}
-    - {{name}}: الرصيد {{balance}} ({{percentage}}%)
-    {{/each}}
+**فلسفة نظام الموازين التي تدربت عليها:**
+1. **وعاء الضروريات (55%)**: للمصاريف الحتمية (إيجار، فواتير، طعام). إذا تجاوز المستخدم هذه النسبة، حذره بلطف.
+2. **وعاء الحرية المالية (10%)**: للاستثمار وبناء الثروة. شجعه دائماً على عدم لمس هذا الوعاء إلا للاستثمار.
+3. **وعاء التوفير طويل الأجل (10%)**: للمشتريات الكبيرة أو الطوارئ.
+4. **وعاء التعليم (10%)**: لتطوير الذات والكورسات والكتب.
+5. **وعاء المرح والترفيه (10%)**: لتدليل النفس بدون شعور بالذنب.
+6. **وعاء العطاء (5%)**: للصدقة والزكاة ومساعدة الآخرين.
+
+**البيانات المالية الفعلية للمستخدم الآن:**
+- إجمالي الدخل: {{financials.totalIncome}}
+- إجمالي المصاريف: {{financials.totalExpenses}}
+- حالة الأوعية الحالية:
+{{#each financials.pots}}
+  * {{name}}: رصيد {{balance}} (تخصيص {{percentage}}%)
+{{/each}}
 
 **المعاملات الأخيرة:**
 {{#if financials.transactions}}
 {{#each financials.transactions}}
-* {{type}}: {{description}} - {{amount}} بتاريخ {{date}}
+- {{type === 'income' ? 'دخل' : 'مصروف'}}: {{description}} بمبلغ {{amount}} بتاريخ {{date}}
 {{/each}}
 {{else}}
-لا توجد معاملات مسجلة.
+لا توجد معاملات مسجلة بعد.
 {{/if}}
 
-استخدم الأدوات المتاحة إذا طلب المستخدم تسجيل عملية مالية (إضافة دخل أو مصروف). كن ودوداً، مختصراً، ومحفزاً باللغة العربية. إذا قمت باستخدام أداة، أخبر المستخدم بذلك في ردك.
+**قواعد الرد:**
+- استخدم الأرقام الإنجليزية (1, 2, 3...) دائماً في ردودك.
+- كن ودوداً، مختصراً، ومهنياً باللغة العربية.
+- إذا لاحظت أن رصيد وعاء "الضروريات" منخفض جداً مقارنة بالبقية، قدم نصيحة تقشفية.
+- إذا طلب المستخدم تسجيل دخل أو مصروف، استخدم الأدوات فوراً.
+- إذا كان ردك يتضمن أرقام مبالغ، أضف رمز العملة.
 
 سؤال المستخدم: {{{query}}}`,
 });
 
-/**
- * تنفيذ تدفق المرشد المالي.
- */
 export async function getFinancialAdvice(input: FinancialAdviceInput) {
     try {
         const response = await financialAdvicePrompt(input);
@@ -111,7 +125,7 @@ export async function getFinancialAdvice(input: FinancialAdviceInput) {
     } catch (e) {
         console.error("AI Flow Error:", e);
         return {
-            text: "عذراً، واجهت مشكلة في الاتصال بالمرشد الذكي. يرجى التأكد من استقرار الإنترنت وصلاحية مفتاح الوصول للخدمة. (تأكد من وجود GOOGLE_GENAI_API_KEY في ملف .env)",
+            text: "عذراً، واجهت مشكلة في الاتصال بذكاء الموازين. يرجى التأكد من استقرار الإنترنت وصلاحية مفتاح API الخاص بـ Google GenAI.",
         };
     }
 }
