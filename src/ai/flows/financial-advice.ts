@@ -73,7 +73,7 @@ const navigateToTool = ai.defineTool({
     outputSchema: z.string(),
 }, async () => "جاري توجيهك إلى الصفحة المطلوبة.");
 
-// تعريف المطالبة (Prompt) المطورة والمدربة
+// تعريف المطالبة (Prompt)
 const financialAdvicePrompt = ai.definePrompt({
     name: 'financialAdvicePrompt',
     input: { schema: FinancialAdviceInputSchema },
@@ -83,51 +83,64 @@ const financialAdvicePrompt = ai.definePrompt({
 مهمتك هي مساعدة المستخدم في إدارة ماله بذكاء وحكمة وفق الفلسفة التالية:
 
 **فلسفة نظام الموازين التي تدربت عليها:**
-1. **وعاء الضروريات (55%)**: للمصاريف الحتمية (إيجار، فواتير، طعام). إذا تجاوز المستخدم هذه النسبة، حذره بلطف.
-2. **وعاء الحرية المالية (10%)**: للاستثمار وبناء الثروة. شجعه دائماً على عدم لمس هذا الوعاء إلا للاستثمار.
-3. **وعاء التوفير طويل الأجل (10%)**: للمشتريات الكبيرة أو الطوارئ.
-4. **وعاء التعليم (10%)**: لتطوير الذات والكورسات والكتب.
-5. **وعاء المرح والترفيه (10%)**: لتدليل النفس بدون شعور بالذنب.
-6. **وعاء العطاء (5%)**: للصدقة والزكاة ومساعدة الآخرين.
+1. **وعاء الضروريات (55%)**: للمصاريف الحتمية. إذا تجاوزت هذه النسبة، قدم نصيحة للتقشف.
+2. **وعاء الحرية المالية (10%)**: للاستثمار فقط. شجعه على بناء ثروته.
+3. **وعاء التوفير طويل الأجل (10%)**: للمشتريات الكبيرة والطوارئ.
+4. **وعاء التعليم (10%)**: للتطوير الذاتي.
+5. **وعاء المرح والترفيه (10%)**: للاستمتاع بالحياة.
+6. **وعاء العطاء (5%)**: للصدقة والزكاة.
 
-**البيانات المالية الفعلية للمستخدم الآن:**
+**بيانات المستخدم الحالية:**
 - إجمالي الدخل: {{financials.totalIncome}}
 - إجمالي المصاريف: {{financials.totalExpenses}}
-- حالة الأوعية الحالية:
+- حالة الأوعية:
 {{#each financials.pots}}
-  * {{name}}: رصيد {{balance}} (تخصيص {{percentage}}%)
+  * {{name}}: رصيد {{balance}} ({{percentage}}%)
 {{/each}}
 
-**المعاملات الأخيرة:**
-{{#if financials.transactions}}
-{{#each financials.transactions}}
-- {{type === 'income' ? 'دخل' : 'مصروف'}}: {{description}} بمبلغ {{amount}} بتاريخ {{date}}
+**سجل المحادثة:**
+{{#each history}}
+{{sender}}: {{text}}
 {{/each}}
-{{else}}
-لا توجد معاملات مسجلة بعد.
-{{/if}}
 
-**قواعد الرد:**
-- **قاعدة ذهبية**: استخدم الأرقام الإنجليزية (1, 2, 3...) دائماً وأبداً في كل ردودك، ولا تستخدم الأرقام العربية المشرقية (١، ٢، ٣) إطلاقاً.
-- كن ودوداً، مختصراً، ومهنياً باللغة العربية.
-- إذا لاحظت أن رصيد وعاء "الضروريات" منخفض جداً مقارنة بالبقية، قدم نصيحة تقشفية.
-- إذا طلب المستخدم تسجيل دخل أو مصروف، استخدم الأدوات فوراً.
-- إذا كان ردك يتضمن أرقام مبالغ، أضف رمز العملة.
+**قواعد الرد الصارمة:**
+- استخدم الأرقام الإنجليزية (1, 2, 3...) دائماً في كل ردودك.
+- كن ودوداً، مختصراً، وعملياً باللغة العربية.
+- إذا طلب المستخدم تسجيل دخل أو مصروف، استخدم الأدوات المناسبة.
 
-سؤال المستخدم: {{{query}}}`,
+سؤال المستخدم الحالي: {{{query}}}`,
 });
+
+// تعريف التدفق (Flow) لضمان استقرار الاستجابة
+const financialAdviceFlow = ai.defineFlow(
+  {
+    name: 'financialAdviceFlow',
+    inputSchema: FinancialAdviceInputSchema,
+  },
+  async (input) => {
+    try {
+      const response = await financialAdvicePrompt(input);
+      return {
+        text: response.text,
+        toolRequests: response.toolRequests || [],
+        success: true
+      };
+    } catch (error) {
+      console.error("Genkit Flow Inner Error:", error);
+      throw error;
+    }
+  }
+);
 
 export async function getFinancialAdvice(input: FinancialAdviceInput) {
     try {
-        const response = await financialAdvicePrompt(input);
-        return {
-            text: response.text,
-            toolRequests: response.toolRequests,
-        };
+        return await financialAdviceFlow(input);
     } catch (e) {
-        console.error("AI Flow Error:", e);
+        console.error("AI Server Action Error:", e);
         return {
-            text: "عذراً، واجهت مشكلة في الاتصال بذكاء الموازين. يرجى التأكد من استقرار الإنترنت وصلاحية مفتاح API الخاص بـ Google GenAI.",
+            text: "عذراً، واجهت مشكلة في معالجة طلبك حالياً. يرجى التأكد من استقرار الإنترنت وصلاحية مفتاح الخدمة.",
+            toolRequests: [],
+            success: false
         };
     }
 }

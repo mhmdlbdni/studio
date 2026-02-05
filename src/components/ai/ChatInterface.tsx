@@ -1,3 +1,4 @@
+
 'use client';
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -29,16 +30,14 @@ const questionPool = {
         'كيف يمكنني تحسين ميزانيتي؟',
         'ما هي أكبر مصاريفي؟',
         'أريد إضافة راتبي الجديد',
-        'ساعدني في تسجيل مصروف',
-        'كيف أعدل نسب الموازين؟'
+        'ساعدني في تسجيل مصروف'
     ],
     en: [
         'Analyze my current financial situation',
         'How can I improve my budget?',
         'What are my biggest expenses?',
         'I want to add my new salary',
-        'Help me record an expense',
-        'How do I adjust the pot percentages?'
+        'Help me record an expense'
     ]
 };
 
@@ -51,7 +50,6 @@ const shuffleArray = (array: string[]) => {
     }
     return newArray;
 };
-
 
 export function ChatInterface({ requestOpenIncomeDialog, requestOpenExpenseDialog, closeChat }: ChatInterfaceProps) {
   const { language, user, pots, getPotBalance, totalIncome, totalExpenses, addTransaction, transactions } = useApp();
@@ -79,25 +77,18 @@ export function ChatInterface({ requestOpenIncomeDialog, requestOpenExpenseDialo
   }, [language.key]);
 
   const formatCurrency = (amount: number) => {
-    // Force English numerals by using 'en-US' locale
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: user?.currency || 'YER', minimumFractionDigits: 0 }).format(amount);
   };
-
 
   const handleSend = async (query?: string) => {
     const textToSend = query || input;
     if (textToSend.trim() === '' || isLoading) return;
 
     const userMessage: Message = { sender: 'user', text: textToSend };
-    const updatedMessages = [...messages, userMessage];
-    setMessages(updatedMessages);
+    setMessages(prev => [...prev, userMessage]);
 
-    if (!query) {
-        setInput('');
-    }
-    if (showSuggestions) {
-        setShowSuggestions(false);
-    }
+    if (!query) setInput('');
+    if (showSuggestions) setShowSuggestions(false);
     setIsLoading(true);
 
     try {
@@ -108,8 +99,8 @@ export function ChatInterface({ requestOpenIncomeDialog, requestOpenExpenseDialo
         balance: getPotBalance(pot.id)
       }));
 
-      const historyForAI = updatedMessages.map(msg => ({
-        sender: msg.sender === 'user' ? (language.key === 'ar' ? 'المستخدم' : 'User') : (language.key === 'ar' ? 'المرشد' : 'Guide'),
+      const historyForAI = messages.slice(-5).map(msg => ({
+        sender: msg.sender === 'user' ? 'User' : 'Guide',
         text: msg.text
       }));
 
@@ -124,60 +115,46 @@ export function ChatInterface({ requestOpenIncomeDialog, requestOpenExpenseDialo
         }
       });
       
-      if (response.text) {
-        const aiMessage: Message = { sender: 'ai', text: response.text };
-        setMessages(prev => [...prev, aiMessage]);
+      if (response && response.text) {
+        setMessages(prev => [...prev, { sender: 'ai', text: response.text }]);
       }
 
-      if (response.toolRequests && response.toolRequests.length > 0) {
-        let confirmationMessage: Message | null = null;
-        
+      if (response && response.toolRequests && response.toolRequests.length > 0) {
         for (const toolRequest of response.toolRequests) {
           switch (toolRequest.name) {
             case 'addIncome': {
               const { description, amount } = toolRequest.input;
               addTransaction({ type: 'income', description, amount });
-              const formattedAmount = formatCurrency(amount);
-              confirmationMessage = { sender: 'ai', text: language.key === 'ar' ? `تم! لقد أضفت دخلاً بقيمة ${formattedAmount} بنجاح.` : `Done! I've successfully added an income of ${formattedAmount}.` };
+              setMessages(prev => [...prev, { sender: 'ai', text: language.key === 'ar' ? `تم! أضفت دخلاً بقيمة ${formatCurrency(amount)}.` : `Done! Added income: ${formatCurrency(amount)}.` }]);
               break;
             }
             case 'addExpense': {
               const { description, amount, potId } = toolRequest.input;
               addTransaction({ type: 'expense', description, amount, potId });
               const potName = pots.find(p => p.id === potId)?.name[language.key] || '';
-              const formattedAmount = formatCurrency(amount);
-              confirmationMessage = { sender: 'ai', text: language.key === 'ar' ? `تمام! تم تسجيل مصروف بقيمة ${formattedAmount} من وعاء "${potName}".` : `Got it! An expense of ${formattedAmount} from the "${potName}" pot has been recorded.` };
+              setMessages(prev => [...prev, { sender: 'ai', text: language.key === 'ar' ? `تمام! سجلت مصروفاً بقيمة ${formatCurrency(amount)} من وعاء ${potName}.` : `Recorded expense: ${formatCurrency(amount)} from ${potName}.` }]);
               break;
             }
             case 'navigateTo': {
               const page = toolRequest.input.page;
-              if (page === 'manage-pots' || page === 'settings') {
-                  router.push(`/${page}`);
-                  closeChat?.();
-              }
+              router.push(`/${page}`);
+              closeChat?.();
               break;
             }
           }
         }
-
-        if (confirmationMessage) {
-            setMessages(prev => [...prev, confirmationMessage!]);
-        }
       }
 
     } catch (error) {
-      console.error("Error calling financial advice flow:", error);
-      const errorMessage: Message = { sender: 'ai', text: language.key === 'ar' ? 'عذراً، حدث خطأ ما في الاتصال. يرجى التأكد من استقرار الإنترنت.' : 'Sorry, something went wrong with the connection. Please ensure your internet is stable.' };
-      setMessages(prev => [...prev, errorMessage]);
+      console.error("ChatInterface Error:", error);
+      setMessages(prev => [...prev, { sender: 'ai', text: language.key === 'ar' ? 'عذراً، حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.' : 'Sorry, an unexpected error occurred. Please try again.' }]);
     } finally {
       setIsLoading(false);
     }
   };
   
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-        handleSend();
-    }
+    if (e.key === 'Enter') handleSend();
   }
 
   const handleReset = () => {
