@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Plus, Bot, Wallet, TrendingUp, TrendingDown, Droplets, Sparkles, Zap } from 'lucide-react';
+import { Plus, Bot, Wallet, TrendingUp, TrendingDown, Droplets, CircleDollarSign, Coins } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -64,7 +64,7 @@ export default function DashboardPage() {
         <CardHeader className="pb-2 relative z-10 pt-6 md:pt-8 px-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-primary animate-pulse" />
+              <CircleDollarSign className="h-4 w-4 text-primary animate-pulse" />
               <CardTitle className="text-[10px] md:text-[11px] font-black uppercase tracking-[0.25em] md:tracking-[0.35em] text-white/90 drop-shadow-md">
                 {t.netBalance}
               </CardTitle>
@@ -85,7 +85,7 @@ export default function DashboardPage() {
             <div className="flex items-center gap-2 mt-3">
               <div className="px-3 py-1 rounded-full bg-primary/20 border border-primary/40 backdrop-blur-md shadow-inner">
                 <p className="text-[10px] md:text-[12px] font-black text-white uppercase tracking-wider flex items-center gap-2">
-                  <Zap className="h-3 w-3 fill-primary text-primary" />
+                  <Coins className="h-3 w-3 fill-primary text-primary" />
                   {Math.round(balanceRatio)}% {language.key === 'ar' ? 'طاقة الرصيد' : 'Balance Energy'}
                 </p>
               </div>
@@ -98,7 +98,7 @@ export default function DashboardPage() {
                 <TrendingUp className="h-5 w-5" />
               </div>
               <div className="min-w-0">
-                <p className="text-[9px] text-slate-300 font-black uppercase tracking-widest truncate drop-shadow-sm">{language.key === 'ar' ? 'الوارد' : 'Inflow'}</p>
+                <p className="text-[9px] text-slate-100 font-black uppercase tracking-widest truncate drop-shadow-sm">{language.key === 'ar' ? 'الوارد' : 'Inflow'}</p>
                 <p className="text-base md:text-lg font-black text-green-400 truncate drop-shadow-sm">{new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(totalIncome)}</p>
               </div>
             </div>
@@ -107,7 +107,7 @@ export default function DashboardPage() {
                 <TrendingDown className="h-5 w-5" />
               </div>
               <div className="min-w-0">
-                <p className="text-[9px] text-slate-300 font-black uppercase tracking-widest truncate drop-shadow-sm">{language.key === 'ar' ? 'الصادر' : 'Outflow'}</p>
+                <p className="text-[9px] text-slate-100 font-black uppercase tracking-widest truncate drop-shadow-sm">{language.key === 'ar' ? 'الصادر' : 'Outflow'}</p>
                 <p className="text-base md:text-lg font-black text-red-400 truncate drop-shadow-sm">{new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(totalExpenses)}</p>
               </div>
             </div>
