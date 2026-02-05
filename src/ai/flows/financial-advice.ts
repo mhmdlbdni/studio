@@ -6,7 +6,8 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'zod';
+import { z } from 'genkit';
+import { gemini15Flash } from '@genkit-ai/google-genai';
 
 // تعريف هيكل البيانات المدخلة للمرشد
 const FinancialAdviceInputSchema = z.object({
@@ -72,7 +73,7 @@ const navigateToTool = ai.defineTool({
 const financialAdvicePrompt = ai.definePrompt({
     name: 'financialAdvicePrompt',
     input: { schema: FinancialAdviceInputSchema },
-    model: 'googleai/gemini-1.5-flash',
+    model: gemini15Flash,
     tools: [addIncomeTool, addExpenseTool, navigateToTool],
     prompt: `أنت "مرشد الموازين"، خبير مالي ذكي. مهمتك هي تحليل البيانات المالية للمستخدم وتقديم نصائح عملية.
 
@@ -111,7 +112,7 @@ export async function getFinancialAdvice(input: FinancialAdviceInput) {
     } catch (e) {
         console.error("AI Flow Error:", e);
         return {
-            text: "عذراً، واجهت مشكلة في معالجة طلبك حالياً. يرجى التأكد من اتصالك بالإنترنت وصلاحية مفتاح الخدمة في ملف .env",
+            text: "عذراً، واجهت مشكلة في معالجة طلبك حالياً. يرجى التأكد من إضافة مفتاح GOOGLE_GENAI_API_KEY صالح في ملف .env وإعادة تشغيل التطبيق.",
         };
     }
 }

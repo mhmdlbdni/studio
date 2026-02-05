@@ -1,15 +1,11 @@
-// src/ai/flows/financial-balance.ts
 'use server';
 /**
  * @fileOverview A flow for providing financial advice and suggestions for better financial balance.
- *
- * - getFinancialBalanceAdvice - A function that takes user's financial data and returns advice.
- * - FinancialBalanceInput - The input type for the getFinancialBalanceAdvice function.
- * - FinancialBalanceOutput - The return type for the getFinancialBalanceAdvice function.
  */
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import { gemini15Flash } from '@genkit-ai/google-genai';
 
 const FinancialBalanceInputSchema = z.object({
   income: z.number().describe('Total monthly income.'),
@@ -31,6 +27,7 @@ const prompt = ai.definePrompt({
   name: 'financialBalancePrompt',
   input: {schema: FinancialBalanceInputSchema},
   output: {schema: FinancialBalanceOutputSchema},
+  model: gemini15Flash,
   prompt: `You are a financial advisor. Analyze the user's financial situation and provide advice on how to achieve a better financial balance.
 
   Here is the user's monthly income: {{income}}
