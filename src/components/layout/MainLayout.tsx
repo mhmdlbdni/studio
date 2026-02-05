@@ -36,26 +36,26 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
   
   return (
     <div className="flex min-h-screen w-full flex-col bg-background text-foreground overflow-x-hidden">
-      <header className="sticky top-0 z-20 border-b bg-background/60 backdrop-blur-xl">
-        <div className="mx-auto flex h-16 max-w-screen-md items-center justify-between px-5 md:px-6">
-          <div className="flex items-center gap-3">
+      <header className="sticky top-0 z-20 border-b bg-background/70 backdrop-blur-2xl">
+        <div className="mx-auto flex h-16 md:h-20 max-w-screen-md items-center justify-between px-5 md:px-8">
+          <div className="flex items-center gap-3 md:gap-4">
             {!isDashboard ? (
-              <Button variant="ghost" size="icon" onClick={() => router.back()} className="h-9 w-9 rounded-xl hover:bg-secondary">
-                {language.dir === 'rtl' ? <ArrowRight className="h-5 w-5" /> : <ArrowLeft className="h-5 w-5" />}
+              <Button variant="ghost" size="icon" onClick={() => router.back()} className="h-10 w-10 md:h-12 md:w-12 rounded-[1rem] md:rounded-2xl hover:bg-secondary active:scale-90 transition-all">
+                {language.dir === 'rtl' ? <ArrowRight className="h-5 w-5 md:h-6 md:w-6" /> : <ArrowLeft className="h-5 w-5 md:h-6 md:w-6" />}
                 <span className="sr-only">{language.key === 'ar' ? 'العودة' : 'Back'}</span>
               </Button>
             ) : null}
-            <h1 className="font-headline text-lg md:text-xl font-black tracking-tight truncate max-w-[180px] md:max-w-none">
+            <h1 className="font-headline text-lg md:text-2xl font-black tracking-tight truncate max-w-[160px] xs:max-w-[220px] md:max-w-none">
               {getTitle()}
             </h1>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 md:gap-3">
             <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
             {isDashboard && (
-              <Button variant="ghost" size="icon" asChild className="h-9 w-9 rounded-xl">
+              <Button variant="ghost" size="icon" asChild className="h-10 w-10 md:h-12 md:w-12 rounded-[1rem] md:rounded-2xl active:scale-90 transition-all">
                 <Link href="/settings">
-                  <Settings className="h-5 w-5" />
+                  <Settings className="h-5 w-5 md:h-6 md:w-6" />
                   <span className="sr-only">{language.key === 'ar' ? 'الإعدادات' : 'Settings'}</span>
                 </Link>
               </Button>
@@ -64,7 +64,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
         </div>
       </header>
       <main className="w-full flex-1">
-        <div className="mx-auto max-w-screen-md p-5 md:p-6">
+        <div className="mx-auto max-w-screen-md p-4 md:p-8">
             {children}
         </div>
       </main>
