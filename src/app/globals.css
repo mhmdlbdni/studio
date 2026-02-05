@@ -71,12 +71,35 @@ body {
   100% { transform: translateX(-50%) translateZ(0) scaleY(1); }
 }
 
+@keyframes shake-vibration {
+  0%, 100% { transform: translate(0, 0); }
+  25% { transform: translate(-1px, 1px); }
+  50% { transform: translate(1px, -1px); }
+  75% { transform: translate(-1px, -1px); }
+}
+
+@keyframes tri-color-flow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
 .liquid-wave {
   animation: wave 4s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite;
 }
 
 .liquid-wave-slow {
   animation: wave 7s cubic-bezier(0.36, 0.45, 0.63, 0.53) -2s infinite;
+}
+
+.animate-shake-bottle {
+  animation: shake-vibration 0.15s ease-in-out infinite;
+}
+
+.liquid-tri-color {
+  background: linear-gradient(270deg, #22c55e, #ef4444, #ffffff, #22c55e);
+  background-size: 400% 400%;
+  animation: tri-color-flow 8s ease infinite;
 }
 
 /* Custom Utilities for Liquid Effect */

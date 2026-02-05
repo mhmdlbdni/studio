@@ -45,24 +45,24 @@ export default function DashboardPage() {
   return (
     <div className="space-y-8">
        <Card className="overflow-hidden border-none shadow-2xl bg-card relative min-h-[220px] flex flex-col justify-center">
-            {/* Full Background Liquid Visualization */}
-            <div className="absolute inset-0 pointer-events-none overflow-hidden">
+            {/* Full Background Vibrating Liquid Visualization */}
+            <div className="absolute inset-0 pointer-events-none overflow-hidden animate-shake-bottle">
                 <div 
-                  className="absolute bottom-0 left-0 right-0 bg-primary/20 transition-all duration-1000 ease-in-out"
+                  className="absolute bottom-0 left-0 right-0 liquid-tri-color opacity-30 transition-all duration-1000 ease-in-out"
                   style={{ height: `${Math.max(15, balanceRatio)}%` }}
                 >
-                  <div className="absolute -top-16 left-0 w-[400%] h-32 bg-primary/10 liquid-wave opacity-50" />
-                  <div className="absolute -top-16 left-0 w-[400%] h-32 bg-primary/5 liquid-wave-slow opacity-30" />
+                  <div className="absolute -top-16 left-0 w-[400%] h-32 bg-white/20 liquid-wave opacity-50" />
+                  <div className="absolute -top-16 left-0 w-[400%] h-32 bg-white/10 liquid-wave-slow opacity-30" />
                 </div>
                 {/* Glow effect at the bottom */}
-                <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-primary/10 to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-white/10 to-transparent" />
             </div>
 
             <CardHeader className="pb-2 relative z-10">
                 <div className="flex items-center justify-between">
                     <CardTitle className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80">{t.netBalance}</CardTitle>
                     <Link href="/transactions">
-                      <div className="p-2 rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-white transition-all backdrop-blur-md">
+                      <div className="p-2 rounded-full bg-white/10 text-primary hover:bg-primary hover:text-white transition-all backdrop-blur-md">
                         <Wallet className="h-4 w-4" />
                       </div>
                     </Link>
@@ -70,7 +70,7 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent className="relative z-10">
                 <div className="flex flex-col gap-2">
-                    <div className="text-5xl font-black tracking-tighter drop-shadow-sm">
+                    <div className="text-5xl font-black tracking-tighter drop-shadow-md text-foreground">
                         {new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(netBalance)}
                     </div>
                     <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground uppercase tracking-widest">
