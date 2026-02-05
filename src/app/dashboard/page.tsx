@@ -22,7 +22,7 @@ export default function DashboardPage({ searchParams }: { searchParams: Promise<
   const [reorderingId, setReorderingId] = useState<string | null>(null);
   const longPressTimer = useRef<NodeJS.Timeout | null>(null);
   
-  // Unwrap searchParams to satisfy Next.js 15
+  // Next.js 15 compatibility: Unwrap searchParams if needed, though we don't use it directly here
   const _resolvedSearchParams = use(searchParams);
 
   const currency = user?.currency || 'YER';
@@ -75,6 +75,7 @@ export default function DashboardPage({ searchParams }: { searchParams: Promise<
   };
 
   const formatCurrency = (amount: number) => {
+    // Force English numerals for deployment readiness
     return new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(amount);
   };
 
@@ -119,7 +120,7 @@ export default function DashboardPage({ searchParams }: { searchParams: Promise<
               <div className="px-4 py-1.5 rounded-full bg-primary/25 border border-primary/40 backdrop-blur-md shadow-2xl">
                 <p className="text-[10px] md:text-[13px] font-black text-foreground dark:text-white uppercase tracking-wider flex items-center gap-2">
                   <Coins className="h-3.5 w-3.5 fill-primary text-primary" />
-                  {Math.round(balanceRatio)}% {language.key === 'ar' ? 'طاقة الرصيد' : 'Balance Energy'}
+                  <span className="tabular-nums">{Math.round(balanceRatio)}%</span> {language.key === 'ar' ? 'طاقة الرصيد' : 'Balance Energy'}
                 </p>
               </div>
             </div>
@@ -132,7 +133,7 @@ export default function DashboardPage({ searchParams }: { searchParams: Promise<
               </div>
               <div className="min-w-0">
                 <p className="text-[8px] md:text-[10px] text-muted-foreground dark:text-slate-200 font-black uppercase tracking-widest truncate">{language.key === 'ar' ? 'الوارد' : 'Inflow'}</p>
-                <p className="text-sm md:text-xl font-black text-green-500 truncate">{formatCurrency(totalIncome)}</p>
+                <p className="text-sm md:text-xl font-black text-green-500 truncate tabular-nums">{formatCurrency(totalIncome)}</p>
               </div>
             </div>
             <div className="group relative overflow-hidden flex items-center gap-3 p-3.5 md:p-5 rounded-[2rem] bg-secondary/30 dark:bg-white/10 border border-border dark:border-white/10 backdrop-blur-3xl shadow-2xl transition-transform hover:scale-[1.02]">
@@ -141,7 +142,7 @@ export default function DashboardPage({ searchParams }: { searchParams: Promise<
               </div>
               <div className="min-w-0">
                 <p className="text-[8px] md:text-[10px] text-muted-foreground dark:text-slate-200 font-black uppercase tracking-widest truncate">{language.key === 'ar' ? 'الصادر' : 'Outflow'}</p>
-                <p className="text-sm md:text-xl font-black text-red-500 truncate">{formatCurrency(totalExpenses)}</p>
+                <p className="text-sm md:text-xl font-black text-red-500 truncate tabular-nums">{formatCurrency(totalExpenses)}</p>
               </div>
             </div>
           </div>
@@ -227,7 +228,7 @@ export default function DashboardPage({ searchParams }: { searchParams: Promise<
                           </div>
                           <div>
                             <p className="font-black text-lg md:text-2xl tracking-tight text-foreground leading-none">{pot.name[language.key]}</p>
-                            <p className="text-[9px] md:text-[11px] font-black text-muted-foreground uppercase tracking-[0.2em] mt-2">{pot.percentage}% {language.key === 'ar' ? 'تخصيص' : 'Allocated'}</p>
+                            <p className="text-[9px] md:text-[11px] font-black text-muted-foreground uppercase tracking-[0.2em] mt-2 tabular-nums">{pot.percentage}% {language.key === 'ar' ? 'تخصيص' : 'Allocated'}</p>
                           </div>
                         </div>
                         <div className="text-right">

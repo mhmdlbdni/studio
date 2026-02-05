@@ -1,4 +1,3 @@
-
 'use client';
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -117,6 +116,8 @@ export function ChatInterface({ requestOpenIncomeDialog, requestOpenExpenseDialo
       
       if (response && response.text) {
         setMessages(prev => [...prev, { sender: 'ai', text: response.text }]);
+      } else if (!response.success) {
+         setMessages(prev => [...prev, { sender: 'ai', text: language.key === 'ar' ? 'حدث خطأ في الاتصال بالمرشد. يرجى التأكد من استقرار الإنترنت.' : 'Connection error with the guide. Please check your internet.' }]);
       }
 
       if (response && response.toolRequests && response.toolRequests.length > 0) {
@@ -145,9 +146,14 @@ export function ChatInterface({ requestOpenIncomeDialog, requestOpenExpenseDialo
         }
       }
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("ChatInterface Error:", error);
-      setMessages(prev => [...prev, { sender: 'ai', text: language.key === 'ar' ? 'عذراً، حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.' : 'Sorry, an unexpected error occurred. Please try again.' }]);
+      setMessages(prev => [...prev, { 
+        sender: 'ai', 
+        text: language.key === 'ar' 
+          ? 'عذراً، انقطع الاتصال بالمرشد الذكي. يرجى المحاولة مرة أخرى أو التأكد من إعدادات الـ API.' 
+          : 'Sorry, the connection was closed. Please try again or check your API settings.' 
+      }]);
     } finally {
       setIsLoading(false);
     }

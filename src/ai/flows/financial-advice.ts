@@ -1,12 +1,6 @@
 'use server';
 /**
  * @fileOverview مرشد مالي ذكي مطور ومدرب على فلسفة نظام "الموازين" (الأوعية الستة).
- * 
- * الميزات:
- * - تحليل عميق للنسب المالية بناءً على قواعد الموازين.
- * - تقديم نصائح مخصصة لتحسين التوازن المالي.
- * - دعم تسجيل العمليات والتنقل داخل التطبيق.
- * - الالتزام بالأرقام الإنجليزية (1, 2, 3) دائماً.
  */
 
 import { ai } from '@/ai/genkit';
@@ -120,21 +114,18 @@ const financialAdviceFlow = ai.defineFlow(
         toolRequests: response.toolRequests || [],
         success: true
       };
-    } catch (error) {
+    } catch (error: any) {
       console.error("Genkit Flow Error:", error);
-      throw error;
+      return {
+        text: "عذراً، واجهت مشكلة في الاتصال بالمرشد الذكي حالياً. يرجى المحاولة مرة أخرى لاحقاً.",
+        toolRequests: [],
+        success: false,
+        error: error.message
+      };
     }
   }
 );
 
 export async function getFinancialAdvice(input: FinancialAdviceInput) {
-    try {
-        return await financialAdviceFlow(input);
-    } catch (e) {
-        return {
-            text: "عذراً، واجهت مشكلة في الاتصال بالمرشد الذكي. يرجى التأكد من استقرار الإنترنت وتوفر صلاحيات الوصول للخدمة.",
-            toolRequests: [],
-            success: false
-        };
-    }
+    return await financialAdviceFlow(input);
 }
