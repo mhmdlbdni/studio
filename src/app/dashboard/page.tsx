@@ -48,7 +48,6 @@ export default function DashboardPage({ searchParams }: { searchParams: Promise<
     setPopoverOpen(false);
   }
 
-  // Long Press Handlers for Reordering
   const handleTouchStart = (id: string) => {
     if (reorderingId) return;
     longPressTimer.current = setTimeout(() => {
@@ -76,13 +75,12 @@ export default function DashboardPage({ searchParams }: { searchParams: Promise<
   };
 
   const formatCurrency = (amount: number) => {
-    // Force English (Latin) numerals by using 'en-US' locale
     return new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(amount);
   };
 
   return (
     <div className="space-y-5 pb-28 md:space-y-10 md:pb-20 px-0.5 select-none">
-      {/* Futuristic Hero Section - Theme Aware */}
+      {/* Hero Section */}
       <Card className="relative overflow-hidden border-none shadow-2xl bg-card dark:bg-black min-h-[220px] md:min-h-[300px] flex flex-col justify-center rounded-[2.8rem] md:rounded-[3.5rem] transition-all duration-500">
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           <div className="futuristic-card-glow opacity-40" />
@@ -91,9 +89,7 @@ export default function DashboardPage({ searchParams }: { searchParams: Promise<
             style={{ height: `${Math.max(15, balanceRatio)}%`, opacity: 0.7 }}
           >
             <div className="absolute -top-32 left-0 w-[400%] h-64 liquid-wave-futuristic opacity-30" />
-            <div className="absolute -top-32 left-0 w-[400%] h-64 liquid-wave-futuristic-slow opacity-20" />
           </div>
-          <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-primary/15 to-transparent" />
         </div>
 
         <CardHeader className="pb-1 relative z-10 pt-5 md:pt-8 px-6 md:px-10">
@@ -107,7 +103,7 @@ export default function DashboardPage({ searchParams }: { searchParams: Promise<
               </CardTitle>
             </div>
             <Link href="/transactions">
-              <div className="p-3.5 rounded-2xl bg-secondary/50 dark:bg-white/10 border border-border dark:border-white/20 text-foreground dark:text-white hover:bg-primary hover:text-white transition-all backdrop-blur-3xl active:scale-90 shadow-2xl">
+              <div className="p-3 rounded-2xl bg-secondary/50 dark:bg-white/10 border border-border dark:border-white/20 text-foreground dark:text-white hover:bg-primary transition-all backdrop-blur-3xl active:scale-90 shadow-2xl">
                 <Wallet className="h-5 w-5" />
               </div>
             </Link>
@@ -152,14 +148,14 @@ export default function DashboardPage({ searchParams }: { searchParams: Promise<
         </CardContent>
       </Card>
 
-      {/* Financial Pots Section */}
-      <div className="space-y-5 md:space-y-8 mt-4 md:mt-8">
+      {/* Pots List */}
+      <div className="space-y-5 mt-4 md:mt-8">
         <div className="flex items-center justify-between px-5">
           <div className="flex flex-col">
-            <h2 className={cn("font-headline text-xl md:text-3xl font-black tracking-tighter text-foreground drop-shadow-sm", language.dir === 'rtl' ? 'text-right' : 'text-left')}>
+            <h2 className={cn("font-headline text-xl md:text-3xl font-black tracking-tighter text-foreground", language.dir === 'rtl' ? 'text-right' : 'text-left')}>
               {t.financialPots}
             </h2>
-            <div className="h-1.5 w-10 bg-primary mt-1 rounded-full shadow-lg" />
+            <div className="h-1 w-8 bg-primary mt-1 rounded-full shadow-lg" />
           </div>
           {reorderingId && (
             <Button 
@@ -178,7 +174,7 @@ export default function DashboardPage({ searchParams }: { searchParams: Promise<
           {potDetails.map((pot, index) => {
             const PotIcon = pot.icon;
             const totalAllocated = totalIncome * (pot.percentage / 100);
-            const remainingBalance = getPotBalance(pot.id);
+            const remainingBalance = pot.balance;
             const liquidLevel = totalAllocated > 0 ? (remainingBalance / totalAllocated) * 100 : 0;
             const safeLevel = Math.max(0, Math.min(liquidLevel, 100));
             const isTarget = reorderingId === pot.id;
@@ -195,12 +191,11 @@ export default function DashboardPage({ searchParams }: { searchParams: Promise<
                 onTouchStart={() => handleTouchStart(pot.id)}
                 onTouchEnd={handleTouchEnd}
               >
-                {/* Reorder Controls Overlay */}
                 {isTarget && (
                   <div className="absolute -right-2 top-1/2 -translate-y-1/2 z-30 flex flex-col gap-2">
                     <Button 
                       size="icon" 
-                      className="rounded-full w-10 h-10 bg-white/20 backdrop-blur-3xl border border-white/30 text-white shadow-2xl active:scale-90"
+                      className="rounded-full w-10 h-10 bg-white/20 backdrop-blur-3xl border border-white/30 text-white shadow-2xl"
                       onClick={(e) => { e.preventDefault(); movePot(pot.id, 'up'); }}
                       disabled={index === 0}
                     >
@@ -208,7 +203,7 @@ export default function DashboardPage({ searchParams }: { searchParams: Promise<
                     </Button>
                     <Button 
                       size="icon" 
-                      className="rounded-full w-10 h-10 bg-white/20 backdrop-blur-3xl border border-white/30 text-white shadow-2xl active:scale-90"
+                      className="rounded-full w-10 h-10 bg-white/20 backdrop-blur-3xl border border-white/30 text-white shadow-2xl"
                       onClick={(e) => { e.preventDefault(); movePot(pot.id, 'down'); }}
                       disabled={index === pots.length - 1}
                     >
@@ -217,10 +212,10 @@ export default function DashboardPage({ searchParams }: { searchParams: Promise<
                   </div>
                 )}
 
-                <Link href={reorderingId ? "#" : `/pots/${pot.id}`} className={cn("block w-full", reorderingId && "cursor-default")}>
+                <Link href={reorderingId ? "#" : `/pots/${pot.id}`} className="block w-full">
                   <Card className={cn(
-                    "group relative overflow-hidden bg-card/60 backdrop-blur-3xl rounded-[2.5rem] border-white/10 transition-all duration-300 shadow-2xl",
-                    isTarget ? "border-primary/50 bg-primary/5" : "hover:border-primary/50 active:scale-[0.97]"
+                    "group relative overflow-hidden bg-card/60 backdrop-blur-3xl rounded-[2.5rem] border-white/10 transition-all duration-300",
+                    isTarget ? "border-primary/50" : "hover:border-primary/50 active:scale-[0.98]"
                   )}>
                     <CardContent className="p-5 md:p-8 flex flex-col gap-5">
                       <div className="flex items-center justify-between w-full">
@@ -229,7 +224,6 @@ export default function DashboardPage({ searchParams }: { searchParams: Promise<
                             <div className="p-4 rounded-[1.8rem] bg-secondary/60 group-hover:bg-primary/20 transition-all duration-500 shadow-inner">
                               <PotIcon className="h-6 w-6 md:h-8 md:w-8" style={{ color: pot.color }}/>
                             </div>
-                            <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full border-2 border-background" style={{ backgroundColor: pot.color }} />
                           </div>
                           <div>
                             <p className="font-black text-lg md:text-2xl tracking-tight text-foreground leading-none">{pot.name[language.key]}</p>
@@ -240,22 +234,18 @@ export default function DashboardPage({ searchParams }: { searchParams: Promise<
                           <p className="text-xl md:text-3xl font-black tabular-nums" style={{ color: pot.color }}>
                             {formatCurrency(pot.balance)}
                           </p>
-                          <p className="text-[8px] md:text-[9px] text-muted-foreground font-black uppercase tracking-widest mt-1">{language.key === 'ar' ? 'المتاح حالياً' : 'Available Now'}</p>
                         </div>
                       </div>
 
-                      <div className="relative w-full h-3.5 rounded-full bg-black/20 border border-white/5 overflow-hidden shadow-inner">
+                      <div className="relative w-full h-3 rounded-full bg-black/20 border border-white/5 overflow-hidden">
                         <div 
                           className="absolute bottom-0 left-0 top-0 transition-all duration-1000 ease-in-out"
                           style={{ 
                             width: `${safeLevel}%`, 
                             backgroundColor: pot.color,
-                            boxShadow: `0 0 25px ${pot.color}80`
+                            boxShadow: `0 0 20px ${pot.color}80`
                           }}
-                        >
-                          <div className="absolute inset-0 bg-gradient-to-r from-white/30 to-transparent" />
-                          <div className="absolute top-0 right-0 bottom-0 w-[300%] liquid-wave-futuristic opacity-40" />
-                        </div>
+                        />
                       </div>
                     </CardContent>
                   </Card>
@@ -266,40 +256,38 @@ export default function DashboardPage({ searchParams }: { searchParams: Promise<
         </div>
       </div>
 
-      {/* Floating Action Buttons */}
+      {/* Floating Buttons */}
       <div className={cn(
-        "fixed bottom-10 z-30 flex flex-col gap-6",
+        "fixed bottom-8 z-30 flex flex-col gap-5",
         language.dir === 'rtl' ? 'left-6' : 'right-6'
       )}>
         <Button
           variant="outline"
-          className="h-14 w-14 md:h-16 md:w-16 rounded-[1.6rem] bg-card/90 backdrop-blur-3xl border-primary/40 shadow-[0_10px_40px_rgba(0,0,0,0.4)] active:scale-90 transition-all group overflow-hidden"
+          className="h-14 w-14 rounded-[1.4rem] bg-card/90 backdrop-blur-3xl border-primary/40 shadow-2xl active:scale-90 transition-all group overflow-hidden"
           size="icon"
           onClick={() => setChatOpen(true)}
         >
-          <Bot className="h-7 w-7 md:h-8 md:w-8 text-primary group-hover:scale-110 transition-transform" />
-          <div className="absolute inset-0 bg-primary/5 group-hover:bg-primary/10 transition-colors" />
+          <Bot className="h-7 w-7 text-primary group-hover:scale-110 transition-transform" />
           <span className="sr-only">{t.guide}</span>
         </Button>
         
         <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
           <PopoverTrigger asChild>
             <Button
-              className="h-16 w-16 md:h-16 md:w-16 rounded-[1.8rem] shadow-[0_15px_50px_rgba(var(--primary),0.5)] active:scale-95 bg-primary hover:bg-primary/90 transition-all group relative overflow-hidden"
+              className="h-16 w-16 rounded-[1.6rem] shadow-primary/40 active:scale-95 bg-primary hover:bg-primary/90 transition-all group relative overflow-hidden"
               size="icon"
             >
-              <Plus className="h-8 w-8 md:h-10 md:w-10 text-white group-hover:rotate-90 transition-transform duration-500" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent pointer-events-none" />
+              <Plus className="h-8 w-8 text-white group-hover:rotate-90 transition-transform duration-500" />
               <span className="sr-only">{t.addTransaction}</span>
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-auto p-0 border-none bg-transparent shadow-none" side="top" align={language.dir === 'rtl' ? 'start' : 'end'} sideOffset={20}>
-            <div className="flex flex-col items-end gap-4 p-2">
-              <Button onClick={openIncomeDialog} className="rounded-[1.5rem] bg-green-500 text-white hover:bg-green-600 h-12 px-5 shadow-[0_10px_30px_rgba(34,197,94,0.3)] border-none font-black text-sm transition-all hover:-translate-y-1 active:scale-95">
+          <PopoverContent className="w-auto p-0 border-none bg-transparent shadow-none" side="top" align={language.dir === 'rtl' ? 'start' : 'end'} sideOffset={15}>
+            <div className="flex flex-col items-end gap-3 p-2">
+              <Button onClick={openIncomeDialog} className="rounded-[1.2rem] bg-green-500 text-white hover:bg-green-600 h-11 px-5 shadow-lg border-none font-black text-xs">
                 <Plus className={cn("h-4 w-4", language.dir === 'rtl' ? 'ml-1.5' : 'mr-1.5')} />
                 {t.addIncome}
               </Button>
-              <Button onClick={openExpenseDialog} className="rounded-[1.5rem] bg-destructive text-white hover:bg-destructive/90 h-12 px-5 shadow-[0_10px_30px_rgba(220,38,38,0.3)] border-none font-black text-sm transition-all hover:-translate-y-1 active:scale-95">
+              <Button onClick={openExpenseDialog} className="rounded-[1.2rem] bg-destructive text-white hover:bg-destructive/90 h-11 px-5 shadow-lg border-none font-black text-xs">
                 <span className={cn("font-black text-lg", language.dir === 'rtl' ? 'ml-1.5' : 'mr-1.5')}>−</span>
                 {t.addExpense}
               </Button>
@@ -308,16 +296,8 @@ export default function DashboardPage({ searchParams }: { searchParams: Promise<
         </Popover>
       </div>
 
-      <AddTransactionDialog 
-        open={isIncomeDialogOpen} 
-        onOpenChange={setIncomeDialogOpen}
-        type="income"
-      />
-      <AddTransactionDialog 
-        open={isExpenseDialogOpen} 
-        onOpenChange={setExpenseDialogOpen}
-        type="expense"
-      />
+      <AddTransactionDialog open={isIncomeDialogOpen} onOpenChange={setIncomeDialogOpen} type="income" />
+      <AddTransactionDialog open={isExpenseDialogOpen} onOpenChange={setExpenseDialogOpen} type="expense" />
 
       <Dialog open={isChatOpen} onOpenChange={setChatOpen}>
         <DialogContent className="p-0 bg-transparent border-none shadow-none sm:max-w-xl w-[98vw] mx-auto overflow-hidden rounded-[2.8rem]">

@@ -34,10 +34,7 @@ const addDynamicPotData = (pots: Omit<Pot, 'icon'>[]): Pot[] => {
 
 const getDefaultPots = () => addDynamicPotData(DEFAULT_POTS.map(p => ({
     ...p,
-    name: {
-        ar: p.name.ar,
-        en: p.name.en,
-    }
+    name: { ar: p.name.ar, en: p.name.en }
 })));
 
 export const AppContextProvider = ({ children }: { children: ReactNode }) => {
@@ -56,15 +53,10 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
       const storedTheme = localStorage.getItem('al-mawazin-theme') as 'light' | 'dark' | null;
       const storedLanguage = localStorage.getItem('al-mawazin-language') as LanguageKey | null;
 
-      if (storedUser) {
-        const parsedUser = JSON.parse(storedUser);
-        if (!parsedUser.currency) parsedUser.currency = 'YER';
-        setUserState(parsedUser);
-      }
+      if (storedUser) setUserState(JSON.parse(storedUser));
       
       if (storedPots) {
-        const parsedPots = JSON.parse(storedPots);
-        setPots(addDynamicPotData(parsedPots));
+        setPots(addDynamicPotData(JSON.parse(storedPots)));
       } else {
         setPots(getDefaultPots());
       }
@@ -74,8 +66,6 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
       if (storedTheme) {
         setTheme(storedTheme);
         document.documentElement.classList.toggle('dark', storedTheme === 'dark');
-      } else {
-        document.documentElement.classList.add('dark');
       }
 
       const effectiveLanguageKey = storedLanguage || 'ar';
@@ -83,17 +73,13 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
       setLanguageState(langPack);
       document.documentElement.lang = langPack.key;
       document.documentElement.dir = langPack.dir;
-
     }
   }, [isMounted]);
 
   const setUser = useCallback((newUser: User | null) => {
     setUserState(newUser);
-    if (newUser) {
-      localStorage.setItem('al-mawazin-user', JSON.stringify(newUser));
-    } else {
-      localStorage.removeItem('al-mawazin-user');
-    }
+    if (newUser) localStorage.setItem('al-mawazin-user', JSON.stringify(newUser));
+    else localStorage.removeItem('al-mawazin-user');
   }, []);
   
   const updatePots = useCallback((updatedPots: Omit<Pot, 'icon'>[]) => {
@@ -104,7 +90,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
   const addTransaction = useCallback((transaction: Omit<Transaction, 'id' | 'date'>) => {
     const newTransaction: Transaction = {
       ...transaction,
-      id: new Date().toISOString() + Math.random(),
+      id: Math.random().toString(36).substr(2, 9),
       date: new Date().toISOString(),
     };
     
@@ -134,8 +120,8 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
   const totalExpenses = useMemo(() => transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0), [transactions]);
 
   const toggleTheme = useCallback(() => {
-    setTheme(prevTheme => {
-      const newTheme = prevTheme === 'light' ? 'dark' : 'light';
+    setTheme(prev => {
+      const newTheme = prev === 'light' ? 'dark' : 'light';
       localStorage.setItem('al-mawazin-theme', newTheme);
       document.documentElement.classList.toggle('dark', newTheme === 'dark');
       return newTheme;
@@ -152,46 +138,27 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 
   const logout = useCallback(() => {
     localStorage.clear();
-
     setUserState(null);
     setPots(getDefaultPots());
     setTransactions([]);
-    
-    const defaultTheme = 'dark';
-    setTheme(defaultTheme);
-    document.documentElement.classList.toggle('dark', true);
+    setTheme('dark');
+    document.documentElement.classList.add('dark');
+    setLanguage('ar');
+  }, [setLanguage]);
 
-    const defaultLangKey = 'ar';
-    const langPack = getLanguagePack(defaultLangKey);
-    setLanguageState(langPack);
-    document.documentElement.lang = langPack.key;
-    document.documentElement.dir = langPack.dir;
-  }, []);
-
-  const value = {
-    user,
-    pots,
-    transactions,
-    theme,
-    language,
-    setUser,
-    addTransaction,
-    updatePots,
-    toggleTheme,
-    setLanguage,
-    getPotBalance,
-    totalIncome,
-    totalExpenses,
-    logout,
-  };
-
-  return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
+  return (
+    <AppContext.Provider value={{
+      user, pots, transactions, theme, language,
+      setUser, addTransaction, updatePots, toggleTheme,
+      setLanguage, getPotBalance, totalIncome, totalExpenses, logout
+    }}>
+      {children}
+    </AppContext.Provider>
+  );
 };
 
 export const useApp = () => {
   const context = useContext(AppContext);
-  if (context === undefined) {
-    throw new Error('useApp must be used within an AppProvider');
-  }
+  if (!context) throw new Error('useApp must be used within an AppProvider');
   return context;
 };

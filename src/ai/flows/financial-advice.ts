@@ -1,4 +1,3 @@
-
 'use server';
 /**
  * @fileOverview مرشد مالي ذكي مطور ومدرب على فلسفة نظام "الموازين" (الأوعية الستة).
@@ -13,7 +12,6 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 
-// تعريف هيكل البيانات المدخلة للمرشد
 const FinancialAdviceInputSchema = z.object({
   query: z.string().describe('استعلام المستخدم المالي.'),
   history: z.array(z.object({
@@ -42,7 +40,6 @@ const FinancialAdviceInputSchema = z.object({
 
 export type FinancialAdviceInput = z.infer<typeof FinancialAdviceInputSchema>;
 
-// تعريف الأدوات (Tools)
 const addIncomeTool = ai.defineTool({
     name: 'addIncome',
     description: 'تسجيل دخل جديد للمستخدم وتوزيعه على الأوعية.',
@@ -73,7 +70,6 @@ const navigateToTool = ai.defineTool({
     outputSchema: z.string(),
 }, async () => "جاري توجيهك إلى الصفحة المطلوبة.");
 
-// تعريف المطالبة (Prompt)
 const financialAdvicePrompt = ai.definePrompt({
     name: 'financialAdvicePrompt',
     input: { schema: FinancialAdviceInputSchema },
@@ -104,14 +100,13 @@ const financialAdvicePrompt = ai.definePrompt({
 {{/each}}
 
 **قواعد الرد الصارمة:**
-- استخدم الأرقام الإنجليزية (1, 2, 3...) دائماً في كل ردودك.
+- استخدم الأرقام الإنجليزية (1, 2, 3...) دائماً في كل ردودك المالية والرياضية.
 - كن ودوداً، مختصراً، وعملياً باللغة العربية.
 - إذا طلب المستخدم تسجيل دخل أو مصروف، استخدم الأدوات المناسبة.
 
 سؤال المستخدم الحالي: {{{query}}}`,
 });
 
-// تعريف التدفق (Flow) لضمان استقرار الاستجابة
 const financialAdviceFlow = ai.defineFlow(
   {
     name: 'financialAdviceFlow',
@@ -126,7 +121,7 @@ const financialAdviceFlow = ai.defineFlow(
         success: true
       };
     } catch (error) {
-      console.error("Genkit Flow Inner Error:", error);
+      console.error("Genkit Flow Error:", error);
       throw error;
     }
   }
@@ -136,9 +131,8 @@ export async function getFinancialAdvice(input: FinancialAdviceInput) {
     try {
         return await financialAdviceFlow(input);
     } catch (e) {
-        console.error("AI Server Action Error:", e);
         return {
-            text: "عذراً، واجهت مشكلة في معالجة طلبك حالياً. يرجى التأكد من استقرار الإنترنت وصلاحية مفتاح الخدمة.",
+            text: "عذراً، واجهت مشكلة في الاتصال بالمرشد الذكي. يرجى التأكد من استقرار الإنترنت وتوفر صلاحيات الوصول للخدمة.",
             toolRequests: [],
             success: false
         };
