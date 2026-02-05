@@ -8,11 +8,18 @@ import { ArrowLeft, ArrowUp, ArrowDown, Wallet, History, TrendingUp, TrendingDow
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
-export default function PotDetailPage(props: { params: Promise<{ potId: string }> }) {
+interface PotPageProps {
+  params: Promise<{ potId: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}
+
+export default function PotDetailPage({ params, searchParams }: PotPageProps) {
   const router = useRouter();
-  // Unwrap params using React.use() as required by Next.js 15
-  const params = use(props.params);
-  const potId = params.potId;
+  
+  // Unwrap params and searchParams using React.use() as required by Next.js 15
+  const resolvedParams = use(params);
+  const _resolvedSearchParams = use(searchParams);
+  const potId = resolvedParams.potId;
   
   const { pots, transactions, getPotBalance, user, language, totalIncome } = useApp();
   const currency = user?.currency || 'YER';

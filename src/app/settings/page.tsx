@@ -1,7 +1,6 @@
-
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,10 +11,13 @@ import { CURRENCIES, LanguageKey } from '@/lib/constants';
 import { ChevronLeft, Palette, SlidersHorizontal, LogOut, Info, Loader2, Globe, Coins } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-export default function SettingsPage() {
+export default function SettingsPage({ searchParams }: { searchParams: Promise<any> }) {
   const router = useRouter();
   const { user, setUser, language, setLanguage, logout } = useApp();
   const [mounted, setMounted] = useState(false);
+  
+  // Unwrap searchParams to satisfy Next.js 15
+  const _resolvedSearchParams = use(searchParams);
 
   useEffect(() => {
     setMounted(true);

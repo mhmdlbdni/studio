@@ -1,9 +1,9 @@
 'use client';
 
-import { useMemo, useState, useRef, useEffect } from 'react';
+import { useMemo, useState, useRef, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Plus, Bot, Wallet, TrendingUp, TrendingDown, Droplets, CircleDollarSign, Coins, ChevronUp, ChevronDown, Check } from 'lucide-react';
+import { Plus, Bot, Wallet, TrendingUp, TrendingDown, CircleDollarSign, Coins, ChevronUp, ChevronDown, Check } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,7 +13,7 @@ import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { ChatInterface } from '@/components/ai/ChatInterface';
 import { cn } from '@/lib/utils';
 
-export default function DashboardPage() {
+export default function DashboardPage({ searchParams }: { searchParams: Promise<any> }) {
   const { pots, user, getPotBalance, totalIncome, totalExpenses, language, updatePots } = useApp();
   const [isIncomeDialogOpen, setIncomeDialogOpen] = useState(false);
   const [isExpenseDialogOpen, setExpenseDialogOpen] = useState(false);
@@ -22,6 +22,9 @@ export default function DashboardPage() {
   const [reorderingId, setReorderingId] = useState<string | null>(null);
   const longPressTimer = useRef<NodeJS.Timeout | null>(null);
   
+  // Unwrap searchParams to satisfy Next.js 15
+  const _resolvedSearchParams = use(searchParams);
+
   const currency = user?.currency || 'YER';
   const t = language.translations.dashboard;
   const locale = language.code;
@@ -292,12 +295,12 @@ export default function DashboardPage() {
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0 border-none bg-transparent shadow-none" side="top" align={language.dir === 'rtl' ? 'start' : 'end'} sideOffset={20}>
             <div className="flex flex-col items-end gap-4 p-2">
-              <Button onClick={openIncomeDialog} className="rounded-[1.8rem] bg-green-500 text-white hover:bg-green-600 h-14 px-7 shadow-[0_10px_40px_rgba(34,197,94,0.4)] border-none font-black text-base transition-all hover:-translate-y-1.5 active:scale-95">
-                <Plus className={cn("h-5 w-5", language.dir === 'rtl' ? 'ml-2' : 'mr-2')} />
+              <Button onClick={openIncomeDialog} className="rounded-[1.5rem] bg-green-500 text-white hover:bg-green-600 h-12 px-5 shadow-[0_10px_30px_rgba(34,197,94,0.3)] border-none font-black text-sm transition-all hover:-translate-y-1 active:scale-95">
+                <Plus className={cn("h-4 w-4", language.dir === 'rtl' ? 'ml-1.5' : 'mr-1.5')} />
                 {t.addIncome}
               </Button>
-              <Button onClick={openExpenseDialog} className="rounded-[1.8rem] bg-destructive text-white hover:bg-destructive/90 h-14 px-7 shadow-[0_10px_40px_rgba(220,38,38,0.4)] border-none font-black text-base transition-all hover:-translate-y-1.5 active:scale-95">
-                <span className={cn("font-black text-2xl", language.dir === 'rtl' ? 'ml-2' : 'mr-2')}>−</span>
+              <Button onClick={openExpenseDialog} className="rounded-[1.5rem] bg-destructive text-white hover:bg-destructive/90 h-12 px-5 shadow-[0_10px_30px_rgba(220,38,38,0.3)] border-none font-black text-sm transition-all hover:-translate-y-1 active:scale-95">
+                <span className={cn("font-black text-lg", language.dir === 'rtl' ? 'ml-1.5' : 'mr-1.5')}>−</span>
                 {t.addExpense}
               </Button>
             </div>
