@@ -34,7 +34,7 @@ const FinancialAdviceInputSchema = z.object({
     })).optional().describe("A list of the user's recent transactions. Use this to answer questions about spending details.")
   }),
 });
-type FinancialAdviceInput = z.infer<typeof FinancialAdviceInputSchema>;
+export type FinancialAdviceInput = z.infer<typeof FinancialAdviceInputSchema>;
 
 // Define tools for the AI to interact with the application
 const addIncomeTool = ai.defineTool({
