@@ -44,53 +44,43 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8">
-       <Card className="overflow-hidden border-none shadow-2xl bg-gradient-to-br from-card to-card/50 relative">
-            {/* Background Bottle Liquid Visualization */}
-            <div className="absolute inset-y-0 left-0 w-32 opacity-20 pointer-events-none">
-              <div className="h-full w-full relative overflow-hidden bg-secondary/20 rounded-r-3xl border-r border-white/10">
+       <Card className="overflow-hidden border-none shadow-2xl bg-card relative min-h-[220px] flex flex-col justify-center">
+            {/* Full Background Liquid Visualization */}
+            <div className="absolute inset-0 pointer-events-none overflow-hidden">
                 <div 
-                  className="absolute bottom-0 left-0 right-0 bg-primary/40 transition-all duration-1000 ease-in-out"
-                  style={{ height: `${Math.max(10, balanceRatio)}%` }}
+                  className="absolute bottom-0 left-0 right-0 bg-primary/20 transition-all duration-1000 ease-in-out"
+                  style={{ height: `${Math.max(15, balanceRatio)}%` }}
                 >
-                  <div className="absolute -top-10 left-0 w-[200%] h-20 bg-primary/30 liquid-wave opacity-50" />
-                  <div className="absolute -top-10 left-0 w-[200%] h-20 bg-primary/20 liquid-wave-slow opacity-30" />
+                  <div className="absolute -top-16 left-0 w-[400%] h-32 bg-primary/10 liquid-wave opacity-50" />
+                  <div className="absolute -top-16 left-0 w-[400%] h-32 bg-primary/5 liquid-wave-slow opacity-30" />
                 </div>
-              </div>
+                {/* Glow effect at the bottom */}
+                <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-primary/10 to-transparent" />
             </div>
 
             <CardHeader className="pb-2 relative z-10">
                 <div className="flex items-center justify-between">
-                    <CardTitle className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{t.netBalance}</CardTitle>
+                    <CardTitle className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80">{t.netBalance}</CardTitle>
                     <Link href="/transactions">
-                      <div className="p-2 rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-white transition-all">
+                      <div className="p-2 rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-white transition-all backdrop-blur-md">
                         <Wallet className="h-4 w-4" />
                       </div>
                     </Link>
                 </div>
             </CardHeader>
             <CardContent className="relative z-10">
-                <div className="flex items-center gap-6">
-                  <div className="flex-1">
-                    <div className="text-4xl font-black tracking-tighter">
+                <div className="flex flex-col gap-2">
+                    <div className="text-5xl font-black tracking-tighter drop-shadow-sm">
                         {new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(netBalance)}
                     </div>
-                  </div>
-                  
-                  {/* Creative Bottle Icon */}
-                  <div className="w-12 h-20 relative rounded-b-xl rounded-t-sm border-2 border-primary/30 bg-secondary/10 overflow-hidden shadow-inner flex items-end">
-                    <div 
-                      className="w-full bg-primary/60 transition-all duration-1000 ease-in-out relative"
-                      style={{ height: `${balanceRatio}%` }}
-                    >
-                      <div className="absolute -top-2 left-0 w-[400%] h-4 bg-primary/40 liquid-wave" />
+                    <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground uppercase tracking-widest">
+                      <Droplets className="h-3 w-3 text-primary animate-bounce" />
+                      {Math.round(balanceRatio)}% {language.key === 'ar' ? 'مستوى الامتلاء المالي' : 'Financial Fill Level'}
                     </div>
-                    {/* Bottle Neck Detail */}
-                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-4 h-2 bg-primary/20 rounded-t-sm" />
-                  </div>
                 </div>
 
-                <div className="mt-6 grid grid-cols-2 gap-4">
-                    <div className="flex items-center gap-3 p-3 rounded-2xl bg-green-500/5 border border-green-500/10">
+                <div className="mt-8 grid grid-cols-2 gap-4">
+                    <div className="flex items-center gap-3 p-3 rounded-2xl bg-green-500/10 border border-green-500/20 backdrop-blur-md">
                         <div className="p-2 rounded-xl bg-green-500/20 text-green-500">
                             <TrendingUp className="h-4 w-4" />
                         </div>
@@ -99,7 +89,7 @@ export default function DashboardPage() {
                             <p className="text-sm font-bold text-green-500">{new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(totalIncome)}</p>
                         </div>
                     </div>
-                    <div className="flex items-center gap-3 p-3 rounded-2xl bg-destructive/5 border border-destructive/10">
+                    <div className="flex items-center gap-3 p-3 rounded-2xl bg-destructive/10 border border-destructive/20 backdrop-blur-md">
                         <div className="p-2 rounded-xl bg-destructive/20 text-destructive">
                             <TrendingDown className="h-4 w-4" />
                         </div>
