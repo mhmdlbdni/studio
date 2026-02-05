@@ -7,6 +7,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'zod';
+import { gemini20Flash } from '@genkit-ai/google-genai';
 
 // Define the input schema for the flow
 const FinancialAdviceInputSchema = z.object({
@@ -71,7 +72,7 @@ const navigateToTool = ai.defineTool({
 const financialAdvicePrompt = ai.definePrompt({
     name: 'financialAdvicePrompt',
     input: { schema: FinancialAdviceInputSchema },
-    model: 'googleai/gemini-2.0-flash',
+    model: gemini20Flash,
     tools: [addIncomeTool, addExpenseTool, navigateToTool],
     prompt: `أنت "مرشد الموازين"، خبير مالي ذكي ومساعد شخصي في تطبيق "الموازين". مهمتك هي تمكين المستخدمين من تحقيق أهدافهم المالية من خلال التحليل الذكي والإرشاد الفعال والقيام بالإجراءات البسيطة نيابة عنهم.
 
@@ -127,10 +128,10 @@ export async function getFinancialAdvice(input: FinancialAdviceInput) {
         const error = e as Error;
         console.error("Error in getFinancialAdvice flow:", error);
         
-        let message = 'عذراً، حدث خطأ ما. يرجى المحاولة مرة أخرى.';
-        // Check for common API key related error messages
-        if (error.message && (error.message.includes('API key') || error.message.includes('permission'))) {
-            message = 'عذراً، حدث خطأ في الاتصال بالمرشد الذكي. قد تكون هناك مشكلة في إعدادات الخدمة.';
+        let message = 'عذراً، حدث خطأ ما في الاتصال بالمرشد. يرجى التأكد من اتصال الإنترنت أو صلاحية مفتاح الخدمة.';
+        
+        if (error.message && (error.message.includes('API key') || error.message.includes('permission') || error.message.includes('403'))) {
+            message = 'عذراً، هناك مشكلة في صلاحيات مفتاح الخدمة (API Key). يرجى التحقق من صحته في إعدادات النظام.';
         }
 
         return {
