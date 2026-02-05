@@ -7,7 +7,6 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'zod';
-import { gemini20Flash } from '@genkit-ai/google-genai';
 
 // Define the input schema for the flow
 const FinancialAdviceInputSchema = z.object({
@@ -72,7 +71,7 @@ const navigateToTool = ai.defineTool({
 const financialAdvicePrompt = ai.definePrompt({
     name: 'financialAdvicePrompt',
     input: { schema: FinancialAdviceInputSchema },
-    model: gemini20Flash,
+    model: 'googleai/gemini-2.0-flash',
     tools: [addIncomeTool, addExpenseTool, navigateToTool],
     prompt: `أنت "مرشد الموازين"، خبير مالي ذكي ومساعد شخصي في تطبيق "الموازين". مهمتك هي تمكين المستخدمين من تحقيق أهدافهم المالية من خلال التحليل الذكي والإرشاد الفعال والقيام بالإجراءات البسيطة نيابة عنهم.
 
