@@ -187,7 +187,7 @@ export default function DashboardPage() {
 
       {/* Optimized Floating Action Buttons - Mobile Ergonomic Position */}
       <div className={cn(
-        "fixed bottom-10 z-30 flex flex-col gap-5",
+        "fixed bottom-10 z-30 flex flex-col gap-6",
         language.dir === 'rtl' ? 'left-6' : 'right-6'
       )}>
         <Button
@@ -204,10 +204,10 @@ export default function DashboardPage() {
         <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
           <PopoverTrigger asChild>
             <Button
-              className="h-18 w-18 md:h-20 md:w-20 rounded-[1.8rem] shadow-[0_15px_50px_rgba(var(--primary),0.5)] active:scale-90 bg-primary hover:bg-primary/90 transition-all group relative overflow-hidden"
+              className="h-20 w-20 md:h-24 md:w-24 rounded-[2rem] shadow-[0_20px_60px_rgba(var(--primary),0.6)] active:scale-95 bg-primary hover:bg-primary/90 transition-all group relative overflow-hidden"
               size="icon"
             >
-              <Plus className="h-9 w-9 md:h-10 md:w-10 text-white group-hover:rotate-90 transition-transform duration-500" />
+              <Plus className="h-10 w-10 md:h-14 md:w-14 text-white group-hover:rotate-90 transition-transform duration-500" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent pointer-events-none" />
               <span className="sr-only">{t.addTransaction}</span>
             </Button>
