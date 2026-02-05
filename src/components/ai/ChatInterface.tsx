@@ -1,4 +1,3 @@
-
 'use client';
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -63,6 +62,7 @@ export function ChatInterface({ requestOpenIncomeDialog, requestOpenExpenseDialo
   const [isLoading, setIsLoading] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const locale = language.code;
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -78,6 +78,10 @@ export function ChatInterface({ requestOpenIncomeDialog, requestOpenExpenseDialo
     handleReset();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [language.key]);
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat(locale, { style: 'currency', currency: user?.currency || 'YER', minimumFractionDigits: 0 }).format(amount);
+  };
 
 
   const handleSend = async (query?: string) => {
@@ -133,7 +137,7 @@ export function ChatInterface({ requestOpenIncomeDialog, requestOpenExpenseDialo
             case 'addIncome': {
               const { description, amount } = toolRequest.input;
               addTransaction({ type: 'income', description, amount });
-              const formattedAmount = new Intl.NumberFormat('en-US', { style: 'currency', currency: user?.currency || 'YER', minimumFractionDigits: 0 }).format(amount);
+              const formattedAmount = formatCurrency(amount);
               confirmationMessage = { sender: 'ai', text: language.key === 'ar' ? `تم! لقد أضفت دخلاً بقيمة ${formattedAmount} بنجاح.` : `Done! I've successfully added an income of ${formattedAmount}.` };
               break;
             }
@@ -141,7 +145,7 @@ export function ChatInterface({ requestOpenIncomeDialog, requestOpenExpenseDialo
               const { description, amount, potId } = toolRequest.input;
               addTransaction({ type: 'expense', description, amount, potId });
               const potName = pots.find(p => p.id === potId)?.name[language.key] || '';
-              const formattedAmount = new Intl.NumberFormat('en-US', { style: 'currency', currency: user?.currency || 'YER', minimumFractionDigits: 0 }).format(amount);
+              const formattedAmount = formatCurrency(amount);
               confirmationMessage = { sender: 'ai', text: language.key === 'ar' ? `تمام! تم تسجيل مصروف بقيمة ${formattedAmount} من وعاء "${potName}".` : `Got it! An expense of ${formattedAmount} from the "${potName}" pot has been recorded.` };
               break;
             }

@@ -1,4 +1,3 @@
-
 'use client';
 import { useState, useMemo } from 'react';
 import { useApp } from '@/contexts/AppContext';
@@ -16,6 +15,7 @@ export default function TransactionsPage() {
   const { transactions, user, language, pots } = useApp();
   const [filter, setFilter] = useState<FilterType>('all');
   const currency = user?.currency || 'YER';
+  const locale = language.code;
 
   const potMap = useMemo(() => {
     const map = new Map<string, {name: {ar: string, en: string}}>();
@@ -69,8 +69,12 @@ export default function TransactionsPage() {
     );
   }, [filteredTransactions]);
 
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat(locale, { style: 'currency', currency, minimumFractionDigits: 0 }).format(amount);
+  };
+
   const t = language.translations.transactionsPage;
-  const dateLocale = 'en-US';
+  const dateLocale = language.key === 'ar' ? 'ar-SA' : 'en-US';
 
   const handleDownloadXLSX = () => {
     const isArabic = language.key === 'ar';
@@ -175,7 +179,7 @@ export default function TransactionsPage() {
                           <div className="flex items-center justify-end gap-1">
                              <span>
                                 {isExpense ? '-' : '+'}
-                                {new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(transaction.amount)}
+                                {formatCurrency(transaction.amount)}
                              </span>
                              {isExpense ? 
                                 <TrendingDown className="h-4 w-4" /> : 
@@ -197,13 +201,13 @@ export default function TransactionsPage() {
                 <TableRow className="bg-muted/50 font-medium">
                   <TableCell colSpan={2}>{t.table.totalIncome}</TableCell>
                   <TableCell className="text-right text-green-500">
-                      {new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(totalIncome)}
+                      {formatCurrency(totalIncome)}
                   </TableCell>
                 </TableRow>
                 <TableRow className="bg-muted/50 font-bold">
                   <TableCell colSpan={2}>{t.table.totalExpenses}</TableCell>
                   <TableCell className="text-right text-destructive">
-                    - {new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(totalExpenses)}
+                    - {formatCurrency(totalExpenses)}
                   </TableCell>
                 </TableRow>
               </TableFooter>

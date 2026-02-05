@@ -24,6 +24,7 @@ export default function DashboardPage() {
   
   const currency = user?.currency || 'YER';
   const t = language.translations.dashboard;
+  const locale = language.code;
 
   const potDetails = useMemo(() => {
     return pots.map(pot => ({
@@ -72,6 +73,10 @@ export default function DashboardPage() {
     }
   };
 
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat(locale, { style: 'currency', currency, minimumFractionDigits: 0 }).format(amount);
+  };
+
   return (
     <div className="space-y-5 pb-28 md:space-y-10 md:pb-20 px-0.5 select-none">
       {/* Futuristic Hero Section */}
@@ -109,7 +114,7 @@ export default function DashboardPage() {
         <CardContent className="relative z-10 pb-6 md:pb-10 px-6 md:px-10">
           <div className="flex flex-col gap-0.5">
             <div className="text-4xl xs:text-5xl md:text-7xl font-black tracking-tighter text-white drop-shadow-2xl leading-tight">
-              {new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(netBalance)}
+              {formatCurrency(netBalance)}
             </div>
             <div className="flex items-center gap-2 mt-4">
               <div className="px-4 py-1.5 rounded-full bg-primary/25 border border-primary/40 backdrop-blur-md shadow-2xl">
@@ -128,7 +133,7 @@ export default function DashboardPage() {
               </div>
               <div className="min-w-0">
                 <p className="text-[8px] md:text-[10px] text-slate-200 font-black uppercase tracking-widest truncate">{language.key === 'ar' ? 'الوارد' : 'Inflow'}</p>
-                <p className="text-sm md:text-xl font-black text-green-400 truncate">{new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(totalIncome)}</p>
+                <p className="text-sm md:text-xl font-black text-green-400 truncate">{formatCurrency(totalIncome)}</p>
               </div>
             </div>
             <div className="group relative overflow-hidden flex items-center gap-3 p-3.5 md:p-5 rounded-[2rem] bg-white/10 border border-white/10 backdrop-blur-3xl shadow-2xl transition-transform hover:scale-[1.02]">
@@ -137,7 +142,7 @@ export default function DashboardPage() {
               </div>
               <div className="min-w-0">
                 <p className="text-[8px] md:text-[10px] text-slate-200 font-black uppercase tracking-widest truncate">{language.key === 'ar' ? 'الصادر' : 'Outflow'}</p>
-                <p className="text-sm md:text-xl font-black text-red-400 truncate">{new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(totalExpenses)}</p>
+                <p className="text-sm md:text-xl font-black text-red-400 truncate">{formatCurrency(totalExpenses)}</p>
               </div>
             </div>
           </div>
@@ -230,7 +235,7 @@ export default function DashboardPage() {
                         </div>
                         <div className="text-right">
                           <p className="text-xl md:text-3xl font-black tabular-nums" style={{ color: pot.color }}>
-                            {new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(pot.balance)}
+                            {formatCurrency(pot.balance)}
                           </p>
                           <p className="text-[8px] md:text-[9px] text-muted-foreground font-black uppercase tracking-widest mt-1">{language.key === 'ar' ? 'المتاح حالياً' : 'Available Now'}</p>
                         </div>
@@ -277,7 +282,7 @@ export default function DashboardPage() {
         <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
           <PopoverTrigger asChild>
             <Button
-              className="h-16 w-16 md:h-20 md:w-20 rounded-[1.8rem] shadow-[0_15px_50px_rgba(var(--primary),0.5)] active:scale-95 bg-primary hover:bg-primary/90 transition-all group relative overflow-hidden"
+              className="h-16 w-16 md:h-18 md:w-18 rounded-[1.8rem] shadow-[0_15px_50px_rgba(var(--primary),0.5)] active:scale-95 bg-primary hover:bg-primary/90 transition-all group relative overflow-hidden"
               size="icon"
             >
               <Plus className="h-8 w-8 md:h-10 md:w-10 text-white group-hover:rotate-90 transition-transform duration-500" />

@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useMemo } from 'react';
@@ -14,6 +13,7 @@ export default function PotDetailPage() {
   const potId = params.potId as string;
   const { pots, transactions, getPotBalance, user, language } = useApp();
   const currency = user?.currency || 'YER';
+  const locale = language.code;
 
   const pot = useMemo(() => pots.find(p => p.id === potId), [pots, potId]);
   const potBalance = useMemo(() => getPotBalance(potId), [getPotBalance, potId]);
@@ -23,6 +23,10 @@ export default function PotDetailPage() {
       .filter(t => (t.type === 'expense' && t.potId === potId) || (t.type === 'income'))
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [transactions, potId]);
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat(locale, { style: 'currency', currency, minimumFractionDigits: 0 }).format(amount);
+  };
 
   if (!pot) {
     return (
@@ -37,7 +41,7 @@ export default function PotDetailPage() {
     );
   }
   
-  const dateLocale = 'en-US';
+  const dateLocale = language.key === 'ar' ? 'ar-SA' : 'en-US';
 
   return (
     <div className="space-y-6">
@@ -53,7 +57,7 @@ export default function PotDetailPage() {
             </CardHeader>
             <CardContent>
                 <p className="text-3xl font-bold" style={{ color: pot.color }}>
-                    {new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(potBalance)}
+                    {formatCurrency(potBalance)}
                 </p>
                 <p className="text-sm text-muted-foreground">{language.key === 'ar' ? 'الرصيد الحالي' : 'Current Balance'}</p>
             </CardContent>
@@ -89,7 +93,7 @@ export default function PotDetailPage() {
                                     </div>
                                     <p className={`font-bold ${isExpense ? 'text-destructive' : 'text-green-500'}`}>
                                         {isExpense ? '-' : '+'}
-                                        {new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(amountForPot)}
+                                        {formatCurrency(amountForPot)}
                                     </p>
                                 </li>
                             );
