@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback, useMemo } from 'react';
@@ -57,7 +56,11 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
       const storedTheme = localStorage.getItem('al-mawazin-theme') as 'light' | 'dark' | null;
       const storedLanguage = localStorage.getItem('al-mawazin-language') as LanguageKey | null;
 
-      if (storedUser) setUserState(JSON.parse(storedUser));
+      if (storedUser) {
+        const parsedUser = JSON.parse(storedUser);
+        if (!parsedUser.currency) parsedUser.currency = 'YER';
+        setUserState(parsedUser);
+      }
       
       if (storedPots) {
         const parsedPots = JSON.parse(storedPots);
@@ -84,21 +87,21 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [isMounted]);
 
-  const setUser = (user: User | null) => {
-    setUserState(user);
-    if (user) {
-      localStorage.setItem('al-mawazin-user', JSON.stringify(user));
+  const setUser = useCallback((newUser: User | null) => {
+    setUserState(newUser);
+    if (newUser) {
+      localStorage.setItem('al-mawazin-user', JSON.stringify(newUser));
     } else {
       localStorage.removeItem('al-mawazin-user');
     }
-  };
+  }, []);
   
-  const updatePots = (updatedPots: Omit<Pot, 'icon'>[]) => {
+  const updatePots = useCallback((updatedPots: Omit<Pot, 'icon'>[]) => {
     setPots(addDynamicPotData(updatedPots));
     localStorage.setItem('al-mawazin-pots', JSON.stringify(updatedPots));
-  };
+  }, []);
 
-  const addTransaction = (transaction: Omit<Transaction, 'id' | 'date'>) => {
+  const addTransaction = useCallback((transaction: Omit<Transaction, 'id' | 'date'>) => {
     const newTransaction: Transaction = {
       ...transaction,
       id: new Date().toISOString() + Math.random(),
@@ -110,7 +113,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
         localStorage.setItem('al-mawazin-transactions', JSON.stringify(newTransactions));
         return newTransactions;
     });
-  };
+  }, []);
 
   const getPotBalance = useCallback((potId: string) => {
     const pot = pots.find(p => p.id === potId);
@@ -130,23 +133,22 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
   const totalIncome = useMemo(() => transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0), [transactions]);
   const totalExpenses = useMemo(() => transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0), [transactions]);
 
-
-  const toggleTheme = () => {
+  const toggleTheme = useCallback(() => {
     setTheme(prevTheme => {
       const newTheme = prevTheme === 'light' ? 'dark' : 'light';
       localStorage.setItem('al-mawazin-theme', newTheme);
       document.documentElement.classList.toggle('dark', newTheme === 'dark');
       return newTheme;
     });
-  };
+  }, []);
 
-  const setLanguage = (langKey: LanguageKey) => {
+  const setLanguage = useCallback((langKey: LanguageKey) => {
     const langPack = getLanguagePack(langKey);
     setLanguageState(langPack);
     localStorage.setItem('al-mawazin-language', langKey);
     document.documentElement.lang = langPack.key;
     document.documentElement.dir = langPack.dir;
-  };
+  }, []);
 
   const logout = useCallback(() => {
     localStorage.clear();

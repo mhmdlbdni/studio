@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -39,76 +38,84 @@ export default function OnboardingPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4 font-body">
-      <Card className="w-full max-w-md">
+      <Card className="w-full max-w-md rounded-[2.5rem] border-white/10 glass-effect">
         {step === 1 && (
           <>
-            <CardHeader className="text-center">
-              <div className="mb-4 flex justify-center">
-                <Logo className="h-20 w-20 text-primary" />
+            <CardHeader className="text-center pt-10">
+              <div className="mb-6 flex justify-center">
+                <div className="p-6 rounded-[2rem] bg-primary/10 animate-pulse">
+                  <Logo className="h-16 w-16 text-primary" />
+                </div>
               </div>
-              <CardTitle className="font-headline text-2xl font-bold">أهلاً بك في الموازين</CardTitle>
-              <CardDescription className="text-base">
+              <CardTitle className="font-black text-3xl tracking-tighter">أهلاً بك في الموازين</CardTitle>
+              <CardDescription className="text-lg font-medium mt-4 leading-relaxed">
                 غيّر علاقتك بالمال إلى الأبد. نحن هنا لنبني لك نظاماً مالياً ذكياً، مع مرشد ذكي يدعمك في كل خطوة.
               </CardDescription>
             </CardHeader>
-            <CardFooter>
-              <Button onClick={handleNext} className="w-full text-lg">ابدأ الآن</Button>
+            <CardFooter className="pb-10 pt-6">
+              <Button onClick={handleNext} className="w-full h-16 text-xl font-black rounded-2xl shadow-2xl active:scale-95 transition-all">ابدأ الآن</Button>
             </CardFooter>
           </>
         )}
         {step === 2 && (
           <>
-            <CardHeader className="text-center">
-              <CardTitle className="font-headline text-2xl font-bold">نظام ذكي.. وليس مجرد أرقام</CardTitle>
-              <CardDescription className="text-base">
+            <CardHeader className="text-center pt-10">
+              <CardTitle className="font-black text-3xl tracking-tighter">نظام ذكي.. وليس مجرد أرقام</CardTitle>
+              <CardDescription className="text-lg font-medium mt-4">
                 سيتم تقسيم دخلك على 6 أوعية ذكية، بالإضافة إلى وصول كامل ومجاني إلى "مرشد الموازين" للمساعدة في فهم وتحسين عاداتك المالية.
               </CardDescription>
             </CardHeader>
-             <CardContent className="grid grid-cols-3 gap-4 text-center">
+             <CardContent className="grid grid-cols-3 gap-6 text-center py-6">
                 {DEFAULT_POTS.map(pot => {
                     const Icon = potIcons[pot.id as keyof typeof potIcons] || potIcons.custom;
                     return (
-                        <div key={pot.id} className="flex flex-col items-center gap-1">
-                            <div className="rounded-full bg-secondary p-3">
-                                <Icon className="h-6 w-6" style={{color: pot.color}}/>
+                        <div key={pot.id} className="flex flex-col items-center gap-2 group">
+                            <div className="rounded-[1.2rem] bg-secondary/50 p-4 transition-all group-hover:bg-primary/20 group-hover:scale-110">
+                                <Icon className="h-7 w-7" style={{color: pot.color}}/>
                             </div>
-                            <p className="text-xs">{pot.name.ar}</p>
+                            <p className="text-[10px] font-black uppercase tracking-wider">{pot.name.ar}</p>
                         </div>
                     )
                 })}
             </CardContent>
-            <CardFooter>
-              <Button onClick={handleNext} className="w-full text-lg">التالي</Button>
+            <CardFooter className="pb-10 pt-6">
+              <Button onClick={handleNext} className="w-full h-16 text-xl font-black rounded-2xl shadow-2xl active:scale-95 transition-all">التالي</Button>
             </CardFooter>
           </>
         )}
         {step === 3 && (
           <>
-            <CardHeader className="text-center">
-              <CardTitle className="font-headline text-2xl font-bold">على وشك الانتهاء!</CardTitle>
+            <CardHeader className="text-center pt-10">
+              <CardTitle className="font-black text-3xl tracking-tighter">على وشك الانتهاء!</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">بماذا نناديك؟</Label>
-                <Input id="name" placeholder="أدخل اسمك هنا" value={name} onChange={(e) => setName(e.target.value)} />
+            <CardContent className="space-y-6 py-6 px-8">
+              <div className="space-y-3">
+                <Label htmlFor="name" className="font-black text-sm mr-1">بماذا نناديك؟</Label>
+                <Input 
+                  id="name" 
+                  placeholder="أدخل اسمك هنا" 
+                  value={name} 
+                  onChange={(e) => setName(e.target.value)} 
+                  className="h-14 rounded-2xl bg-secondary/50 border-white/5 font-bold text-lg px-6"
+                />
               </div>
-              <div className="space-y-2">
-                <Label>عملتك الأساسية</Label>
-                 <Select value={currency} onValueChange={setCurrency}>
-                    <SelectTrigger>
-                        <SelectValue placeholder="اختر العملة التي تستخدمها يوميًا." />
+              <div className="space-y-3">
+                <Label className="font-black text-sm mr-1">عملتك الأساسية</Label>
+                 <Select value={currency} onValueChange={setCurrency} dir="rtl">
+                    <SelectTrigger className="h-14 rounded-2xl bg-secondary/50 border-white/5 font-bold text-lg px-6">
+                        <SelectValue placeholder="اختر العملة" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="rounded-2xl glass-effect border-white/10">
                         {CURRENCIES.map(c => (
-                            <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
+                            <SelectItem key={c.value} value={c.value} className="font-bold py-3 px-6">{c.label}</SelectItem>
                         ))}
                     </SelectContent>
                 </Select>
-                <p className="text-sm text-muted-foreground">اختر العملة التي تستخدمها يوميًا.</p>
+                <p className="text-xs text-muted-foreground mr-1 font-medium">اختر العملة التي تستخدمها يوميًا.</p>
               </div>
             </CardContent>
-            <CardFooter>
-              <Button onClick={handleFinish} disabled={!name.trim()} className="w-full text-lg">احفظ وانطلق!</Button>
+            <CardFooter className="pb-10 pt-6">
+              <Button onClick={handleFinish} disabled={!name.trim()} className="w-full h-16 text-xl font-black rounded-2xl shadow-2xl active:scale-95 transition-all">احفظ وانطلق!</Button>
             </CardFooter>
           </>
         )}
