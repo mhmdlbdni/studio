@@ -291,13 +291,13 @@ export default function DashboardPage() {
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0 border-none bg-transparent shadow-none" side="top" align={language.dir === 'rtl' ? 'start' : 'end'} sideOffset={20}>
-            <div className="flex flex-col items-end gap-5 p-2">
-              <Button onClick={openIncomeDialog} className="rounded-[1.8rem] bg-green-500 text-white hover:bg-green-600 h-16 px-10 shadow-[0_10px_40px_rgba(34,197,94,0.4)] border-none font-black text-lg transition-all hover:-translate-y-1.5 active:scale-95">
-                <Plus className={cn("h-6 w-6", language.dir === 'rtl' ? 'ml-3' : 'mr-3')} />
+            <div className="flex flex-col items-end gap-4 p-2">
+              <Button onClick={openIncomeDialog} className="rounded-[1.8rem] bg-green-500 text-white hover:bg-green-600 h-14 px-7 shadow-[0_10px_40px_rgba(34,197,94,0.4)] border-none font-black text-base transition-all hover:-translate-y-1.5 active:scale-95">
+                <Plus className={cn("h-5 w-5", language.dir === 'rtl' ? 'ml-2' : 'mr-2')} />
                 {t.addIncome}
               </Button>
-              <Button onClick={openExpenseDialog} className="rounded-[1.8rem] bg-destructive text-white hover:bg-destructive/90 h-16 px-10 shadow-[0_10px_40px_rgba(220,38,38,0.4)] border-none font-black text-lg transition-all hover:-translate-y-1.5 active:scale-95">
-                <span className={cn("font-black text-3xl", language.dir === 'rtl' ? 'ml-3' : 'mr-3')}>−</span>
+              <Button onClick={openExpenseDialog} className="rounded-[1.8rem] bg-destructive text-white hover:bg-destructive/90 h-14 px-7 shadow-[0_10px_40px_rgba(220,38,38,0.4)] border-none font-black text-base transition-all hover:-translate-y-1.5 active:scale-95">
+                <span className={cn("font-black text-2xl", language.dir === 'rtl' ? 'ml-2' : 'mr-2')}>−</span>
                 {t.addExpense}
               </Button>
             </div>
