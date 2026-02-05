@@ -1,3 +1,4 @@
+
 'use client';
 import React from 'react';
 import Link from 'next/link';
@@ -18,17 +19,17 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
       if (pathname === '/dashboard') return `Hello, ${user?.name || ''}!`;
       if (pathname === '/manage-pots') return 'Manage Pots';
       if (pathname === '/settings') return 'Settings';
-      if (pathname === '/support') return 'Support';
+      if (pathname === '/support') return 'Support Center';
       if (pathname === '/transactions') return 'History';
-      if (pathname.startsWith('/pots/')) return 'Pot Detail';
+      if (pathname.startsWith('/pots/')) return 'Pot Details';
       return 'Mawazin';
     }
     if (pathname === '/dashboard') return `مرحباً، ${user?.name || ''}!`;
     if (pathname === '/manage-pots') return 'إدارة الموازين';
     if (pathname === '/settings') return 'الإعدادات';
-    if (pathname === '/support') return 'الدعم';
-    if (pathname === '/transactions') return 'السجلات';
-    if (pathname.startsWith('/pots/')) return 'التفاصيل';
+    if (pathname === '/support') return 'مركز المساعدة';
+    if (pathname === '/transactions') return 'سجل العمليات';
+    if (pathname.startsWith('/pots/')) return 'تفاصيل الوعاء';
     return 'الموازين';
   };
 
@@ -36,16 +37,21 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
   
   return (
     <div className="flex min-h-screen w-full flex-col bg-background text-foreground overflow-x-hidden">
-      <header className="sticky top-0 z-20 border-b bg-background/70 backdrop-blur-2xl">
+      <header className="sticky top-0 z-40 border-b bg-background/70 backdrop-blur-2xl transition-all duration-300">
         <div className="mx-auto flex h-16 md:h-20 max-w-screen-md items-center justify-between px-5 md:px-8">
           <div className="flex items-center gap-3 md:gap-4">
             {!isDashboard ? (
-              <Button variant="ghost" size="icon" onClick={() => router.back()} className="h-10 w-10 md:h-12 md:w-12 rounded-[1rem] md:rounded-2xl hover:bg-secondary active:scale-90 transition-all">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => router.back()} 
+                className="h-10 w-10 md:h-12 md:w-12 rounded-[1rem] md:rounded-2xl hover:bg-secondary active:scale-90 transition-all border border-border/40"
+              >
                 {language.dir === 'rtl' ? <ArrowRight className="h-5 w-5 md:h-6 md:w-6" /> : <ArrowLeft className="h-5 w-5 md:h-6 md:w-6" />}
                 <span className="sr-only">{language.key === 'ar' ? 'العودة' : 'Back'}</span>
               </Button>
             ) : null}
-            <h1 className="font-headline text-lg md:text-2xl font-black tracking-tight truncate max-w-[160px] xs:max-w-[220px] md:max-w-none">
+            <h1 className="font-headline text-lg md:text-2xl font-black tracking-tight truncate max-w-[160px] xs:max-w-[220px] md:max-w-none animate-in fade-in slide-in-from-right-2">
               {getTitle()}
             </h1>
           </div>
@@ -53,7 +59,12 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
           <div className="flex items-center gap-2 md:gap-3">
             <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
             {isDashboard && (
-              <Button variant="ghost" size="icon" asChild className="h-10 w-10 md:h-12 md:w-12 rounded-[1rem] md:rounded-2xl active:scale-90 transition-all">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                asChild 
+                className="h-10 w-10 md:h-12 md:w-12 rounded-[1rem] md:rounded-2xl active:scale-90 transition-all border border-border/40 hover:bg-primary/10 hover:text-primary"
+              >
                 <Link href="/settings">
                   <Settings className="h-5 w-5 md:h-6 md:w-6" />
                   <span className="sr-only">{language.key === 'ar' ? 'الإعدادات' : 'Settings'}</span>
