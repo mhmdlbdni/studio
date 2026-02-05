@@ -5,7 +5,6 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import { gemini15Flash } from '@genkit-ai/google-genai';
 
 const FinancialBalanceInputSchema = z.object({
   income: z.number().describe('Total monthly income.'),
@@ -19,15 +18,11 @@ const FinancialBalanceOutputSchema = z.object({
 });
 export type FinancialBalanceOutput = z.infer<typeof FinancialBalanceOutputSchema>;
 
-export async function getFinancialBalanceAdvice(input: FinancialBalanceInput): Promise<FinancialBalanceOutput> {
-  return financialBalanceFlow(input);
-}
-
 const prompt = ai.definePrompt({
   name: 'financialBalancePrompt',
   input: {schema: FinancialBalanceInputSchema},
   output: {schema: FinancialBalanceOutputSchema},
-  model: gemini15Flash,
+  model: 'googleai/gemini-1.5-flash',
   prompt: `You are a financial advisor. Analyze the user's financial situation and provide advice on how to achieve a better financial balance.
 
   Here is the user's monthly income: {{income}}
@@ -44,14 +39,7 @@ const prompt = ai.definePrompt({
 `,
 });
 
-const financialBalanceFlow = ai.defineFlow(
-  {
-    name: 'financialBalanceFlow',
-    inputSchema: FinancialBalanceInputSchema,
-    outputSchema: FinancialBalanceOutputSchema,
-  },
-  async input => {
-    const {output} = await prompt(input);
-    return output!;
-  }
-);
+export async function getFinancialBalanceAdvice(input: FinancialBalanceInput): Promise<FinancialBalanceOutput> {
+  const response = await prompt(input);
+  return response.output!;
+}

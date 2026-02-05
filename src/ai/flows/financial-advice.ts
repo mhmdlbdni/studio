@@ -7,7 +7,6 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
-import { gemini15Flash } from '@genkit-ai/google-genai';
 
 // تعريف هيكل البيانات المدخلة للمرشد
 const FinancialAdviceInputSchema = z.object({
@@ -73,7 +72,7 @@ const navigateToTool = ai.defineTool({
 const financialAdvicePrompt = ai.definePrompt({
     name: 'financialAdvicePrompt',
     input: { schema: FinancialAdviceInputSchema },
-    model: gemini15Flash,
+    model: 'googleai/gemini-1.5-flash',
     tools: [addIncomeTool, addExpenseTool, navigateToTool],
     prompt: `أنت "مرشد الموازين"، خبير مالي ذكي. مهمتك هي تحليل البيانات المالية للمستخدم وتقديم نصائح عملية.
 

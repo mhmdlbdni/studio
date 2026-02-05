@@ -6,7 +6,6 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import { gemini15Flash } from '@genkit-ai/google-genai';
 
 const SavingStrategiesInputSchema = z.object({
   income: z.number().describe('The user’s total monthly income.'),
@@ -20,15 +19,11 @@ const SavingStrategiesOutputSchema = z.object({
 });
 export type SavingStrategiesOutput = z.infer<typeof SavingStrategiesOutputSchema>;
 
-export async function getSavingStrategies(input: SavingStrategiesInput): Promise<SavingStrategiesOutput> {
-  return savingStrategiesFlow(input);
-}
-
 const prompt = ai.definePrompt({
   name: 'savingStrategiesPrompt',
   input: {schema: SavingStrategiesInputSchema},
   output: {schema: SavingStrategiesOutputSchema},
-  model: gemini15Flash,
+  model: 'googleai/gemini-1.5-flash',
   prompt: `You are a financial advisor. Based on the user's income, expenses, and financial goals, provide personalized saving strategies.
 
 Income: {{{income}}}
@@ -38,14 +33,7 @@ Financial Goals: {{{financialGoals}}}
 Provide a list of actionable saving strategies that the user can implement to achieve their goals faster.`,
 });
 
-const savingStrategiesFlow = ai.defineFlow(
-  {
-    name: 'savingStrategiesFlow',
-    inputSchema: SavingStrategiesInputSchema,
-    outputSchema: SavingStrategiesOutputSchema,
-  },
-  async input => {
-    const {output} = await prompt(input);
-    return output!;
-  }
-);
+export async function getSavingStrategies(input: SavingStrategiesInput): Promise<SavingStrategiesOutput> {
+  const response = await prompt(input);
+  return response.output!;
+}
