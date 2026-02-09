@@ -23,7 +23,6 @@ export default function DashboardPage({ searchParams }: { searchParams: Promise<
   const [reorderingId, setReorderingId] = useState<string | null>(null);
   const longPressTimer = useRef<NodeJS.Timeout | null>(null);
   
-  // Next.js 15 compatibility: Unwrap searchParams
   const _resolvedSearchParams = use(searchParams);
 
   const currency = user?.currency || 'YER';
@@ -38,6 +37,11 @@ export default function DashboardPage({ searchParams }: { searchParams: Promise<
 
   const netBalance = totalIncome - totalExpenses;
   const balanceRatio = totalIncome > 0 ? Math.max(0, Math.min(100, (netBalance / totalIncome) * 100)) : 0;
+
+  const formatCurrency = (amount: number) => {
+    // Force English numerals (1, 2, 3)
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(amount);
+  };
 
   const openIncomeDialog = () => {
     setIncomeDialogOpen(true);
@@ -73,11 +77,6 @@ export default function DashboardPage({ searchParams }: { searchParams: Promise<
       newPots.splice(targetIndex, 0, movedItem);
       updatePots(newPots);
     }
-  };
-
-  const formatCurrency = (amount: number) => {
-    // Force English numerals (1, 2, 3) even in Arabic context
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(amount);
   };
 
   return (

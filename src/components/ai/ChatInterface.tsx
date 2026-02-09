@@ -143,18 +143,11 @@ export function ChatInterface({ requestOpenIncomeDialog, requestOpenExpenseDialo
             }
           }
         }
-      } else if (!response || !response.success) {
-         setMessages(prev => [...prev, { sender: 'ai', text: language.key === 'ar' ? 'عذراً، واجهت مشكلة في الاتصال بالمرشد الذكي. يرجى التأكد من استقرار الإنترنت وتوفر صلاحيات الوصول للخدمة.' : 'Connection error with the guide. Please check your internet.' }]);
       }
 
     } catch (error: any) {
       console.error("ChatInterface Error:", error);
-      setMessages(prev => [...prev, { 
-        sender: 'ai', 
-        text: language.key === 'ar' 
-          ? 'عذراً، انقطع الاتصال بالمرشد الذكي. يرجى المحاولة مرة أخرى لاحقاً.' 
-          : 'Sorry, the connection was closed. Please try again later.' 
-      }]);
+      setMessages(prev => [...prev, { sender: 'ai', text: language.key === 'ar' ? 'عذراً، انقطع الاتصال بالمرشد الذكي.' : 'Sorry, connection lost.' }]);
     } finally {
       setIsLoading(false);
     }
@@ -215,15 +208,9 @@ export function ChatInterface({ requestOpenIncomeDialog, requestOpenExpenseDialo
           ))}
            {isLoading && (
             <div className="flex items-start gap-2 justify-start">
-                {language.dir === 'ltr' && <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/20 text-primary">
-                    <Bot className="h-5 w-5" />
-                </div>}
                 <div className="rounded-[1.5rem] bg-card border border-border p-4 shadow-sm">
                    <Loader2 className="h-5 w-5 animate-spin text-primary" />
                 </div>
-                {language.dir === 'rtl' && <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/20 text-primary">
-                    <Bot className="h-5 w-5" />
-                </div>}
             </div>
           )}
           {showSuggestions && (
