@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import { useApp } from '@/contexts/AppContext';
 import { CURRENCIES, LanguageKey } from '@/lib/constants';
-import { ChevronLeft, Palette, SlidersHorizontal, LogOut, Info, Loader2, MessageCircle, Phone, Smartphone } from 'lucide-react';
+import { ChevronLeft, Palette, SlidersHorizontal, LogOut, Info, Loader2, MessageCircle, Phone } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function SettingsPage({ searchParams }: { searchParams: Promise<any> }) {
@@ -16,7 +16,6 @@ export default function SettingsPage({ searchParams }: { searchParams: Promise<a
   const { user, setUser, language, setLanguage, logout } = useApp();
   const [mounted, setMounted] = useState(false);
   
-  // Next.js 15: Unwrap searchParams
   const _resolvedSearchParams = use(searchParams);
 
   useEffect(() => {
@@ -24,7 +23,7 @@ export default function SettingsPage({ searchParams }: { searchParams: Promise<a
   }, []);
 
   const handleLogout = () => {
-    logout();
+    logout(); // This clears all localStorage and resets state
     router.replace('/onboarding');
   };
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,13 +11,25 @@ import { useApp } from '@/contexts/AppContext';
 import { CURRENCIES, DEFAULT_POTS } from '@/lib/constants';
 import { potIcons } from '@/lib/icons';
 import { Logo } from '@/components/icons/Logo';
+import { Loader2 } from 'lucide-react';
 
 export default function OnboardingPage() {
   const [step, setStep] = useState(1);
   const [name, setName] = useState('');
   const [currency, setCurrency] = useState('YER');
+  const [isChecking, setIsChecking] = useState(true);
   const router = useRouter();
   const { setUser, updatePots, language } = useApp();
+
+  useEffect(() => {
+    // Check if user already exists to skip onboarding
+    const storedUser = localStorage.getItem('al-mawazin-user');
+    if (storedUser) {
+      router.replace('/dashboard');
+    } else {
+      setIsChecking(false);
+    }
+  }, [router]);
 
   const handleNext = () => setStep(s => s + 1);
 
@@ -35,6 +47,14 @@ export default function OnboardingPage() {
       router.push('/dashboard');
     }
   };
+
+  if (isChecking) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-background">
+        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4 font-body">

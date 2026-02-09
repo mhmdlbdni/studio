@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -10,9 +9,10 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // This check needs to be client-side only.
-    const user = localStorage.getItem('al-mawazin-user');
-    if (user) {
+    // Check for user existence in local storage
+    const storedUser = typeof window !== 'undefined' ? localStorage.getItem('al-mawazin-user') : null;
+    
+    if (storedUser) {
       router.replace('/dashboard');
     } else {
       router.replace('/onboarding');
