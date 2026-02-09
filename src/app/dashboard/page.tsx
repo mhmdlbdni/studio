@@ -1,10 +1,9 @@
 
 'use client';
 
-import { useMemo, useState, useRef, use } from 'react';
-import { useRouter } from 'next/navigation';
+import { useMemo, useState, use } from 'react';
 import Link from 'next/link';
-import { Plus, Bot, Wallet, TrendingUp, TrendingDown, CircleDollarSign, Coins, ChevronUp, ChevronDown, Check } from 'lucide-react';
+import { Plus, Bot, Wallet, TrendingUp, TrendingDown, CircleDollarSign, Coins } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,13 +14,11 @@ import { ChatInterface } from '@/components/ai/ChatInterface';
 import { cn } from '@/lib/utils';
 
 export default function DashboardPage({ searchParams }: { searchParams: Promise<any> }) {
-  const { pots, user, getPotBalance, totalIncome, totalExpenses, language, updatePots } = useApp();
+  const { pots, user, getPotBalance, totalIncome, totalExpenses, language } = useApp();
   const [isIncomeDialogOpen, setIncomeDialogOpen] = useState(false);
   const [isExpenseDialogOpen, setExpenseDialogOpen] = useState(false);
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [isChatOpen, setChatOpen] = useState(false);
-  const [reorderingId, setReorderingId] = useState<string | null>(null);
-  const longPressTimer = useRef<NodeJS.Timeout | null>(null);
   
   const _resolvedSearchParams = use(searchParams);
 
@@ -32,7 +29,7 @@ export default function DashboardPage({ searchParams }: { searchParams: Promise<
     return pots.map(pot => {
       const balance = getPotBalance(pot.id);
       const allocated = totalIncome * (pot.percentage / 100);
-      const progress = allocated > 0 ? Math.max(0, Math.min(100, (balance / allocated) * 100)) : 0;
+      const progress = allocated > 0 ? Math.max(0, Math.min(100, (balance / allocated) * 100)) : 100;
       return {
         ...pot,
         balance,
@@ -57,32 +54,6 @@ export default function DashboardPage({ searchParams }: { searchParams: Promise<
     setExpenseDialogOpen(true);
     setPopoverOpen(false);
   }
-
-  const handleTouchStart = (id: string) => {
-    if (reorderingId) return;
-    longPressTimer.current = setTimeout(() => {
-      setReorderingId(id);
-      if (window.navigator.vibrate) window.navigator.vibrate(50);
-    }, 600);
-  };
-
-  const handleTouchEnd = () => {
-    if (longPressTimer.current) clearTimeout(longPressTimer.current);
-  };
-
-  const movePot = (id: string, direction: 'up' | 'down') => {
-    const index = pots.findIndex(p => p.id === id);
-    if (index === -1) return;
-    
-    const newPots = [...pots];
-    const targetIndex = direction === 'up' ? index - 1 : index + 1;
-    
-    if (targetIndex >= 0 && targetIndex < newPots.length) {
-      const [movedItem] = newPots.splice(index, 1);
-      newPots.splice(targetIndex, 0, movedItem);
-      updatePots(newPots);
-    }
-  };
 
   return (
     <div className="space-y-5 pb-28 md:space-y-10 md:pb-20 px-0.5 select-none">
@@ -163,60 +134,15 @@ export default function DashboardPage({ searchParams }: { searchParams: Promise<
             </h2>
             <div className="h-1 w-8 bg-primary mt-1 rounded-full shadow-lg" />
           </div>
-          {reorderingId && (
-            <Button 
-              variant="secondary" 
-              size="sm" 
-              className="rounded-full bg-primary/20 text-primary border border-primary/30 h-8 px-4 font-black"
-              onClick={() => setReorderingId(null)}
-            >
-              <Check className="h-4 w-4 ml-1" />
-              {language.key === 'ar' ? 'تم' : 'Done'}
-            </Button>
-          )}
         </div>
         
         <div className="grid grid-cols-1 gap-4 px-2">
-          {potDetails.map((pot, index) => {
+          {potDetails.map((pot) => {
             const PotIcon = pot.icon;
             return (
-              <div 
-                key={pot.id} 
-                className={cn(
-                  "relative transition-all duration-300",
-                  reorderingId === pot.id ? "scale-[1.05] z-20 shadow-2xl" : reorderingId ? "opacity-50 grayscale scale-[0.98]" : "hover:scale-[1.01]"
-                )}
-                onMouseDown={() => handleTouchStart(pot.id)}
-                onMouseUp={handleTouchEnd}
-                onTouchStart={() => handleTouchStart(pot.id)}
-                onTouchEnd={handleTouchEnd}
-              >
-                {reorderingId === pot.id && (
-                  <div className="absolute -right-2 top-1/2 -translate-y-1/2 z-30 flex flex-col gap-2">
-                    <Button 
-                      size="icon" 
-                      className="rounded-full w-10 h-10 bg-white/20 backdrop-blur-3xl border border-white/30 text-white shadow-2xl"
-                      onClick={(e) => { e.preventDefault(); movePot(pot.id, 'up'); }}
-                      disabled={index === 0}
-                    >
-                      <ChevronUp className="h-6 w-6" />
-                    </Button>
-                    <Button 
-                      size="icon" 
-                      className="rounded-full w-10 h-10 bg-white/20 backdrop-blur-3xl border border-white/30 text-white shadow-2xl"
-                      onClick={(e) => { e.preventDefault(); movePot(pot.id, 'down'); }}
-                      disabled={index === pots.length - 1}
-                    >
-                      <ChevronDown className="h-6 w-6" />
-                    </Button>
-                  </div>
-                )}
-
-                <Link href={reorderingId ? "#" : `/pots/${pot.id}`} className="block w-full">
-                  <Card className={cn(
-                    "group relative overflow-hidden bg-card/60 backdrop-blur-3xl rounded-[2.5rem] border-white/10 transition-all duration-300",
-                    reorderingId === pot.id ? "border-primary/50" : "hover:border-primary/50 active:scale-[0.98]"
-                  )}>
+              <div key={pot.id} className="relative transition-all duration-300 hover:scale-[1.01]">
+                <Link href={`/pots/${pot.id}`} className="block w-full">
+                  <Card className="group relative overflow-hidden bg-card/60 backdrop-blur-3xl rounded-[2.5rem] border-white/10 transition-all duration-300 hover:border-primary/50 active:scale-[0.98]">
                     {/* Water Line Background */}
                     <div 
                       className="absolute bottom-0 left-0 right-0 opacity-10 transition-all duration-1000 ease-in-out pointer-events-none"
