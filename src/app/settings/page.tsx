@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import { useApp } from '@/contexts/AppContext';
 import { CURRENCIES, LanguageKey } from '@/lib/constants';
-import { ChevronLeft, Palette, SlidersHorizontal, LogOut, Info, Loader2, Globe, Coins } from 'lucide-react';
+import { ChevronLeft, Palette, SlidersHorizontal, LogOut, Info, Loader2, MessageCircle, Phone, Smartphone } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function SettingsPage({ searchParams }: { searchParams: Promise<any> }) {
@@ -36,6 +36,10 @@ export default function SettingsPage({ searchParams }: { searchParams: Promise<a
     setLanguage(newLanguage as LanguageKey);
   };
 
+  const openLink = (url: string) => {
+    window.open(url, '_blank');
+  };
+
   if (!mounted || !user) {
     return (
       <div className="flex h-[70vh] items-center justify-center flex-col gap-4">
@@ -51,7 +55,12 @@ export default function SettingsPage({ searchParams }: { searchParams: Promise<a
     management: 'إدارة الأموال',
     managePots: 'تعديل الموازين والنسب',
     support: 'الدعم والمعلومات',
-    help: 'مركز المساعدة',
+    developer: 'المطور',
+    contact: 'تواصل معنا',
+    whatsapp: 'واتساب',
+    call: 'اتصال هاتي',
+    appInfo: 'معلومات التطبيق',
+    version: 'الإصدار',
     account: 'الحساب',
     logout: 'تسجيل الخروج',
   } : {
@@ -60,14 +69,20 @@ export default function SettingsPage({ searchParams }: { searchParams: Promise<a
     language: 'Language',
     management: 'Management',
     managePots: 'Manage Pots',
-    support: 'Support',
-    help: 'Help Center',
+    support: 'Support & Info',
+    developer: 'Developer',
+    contact: 'Contact Us',
+    whatsapp: 'WhatsApp',
+    call: 'Call',
+    appInfo: 'App Information',
+    version: 'Version',
     account: 'Account',
     logout: 'Logout',
   };
 
   return (
     <div className="space-y-6 pb-20 select-none">
+      {/* Customization Card */}
       <Card className="glass-effect rounded-[2.5rem] border-white/10 shadow-2xl overflow-hidden">
         <CardHeader>
           <CardTitle className="flex items-center gap-3 text-xl font-black">
@@ -104,6 +119,7 @@ export default function SettingsPage({ searchParams }: { searchParams: Promise<a
         </CardContent>
       </Card>
       
+      {/* Management Card */}
       <Card className="glass-effect rounded-[2.5rem] border-white/10 shadow-2xl overflow-hidden">
         <CardHeader>
             <CardTitle className="flex items-center gap-3 text-xl font-black">
@@ -119,6 +135,48 @@ export default function SettingsPage({ searchParams }: { searchParams: Promise<a
         </CardContent>
       </Card>
 
+      {/* Support & Developer Info Card */}
+      <Card className="glass-effect rounded-[2.5rem] border-white/10 shadow-2xl overflow-hidden">
+        <CardHeader>
+            <CardTitle className="flex items-center gap-3 text-xl font-black">
+                <Info className="h-5 w-5 text-blue-400" />
+                {t.support}
+            </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="p-4 rounded-2xl bg-secondary/30 border border-white/5 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-bold text-muted-foreground">{t.developer}</span>
+              <span className="text-sm font-black">محمد عبدالواسع البعداني</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-bold text-muted-foreground">{t.version}</span>
+              <span className="text-sm font-black tabular-nums">v4.0</span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <Button 
+              variant="outline" 
+              className="h-14 rounded-2xl border-green-500/30 bg-green-500/5 hover:bg-green-500/10 font-black gap-2"
+              onClick={() => openLink('https://wa.me/967777798804')}
+            >
+              <MessageCircle className="h-5 w-5 text-green-500" />
+              {t.whatsapp}
+            </Button>
+            <Button 
+              variant="outline" 
+              className="h-14 rounded-2xl border-blue-500/30 bg-blue-500/5 hover:bg-blue-500/10 font-black gap-2"
+              onClick={() => openLink('tel:+967777798804')}
+            >
+              <Phone className="h-5 w-5 text-blue-500" />
+              {t.call}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Account Card */}
       <Card className="glass-effect rounded-[2.5rem] border-destructive/20 bg-destructive/5 shadow-2xl overflow-hidden">
         <CardHeader>
             <CardTitle className="flex items-center gap-3 text-xl font-black text-destructive">
