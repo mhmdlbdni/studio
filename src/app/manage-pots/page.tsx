@@ -8,11 +8,104 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import type { Pot } from '@/lib/types';
-import { AlertCircle, Trash2, Edit, Plus, ChevronUp, ChevronDown } from 'lucide-react';
+import { AlertCircle, Trash2, Edit, Plus, GripVertical } from 'lucide-react';
 import { EditPotDialog } from '@/components/pots/EditPotDialog';
 import { ConfirmDeleteDialog } from '@/components/pots/ConfirmDeleteDialog';
 import { AddPotDialog } from '@/components/pots/AddPotDialog';
 import { potIcons, PotIconKey } from '@/lib/icons';
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+  TouchSensor,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  verticalListSortingStrategy,
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+
+interface SortableItemProps {
+  pot: Pot;
+  language: any;
+  handlePercentageChange: (id: string, value: string) => void;
+  setPotToEdit: (pot: Pot) => void;
+  setPotToDelete: (pot: Pot) => void;
+}
+
+function SortablePotItem({ pot, language, handlePercentageChange, setPotToEdit, setPotToDelete }: SortableItemProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging
+  } = useSortable({ id: pot.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 50 : 'auto',
+    opacity: isDragging ? 0.6 : 1,
+  };
+
+  const PotIcon = pot.icon;
+
+  return (
+    <Card 
+      ref={setNodeRef} 
+      style={style} 
+      className={`glass-effect rounded-[1.8rem] border-white/5 overflow-hidden transition-all duration-300 ${isDragging ? 'scale-105 shadow-2xl ring-2 ring-primary/50' : ''}`}
+    >
+      <CardContent className="p-4 flex items-center gap-4">
+        {/* Drag Handle Area */}
+        <div 
+          {...attributes} 
+          {...listeners} 
+          className="p-2 cursor-grab active:cursor-grabbing text-muted-foreground hover:text-primary transition-colors touch-none"
+          title={language.key === 'ar' ? 'اضغط مطولاً للسحب' : 'Long press to drag'}
+        >
+          <GripVertical className="h-5 w-5" />
+        </div>
+
+        {PotIcon && <PotIcon className="h-8 w-8 flex-shrink-0" style={{ color: pot.color }}/>}
+        
+        <div className="flex-1 space-y-1">
+          <Label htmlFor={`pot-${pot.id}`} className="font-black text-sm truncate block max-w-[120px]">
+            {pot.name[language.key]}
+          </Label>
+          <div className="relative">
+            <Input
+              id={`pot-${pot.id}`}
+              type="number"
+              value={pot.percentage}
+              onChange={e => handlePercentageChange(pot.id, e.target.value)}
+              className={language.dir === 'ltr' ? 'pl-8 h-10 rounded-xl bg-secondary/30' : 'pr-8 h-10 rounded-xl bg-secondary/30'}
+            />
+            <span className={`absolute top-1/2 -translate-y-1/2 text-muted-foreground font-black text-xs ${language.dir === 'rtl' ? 'left-3' : 'right-3'}`}>%</span>
+          </div>
+        </div>
+
+        <div className="flex gap-1">
+           <Button variant="ghost" size="icon" onClick={() => setPotToEdit(pot)} className="h-10 w-10 rounded-xl">
+              <Edit className="h-4 w-4" />
+           </Button>
+           { !['necessities', 'freedom', 'saving', 'education', 'play', 'giving'].includes(pot.id) && (
+              <Button variant="ghost" size="icon" onClick={() => setPotToDelete(pot)} className="h-10 w-10 rounded-xl text-destructive hover:text-destructive hover:bg-destructive/10">
+                  <Trash2 className="h-4 w-4" />
+              </Button>
+           )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
 export default function ManagePotsPage() {
   const { pots, updatePots, language } = useApp();
@@ -23,13 +116,27 @@ export default function ManagePotsPage() {
   const [isAddPotDialogOpen, setAddPotDialogOpen] = useState(false);
 
   useEffect(() => {
-    // Create a local copy of pots for editing, preserving the icon component.
     setLocalPots(pots.map(p => ({ ...p, name: { ...p.name } })));
   }, [pots]);
   
   const totalPercentage = useMemo(() => {
     return localPots.reduce((sum, pot) => sum + Number(pot.percentage || 0), 0);
   }, [localPots]);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        delay: 250, // Long press behavior
+        tolerance: 5,
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 250,
+        tolerance: 5,
+      },
+    })
+  );
 
   const handlePercentageChange = (id: string, value: string) => {
     const newPercentage = parseInt(value, 10);
@@ -42,14 +149,15 @@ export default function ManagePotsPage() {
     );
   };
 
-  const movePot = (index: number, direction: 'up' | 'down') => {
-    const newPots = [...localPots];
-    const targetIndex = direction === 'up' ? index - 1 : index + 1;
-    
-    if (targetIndex < 0 || targetIndex >= newPots.length) return;
-
-    [newPots[index], newPots[targetIndex]] = [newPots[targetIndex], newPots[index]];
-    setLocalPots(newPots);
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      setLocalPots((items) => {
+        const oldIndex = items.findIndex((i) => i.id === active.id);
+        const newIndex = items.findIndex((i) => i.id === over.id);
+        return arrayMove(items, oldIndex, newIndex);
+      });
+    }
   };
 
   const handleSaveChanges = () => {
@@ -111,66 +219,29 @@ export default function ManagePotsPage() {
         </CardHeader>
       </Card>
 
-      <div className="space-y-3">
-        {localPots.map((pot, index) => {
-          const PotIcon = pot.icon;
-          return (
-            <Card key={pot.id} className="glass-effect rounded-[1.8rem] border-white/5 overflow-hidden">
-              <CardContent className="p-4 flex items-center gap-4">
-                <div className="flex flex-col gap-1">
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-8 w-8 rounded-lg hover:bg-primary/20"
-                    disabled={index === 0}
-                    onClick={() => movePot(index, 'up')}
-                  >
-                    <ChevronUp className="h-4 w-4" />
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-8 w-8 rounded-lg hover:bg-primary/20"
-                    disabled={index === localPots.length - 1}
-                    onClick={() => movePot(index, 'down')}
-                  >
-                    <ChevronDown className="h-4 w-4" />
-                  </Button>
-                </div>
-
-                {PotIcon && <PotIcon className="h-8 w-8 flex-shrink-0" style={{ color: pot.color }}/>}
-                
-                <div className="flex-1 space-y-1">
-                  <Label htmlFor={`pot-${pot.id}`} className="font-black text-sm truncate block max-w-[120px]">
-                    {pot.name[language.key]}
-                  </Label>
-                  <div className="relative">
-                    <Input
-                      id={`pot-${pot.id}`}
-                      type="number"
-                      value={pot.percentage}
-                      onChange={e => handlePercentageChange(pot.id, e.target.value)}
-                      className={language.dir === 'ltr' ? 'pl-8 h-10 rounded-xl bg-secondary/30' : 'pr-8 h-10 rounded-xl bg-secondary/30'}
-                    />
-                    <span className={`absolute top-1/2 -translate-y-1/2 text-muted-foreground font-black text-xs ${language.dir === 'rtl' ? 'left-3' : 'right-3'}`}>%</span>
-                  </div>
-                </div>
-
-                <div className="flex gap-1">
-                   <Button variant="ghost" size="icon" onClick={() => setPotToEdit(pot)} className="h-10 w-10 rounded-xl">
-                      <Edit className="h-4 w-4" />
-                   </Button>
-                   { !['necessities', 'freedom', 'saving', 'education', 'play', 'giving'].includes(pot.id) && (
-                      <Button variant="ghost" size="icon" onClick={() => setPotToDelete(pot)} className="h-10 w-10 rounded-xl text-destructive hover:text-destructive hover:bg-destructive/10">
-                          <Trash2 className="h-4 w-4" />
-                      </Button>
-                   )}
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
+      <DndContext 
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
+        <div className="space-y-3">
+          <SortableContext 
+            items={localPots.map(p => p.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            {localPots.map((pot) => (
+              <SortablePotItem 
+                key={pot.id} 
+                pot={pot} 
+                language={language}
+                handlePercentageChange={handlePercentageChange}
+                setPotToEdit={setPotToEdit}
+                setPotToDelete={setPotToDelete}
+              />
+            ))}
+          </SortableContext>
+        </div>
+      </DndContext>
 
       <div className="grid grid-cols-1 gap-3">
         <Button variant="outline" className="h-14 rounded-2xl border-dashed border-primary/40 font-black" onClick={() => setAddPotDialogOpen(true)}>
