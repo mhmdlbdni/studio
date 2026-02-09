@@ -29,17 +29,22 @@ export default function DashboardPage({ searchParams }: { searchParams: Promise<
   const t = language.translations.dashboard;
 
   const potDetails = useMemo(() => {
-    return pots.map(pot => ({
-      ...pot,
-      balance: getPotBalance(pot.id)
-    }));
-  }, [pots, getPotBalance]);
+    return pots.map(pot => {
+      const balance = getPotBalance(pot.id);
+      const allocated = totalIncome * (pot.percentage / 100);
+      const progress = allocated > 0 ? Math.max(0, Math.min(100, (balance / allocated) * 100)) : 0;
+      return {
+        ...pot,
+        balance,
+        progress
+      };
+    });
+  }, [pots, getPotBalance, totalIncome]);
 
   const netBalance = totalIncome - totalExpenses;
   const balanceRatio = totalIncome > 0 ? Math.max(0, Math.min(100, (netBalance / totalIncome) * 100)) : 0;
 
   const formatCurrency = (amount: number) => {
-    // Force English numerals (1, 2, 3)
     return new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(amount);
   };
 
@@ -212,7 +217,17 @@ export default function DashboardPage({ searchParams }: { searchParams: Promise<
                     "group relative overflow-hidden bg-card/60 backdrop-blur-3xl rounded-[2.5rem] border-white/10 transition-all duration-300",
                     reorderingId === pot.id ? "border-primary/50" : "hover:border-primary/50 active:scale-[0.98]"
                   )}>
-                    <CardContent className="p-5 md:p-8 flex flex-col gap-5">
+                    {/* Water Line Background */}
+                    <div 
+                      className="absolute bottom-0 left-0 right-0 opacity-10 transition-all duration-1000 ease-in-out pointer-events-none"
+                      style={{ 
+                        height: `${pot.progress}%`, 
+                        backgroundColor: pot.color,
+                        boxShadow: `0 0 40px ${pot.color}`
+                      }}
+                    />
+                    
+                    <CardContent className="p-5 md:p-8 flex flex-col gap-5 relative z-10">
                       <div className="flex items-center justify-between w-full">
                         <div className="flex items-center gap-4">
                           <div className="relative">
@@ -222,7 +237,11 @@ export default function DashboardPage({ searchParams }: { searchParams: Promise<
                           </div>
                           <div>
                             <p className="font-black text-lg md:text-2xl tracking-tight text-foreground leading-none">{pot.name[language.key]}</p>
-                            <p className="text-[9px] md:text-[11px] font-black text-muted-foreground uppercase tracking-[0.2em] mt-2 tabular-nums">{pot.percentage}% {language.key === 'ar' ? 'تخصيص' : 'Allocated'}</p>
+                            <div className="flex items-center gap-2 mt-2">
+                                <p className="text-[9px] md:text-[11px] font-black text-muted-foreground uppercase tracking-[0.2em] tabular-nums">{pot.percentage}% {language.key === 'ar' ? 'تخصيص' : 'Allocated'}</p>
+                                <div className="h-1 w-1 rounded-full bg-muted-foreground/30" />
+                                <p className="text-[9px] md:text-[11px] font-black text-primary uppercase tracking-[0.2em] tabular-nums">{Math.round(pot.progress)}% {language.key === 'ar' ? 'متبقي' : 'Left'}</p>
+                            </div>
                           </div>
                         </div>
                         <div className="text-right">
@@ -230,6 +249,18 @@ export default function DashboardPage({ searchParams }: { searchParams: Promise<
                             {formatCurrency(pot.balance)}
                           </p>
                         </div>
+                      </div>
+
+                      {/* Explicit Water Line Indicator */}
+                      <div className="w-full h-1.5 bg-secondary/40 rounded-full overflow-hidden">
+                        <div 
+                          className="h-full transition-all duration-1000 ease-out" 
+                          style={{ 
+                            width: `${pot.progress}%`, 
+                            backgroundColor: pot.color,
+                            boxShadow: `0 0 10px ${pot.color}`
+                          }}
+                        />
                       </div>
                     </CardContent>
                   </Card>
