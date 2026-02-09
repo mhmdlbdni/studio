@@ -83,12 +83,13 @@ function SortablePotItem({ pot, language, handlePercentageChange, setPotToEdit, 
           <div className="relative">
             <Input
               id={`pot-${pot.id}`}
-              type="number"
+              type="text"
+              inputMode="numeric"
               value={pot.percentage}
               onChange={e => handlePercentageChange(pot.id, e.target.value)}
-              className={language.dir === 'ltr' ? 'pl-8 h-10 rounded-xl bg-secondary/30' : 'pr-8 h-10 rounded-xl bg-secondary/30'}
+              className={language.dir === 'ltr' ? 'pl-8 h-10 rounded-xl bg-secondary/30 tabular-nums' : 'pr-8 h-10 rounded-xl bg-secondary/30 tabular-nums'}
             />
-            <span className={`absolute top-1/2 -translate-y-1/2 text-muted-foreground font-black text-xs ${language.dir === 'rtl' ? 'left-3' : 'right-3'}`}>%</span>
+            <span className={`absolute top-1/2 -translate-y-1/2 text-muted-foreground font-black text-xs tabular-nums ${language.dir === 'rtl' ? 'left-3' : 'right-3'}`}>%</span>
           </div>
         </div>
 
@@ -126,21 +127,21 @@ export default function ManagePotsPage() {
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        delay: 250, // Long press behavior
+        delay: 250, // Long press behavior for desktop/mouse
         tolerance: 5,
       },
     }),
     useSensor(TouchSensor, {
       activationConstraint: {
-        delay: 250,
+        delay: 250, // Long press behavior for mobile/touch
         tolerance: 5,
       },
     })
   );
 
   const handlePercentageChange = (id: string, value: string) => {
-    const newPercentage = parseInt(value, 10);
-    if (isNaN(newPercentage) && value !== '') return;
+    const cleanValue = value.replace(/[^0-9]/g, '');
+    const newPercentage = parseInt(cleanValue, 10);
     
     setLocalPots(prevPots =>
       prevPots.map(pot =>
@@ -204,11 +205,11 @@ export default function ManagePotsPage() {
   }
 
   return (
-    <div className="space-y-6 pb-20">
+    <div className="space-y-6 pb-20 select-none">
       <Card className="glass-effect rounded-[2rem] border-white/10">
         <CardHeader>
           <CardTitle className="text-lg font-black tracking-tight">
-            {language.key === 'ar' ? 'إجمالي النسب' : 'Total Percentage'}: <span className={totalPercentage !== 100 ? 'text-destructive' : 'text-green-500 tabular-nums'}>{totalPercentage}%</span>
+            {language.key === 'ar' ? 'إجمالي النسب' : 'Total Percentage'}: <span className={totalPercentage !== 100 ? 'text-destructive tabular-nums' : 'text-green-500 tabular-nums'}>{totalPercentage}%</span>
           </CardTitle>
           {totalPercentage !== 100 && (
             <CardDescription className="text-destructive flex items-center gap-2 font-bold">
