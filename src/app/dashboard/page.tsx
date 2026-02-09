@@ -57,30 +57,30 @@ export default function DashboardPage({ searchParams }: { searchParams: Promise<
 
   return (
     <div className="space-y-5 pb-28 md:space-y-10 md:pb-20 px-0.5 select-none">
-      {/* Hero Section */}
-      <Card className="relative overflow-hidden border-none shadow-2xl bg-card dark:bg-black min-h-[220px] md:min-h-[300px] flex flex-col justify-center rounded-[2.8rem] md:rounded-[3.5rem] transition-all duration-500">
+      {/* Hero Section - Eye-friendly Colors */}
+      <Card className="relative overflow-hidden border-none shadow-2xl bg-slate-50 dark:bg-slate-950 min-h-[220px] md:min-h-[300px] flex flex-col justify-center rounded-[2.8rem] md:rounded-[3.5rem] transition-all duration-500">
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div className="futuristic-card-glow opacity-40" />
+          <div className="futuristic-card-glow opacity-30" />
           <div 
             className="absolute bottom-0 left-0 right-0 liquid-gradient-bioluminescent transition-all duration-1000 ease-in-out"
-            style={{ height: `${Math.max(15, balanceRatio)}%`, opacity: 0.7 }}
+            style={{ height: `${Math.max(15, balanceRatio)}%`, opacity: 0.5 }}
           >
-            <div className="absolute -top-32 left-0 w-[400%] h-64 liquid-wave-futuristic opacity-30" />
+            <div className="absolute -top-32 left-0 w-[400%] h-64 liquid-wave-futuristic opacity-20" />
           </div>
         </div>
 
         <CardHeader className="pb-1 relative z-10 pt-5 md:pt-8 px-6 md:px-10">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <div className="p-1.5 rounded-full bg-primary/20 animate-pulse">
+              <div className="p-1.5 rounded-full bg-primary/10">
                 <CircleDollarSign className="h-4 w-4 text-primary" />
               </div>
-              <CardTitle className="text-[10px] md:text-[12px] font-black uppercase tracking-[0.2em] md:tracking-[0.4em] text-foreground/80 dark:text-white/80">
+              <CardTitle className="text-[10px] md:text-[12px] font-black uppercase tracking-[0.2em] md:tracking-[0.4em] text-slate-500 dark:text-slate-400">
                 {t.netBalance}
               </CardTitle>
             </div>
             <Link href="/transactions">
-              <div className="p-3 rounded-2xl bg-secondary/50 dark:bg-white/10 border border-border dark:border-white/20 text-foreground dark:text-white hover:bg-primary transition-all backdrop-blur-3xl active:scale-90 shadow-2xl">
+              <div className="p-3 rounded-2xl bg-white/40 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-200 hover:bg-primary/10 transition-all backdrop-blur-xl active:scale-90 shadow-sm">
                 <Wallet className="h-5 w-5" />
               </div>
             </Link>
@@ -89,12 +89,12 @@ export default function DashboardPage({ searchParams }: { searchParams: Promise<
 
         <CardContent className="relative z-10 pb-6 md:pb-10 px-6 md:px-10">
           <div className="flex flex-col gap-0.5">
-            <div className="text-4xl xs:text-5xl md:text-7xl font-black tracking-tighter text-foreground dark:text-white drop-shadow-2xl leading-tight tabular-nums">
+            <div className="text-4xl xs:text-5xl md:text-7xl font-black tracking-tighter text-slate-900 dark:text-white leading-tight tabular-nums">
               {formatCurrency(netBalance)}
             </div>
             <div className="flex items-center gap-2 mt-4">
-              <div className="px-4 py-1.5 rounded-full bg-primary/25 border border-primary/40 backdrop-blur-md shadow-2xl">
-                <p className="text-[10px] md:text-[13px] font-black text-foreground dark:text-white uppercase tracking-wider flex items-center gap-2">
+              <div className="px-4 py-1.5 rounded-full bg-primary/5 dark:bg-primary/20 border border-primary/20 backdrop-blur-md">
+                <p className="text-[10px] md:text-[13px] font-black text-primary dark:text-primary-foreground uppercase tracking-wider flex items-center gap-2">
                   <Coins className="h-3.5 w-3.5 fill-primary text-primary" />
                   <span className="tabular-nums">{Math.round(balanceRatio)}%</span> {language.key === 'ar' ? 'طاقة الرصيد' : 'Balance Energy'}
                 </p>
@@ -103,22 +103,22 @@ export default function DashboardPage({ searchParams }: { searchParams: Promise<
           </div>
 
           <div className="mt-8 grid grid-cols-2 gap-3 md:gap-6">
-            <div className="group relative overflow-hidden flex items-center gap-3 p-3.5 md:p-5 rounded-[2rem] bg-secondary/30 dark:bg-white/10 border border-border dark:border-white/10 backdrop-blur-3xl shadow-2xl transition-transform hover:scale-[1.02]">
-              <div className="p-2.5 md:p-3 rounded-2xl bg-green-500/30 text-green-300 shadow-xl">
+            <div className="group relative overflow-hidden flex items-center gap-3 p-3.5 md:p-5 rounded-[2rem] bg-white/50 dark:bg-slate-900/40 border border-slate-200 dark:border-white/5 backdrop-blur-2xl shadow-sm transition-transform hover:scale-[1.02]">
+              <div className="p-2.5 md:p-3 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
                 <TrendingUp className="h-4 w-4 md:h-6 md:w-6" />
               </div>
               <div className="min-w-0">
-                <p className="text-[8px] md:text-[10px] text-muted-foreground dark:text-slate-200 font-black uppercase tracking-widest truncate">{language.key === 'ar' ? 'الوارد' : 'Inflow'}</p>
-                <p className="text-sm md:text-xl font-black text-green-500 truncate tabular-nums">{formatCurrency(totalIncome)}</p>
+                <p className="text-[8px] md:text-[10px] text-slate-500 dark:text-slate-400 font-black uppercase tracking-widest truncate">{language.key === 'ar' ? 'الوارد' : 'Inflow'}</p>
+                <p className="text-sm md:text-xl font-black text-emerald-600 dark:text-emerald-500 truncate tabular-nums">{formatCurrency(totalIncome)}</p>
               </div>
             </div>
-            <div className="group relative overflow-hidden flex items-center gap-3 p-3.5 md:p-5 rounded-[2rem] bg-secondary/30 dark:bg-white/10 border border-border dark:border-white/10 backdrop-blur-3xl shadow-2xl transition-transform hover:scale-[1.02]">
-              <div className="p-2.5 md:p-3 rounded-2xl bg-destructive/30 text-destructive-foreground shadow-xl">
+            <div className="group relative overflow-hidden flex items-center gap-3 p-3.5 md:p-5 rounded-[2rem] bg-white/50 dark:bg-slate-900/40 border border-slate-200 dark:border-white/5 backdrop-blur-2xl shadow-sm transition-transform hover:scale-[1.02]">
+              <div className="p-2.5 md:p-3 rounded-2xl bg-rose-500/10 text-rose-600 dark:text-rose-400">
                 <TrendingDown className="h-4 w-4 md:h-6 md:w-6" />
               </div>
               <div className="min-w-0">
-                <p className="text-[8px] md:text-[10px] text-muted-foreground dark:text-slate-200 font-black uppercase tracking-widest truncate">{language.key === 'ar' ? 'الصادر' : 'Outflow'}</p>
-                <p className="text-sm md:text-xl font-black text-red-500 truncate tabular-nums">{formatCurrency(totalExpenses)}</p>
+                <p className="text-[8px] md:text-[10px] text-slate-500 dark:text-slate-400 font-black uppercase tracking-widest truncate">{language.key === 'ar' ? 'الصادر' : 'Outflow'}</p>
+                <p className="text-sm md:text-xl font-black text-rose-600 dark:text-rose-500 truncate tabular-nums">{formatCurrency(totalExpenses)}</p>
               </div>
             </div>
           </div>
@@ -129,10 +129,10 @@ export default function DashboardPage({ searchParams }: { searchParams: Promise<
       <div className="space-y-5 mt-4 md:mt-8">
         <div className="flex items-center justify-between px-5">
           <div className="flex flex-col">
-            <h2 className={cn("font-headline text-xl md:text-3xl font-black tracking-tighter text-foreground", language.dir === 'rtl' ? 'text-right' : 'text-left')}>
+            <h2 className={cn("font-headline text-xl md:text-3xl font-black tracking-tighter text-slate-800 dark:text-slate-100", language.dir === 'rtl' ? 'text-right' : 'text-left')}>
               {t.financialPots}
             </h2>
-            <div className="h-1 w-8 bg-primary mt-1 rounded-full shadow-lg" />
+            <div className="h-1 w-8 bg-primary mt-1 rounded-full opacity-60" />
           </div>
         </div>
         
@@ -142,10 +142,10 @@ export default function DashboardPage({ searchParams }: { searchParams: Promise<
             return (
               <div key={pot.id} className="relative transition-all duration-300 hover:scale-[1.01]">
                 <Link href={`/pots/${pot.id}`} className="block w-full">
-                  <Card className="group relative overflow-hidden bg-card/60 backdrop-blur-3xl rounded-[2.5rem] border-white/10 transition-all duration-300 hover:border-primary/50 active:scale-[0.98]">
-                    {/* Water Line Background */}
+                  <Card className="group relative overflow-hidden bg-white/40 dark:bg-slate-900/30 backdrop-blur-3xl rounded-[2.5rem] border-slate-200 dark:border-white/5 transition-all duration-300 hover:border-primary/30 active:scale-[0.98]">
+                    {/* Water Line Background - Softened */}
                     <div 
-                      className="absolute bottom-0 left-0 right-0 opacity-10 transition-all duration-1000 ease-in-out pointer-events-none"
+                      className="absolute bottom-0 left-0 right-0 opacity-[0.03] dark:opacity-[0.07] transition-all duration-1000 ease-in-out pointer-events-none"
                       style={{ 
                         height: `${pot.progress}%`, 
                         backgroundColor: pot.color,
@@ -157,15 +157,15 @@ export default function DashboardPage({ searchParams }: { searchParams: Promise<
                       <div className="flex items-center justify-between w-full">
                         <div className="flex items-center gap-4">
                           <div className="relative">
-                            <div className="p-4 rounded-[1.8rem] bg-secondary/60 group-hover:bg-primary/20 transition-all duration-500 shadow-inner">
+                            <div className="p-4 rounded-[1.8rem] bg-slate-100/80 dark:bg-slate-800/50 group-hover:bg-primary/10 transition-all duration-500">
                               <PotIcon className="h-6 w-6 md:h-8 md:w-8" style={{ color: pot.color }}/>
                             </div>
                           </div>
                           <div>
-                            <p className="font-black text-lg md:text-2xl tracking-tight text-foreground leading-none">{pot.name[language.key]}</p>
+                            <p className="font-black text-lg md:text-2xl tracking-tight text-slate-800 dark:text-slate-100 leading-none">{pot.name[language.key]}</p>
                             <div className="flex items-center gap-2 mt-2">
-                                <p className="text-[9px] md:text-[11px] font-black text-muted-foreground uppercase tracking-[0.2em] tabular-nums">{pot.percentage}% {language.key === 'ar' ? 'تخصيص' : 'Allocated'}</p>
-                                <div className="h-1 w-1 rounded-full bg-muted-foreground/30" />
+                                <p className="text-[9px] md:text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] tabular-nums">{pot.percentage}% {language.key === 'ar' ? 'تخصيص' : 'Allocated'}</p>
+                                <div className="h-1 w-1 rounded-full bg-slate-300 dark:bg-slate-700" />
                                 <p className="text-[9px] md:text-[11px] font-black text-primary uppercase tracking-[0.2em] tabular-nums">{Math.round(pot.progress)}% {language.key === 'ar' ? 'متبقي' : 'Left'}</p>
                             </div>
                           </div>
@@ -178,13 +178,13 @@ export default function DashboardPage({ searchParams }: { searchParams: Promise<
                       </div>
 
                       {/* Explicit Water Line Indicator */}
-                      <div className="w-full h-1.5 bg-secondary/40 rounded-full overflow-hidden">
+                      <div className="w-full h-1.5 bg-slate-100 dark:bg-slate-800/50 rounded-full overflow-hidden">
                         <div 
                           className="h-full transition-all duration-1000 ease-out" 
                           style={{ 
                             width: `${pot.progress}%`, 
                             backgroundColor: pot.color,
-                            boxShadow: `0 0 10px ${pot.color}`
+                            opacity: 0.8
                           }}
                         />
                       </div>
@@ -204,7 +204,7 @@ export default function DashboardPage({ searchParams }: { searchParams: Promise<
       )}>
         <Button
           variant="outline"
-          className="h-14 w-14 rounded-[1.4rem] bg-card/90 backdrop-blur-3xl border-primary/40 shadow-2xl active:scale-90 transition-all group overflow-hidden"
+          className="h-14 w-14 rounded-[1.4rem] bg-white/80 dark:bg-slate-900/80 backdrop-blur-3xl border-slate-200 dark:border-primary/20 shadow-xl active:scale-90 transition-all group overflow-hidden"
           size="icon"
           onClick={() => setChatOpen(true)}
         >
@@ -215,7 +215,7 @@ export default function DashboardPage({ searchParams }: { searchParams: Promise<
         <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
           <PopoverTrigger asChild>
             <Button
-              className="h-16 w-16 rounded-[1.6rem] shadow-primary/40 active:scale-95 bg-primary hover:bg-primary/90 transition-all group relative overflow-hidden"
+              className="h-16 w-16 rounded-[1.6rem] shadow-primary/20 active:scale-95 bg-primary hover:bg-primary/90 transition-all group relative overflow-hidden"
               size="icon"
             >
               <Plus className="h-8 w-8 text-white group-hover:rotate-90 transition-transform duration-500" />
@@ -224,11 +224,11 @@ export default function DashboardPage({ searchParams }: { searchParams: Promise<
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0 border-none bg-transparent shadow-none" side="top" align={language.dir === 'rtl' ? 'start' : 'end'} sideOffset={15}>
             <div className="flex flex-col items-end gap-3 p-2">
-              <Button onClick={openIncomeDialog} className="rounded-[1.2rem] bg-green-500 text-white hover:bg-green-600 h-11 px-5 shadow-lg border-none font-black text-xs">
+              <Button onClick={openIncomeDialog} className="rounded-[1.2rem] bg-emerald-500 text-white hover:bg-emerald-600 h-11 px-5 shadow-lg border-none font-black text-xs">
                 <Plus className={cn("h-4 w-4", language.dir === 'rtl' ? 'ml-1.5' : 'mr-1.5')} />
                 {t.addIncome}
               </Button>
-              <Button onClick={openExpenseDialog} className="rounded-[1.2rem] bg-destructive text-white hover:bg-destructive/90 h-11 px-5 shadow-lg border-none font-black text-xs">
+              <Button onClick={openExpenseDialog} className="rounded-[1.2rem] bg-rose-500 text-white hover:bg-rose-600 h-11 px-5 shadow-lg border-none font-black text-xs">
                 <span className={cn("font-black text-lg", language.dir === 'rtl' ? 'ml-1.5' : 'mr-1.5')}>−</span>
                 {t.addExpense}
               </Button>
