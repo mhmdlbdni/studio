@@ -1,3 +1,4 @@
+
 'use client';
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -72,10 +73,10 @@ export function ChatInterface({ requestOpenIncomeDialog, requestOpenExpenseDialo
 
   useEffect(() => {
     handleReset();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [language.key]);
 
   const formatCurrency = (amount: number) => {
+    // Force English numerals (1, 2, 3)
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: user?.currency || 'YER', minimumFractionDigits: 0 }).format(amount);
   };
 
@@ -116,11 +117,9 @@ export function ChatInterface({ requestOpenIncomeDialog, requestOpenExpenseDialo
       
       if (response && response.text) {
         setMessages(prev => [...prev, { sender: 'ai', text: response.text }]);
-      } else if (!response.success) {
-         setMessages(prev => [...prev, { sender: 'ai', text: language.key === 'ar' ? 'حدث خطأ في الاتصال بالمرشد. يرجى التأكد من استقرار الإنترنت.' : 'Connection error with the guide. Please check your internet.' }]);
       }
 
-      if (response && response.toolRequests && response.toolRequests.length > 0) {
+      if (response && response.success && response.toolRequests && response.toolRequests.length > 0) {
         for (const toolRequest of response.toolRequests) {
           switch (toolRequest.name) {
             case 'addIncome': {
@@ -144,6 +143,8 @@ export function ChatInterface({ requestOpenIncomeDialog, requestOpenExpenseDialo
             }
           }
         }
+      } else if (!response || !response.success) {
+         setMessages(prev => [...prev, { sender: 'ai', text: language.key === 'ar' ? 'عذراً، واجهت مشكلة في الاتصال بالمرشد الذكي. يرجى التأكد من استقرار الإنترنت وتوفر صلاحيات الوصول للخدمة.' : 'Connection error with the guide. Please check your internet.' }]);
       }
 
     } catch (error: any) {
@@ -151,8 +152,8 @@ export function ChatInterface({ requestOpenIncomeDialog, requestOpenExpenseDialo
       setMessages(prev => [...prev, { 
         sender: 'ai', 
         text: language.key === 'ar' 
-          ? 'عذراً، انقطع الاتصال بالمرشد الذكي. يرجى المحاولة مرة أخرى أو التأكد من إعدادات الـ API.' 
-          : 'Sorry, the connection was closed. Please try again or check your API settings.' 
+          ? 'عذراً، انقطع الاتصال بالمرشد الذكي. يرجى المحاولة مرة أخرى لاحقاً.' 
+          : 'Sorry, the connection was closed. Please try again later.' 
       }]);
     } finally {
       setIsLoading(false);
@@ -203,7 +204,7 @@ export function ChatInterface({ requestOpenIncomeDialog, requestOpenExpenseDialo
                   ? 'bg-primary text-primary-foreground rounded-br-none'
                   : 'bg-card border border-border text-foreground rounded-bl-none'
               }`}>
-                <p className="whitespace-pre-wrap leading-relaxed">{message.text}</p>
+                <p className="whitespace-pre-wrap leading-relaxed tabular-nums">{message.text}</p>
               </div>
                {message.sender === 'ai' && language.dir === 'rtl' && (
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/20 text-primary">

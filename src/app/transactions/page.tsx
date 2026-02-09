@@ -1,10 +1,11 @@
+
 'use client';
 import { useState, useMemo } from 'react';
 import { useApp } from '@/contexts/AppContext';
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { subDays, startOfWeek, startOfMonth, isWithinInterval, format } from 'date-fns';
+import { subDays, startOfWeek, startOfMonth, isWithinInterval } from 'date-fns';
 import { TrendingUp, TrendingDown, FileDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import * as XLSX from 'xlsx';
@@ -22,11 +23,11 @@ export default function TransactionsPage() {
     return map;
   }, [pots]);
 
-  const {filteredTransactions, dateRange} = useMemo(() => {
+  const {filteredTransactions} = useMemo(() => {
     const now = new Date();
     const sortedTransactions = [...transactions].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     
-    let range = {start: new Date(), end: new Date()};
+    let range: {start: Date, end: Date};
     
     switch (filter) {
       case 'day':
@@ -40,16 +41,11 @@ export default function TransactionsPage() {
         break;
       case 'all':
       default:
-        const firstTransactionDate = sortedTransactions.length > 0 ? new Date(sortedTransactions[sortedTransactions.length-1].date) : now;
-        return { 
-          filteredTransactions: sortedTransactions,
-          dateRange: { start: firstTransactionDate, end: now }
-        };
+        return { filteredTransactions: sortedTransactions };
     }
 
     return {
       filteredTransactions: sortedTransactions.filter(t => isWithinInterval(new Date(t.date), range as Interval)),
-      dateRange: range
     }
   }, [transactions, filter]);
   
@@ -68,13 +64,12 @@ export default function TransactionsPage() {
   }, [filteredTransactions]);
 
   const formatCurrency = (amount: number) => {
-    // Force English numerals
+    // Force English numerals (1, 2, 3)
     return new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(amount);
   };
 
   const t = language.translations.transactionsPage;
-  // Always use English numbers for dates
-  const dateLocale = 'en-US';
+  const dateLocale = 'en-US'; // Force English numerals for dates
 
   const handleDownloadXLSX = () => {
     const isArabic = language.key === 'ar';
@@ -83,7 +78,6 @@ export default function TransactionsPage() {
     const data = filteredTransactions.map(t => {
       const isExpense = t.type === 'expense';
       const potName = isExpense && t.potId ? potMap.get(t.potId)?.name[language.key] : '—';
-      // Excel dates are usually fine, but to be safe we use a standard numeric format
       const formattedDate = new Date(t.date).toLocaleDateString('en-CA'); 
       
       if (isArabic) {
@@ -104,31 +98,26 @@ export default function TransactionsPage() {
 
     const summaryRows = isArabic
       ? [
-          {}, // Spacer row
+          {}, 
           { 'الوصف': 'إجمالي الدخل', 'المبلغ': totalIncome },
           { 'الوصف': 'إجمالي المصروفات', 'المبلغ': -totalExpenses },
           { 'الوصف': 'صافي الرصيد', 'المبلغ': netBalance },
         ]
       : [
-          {}, // Spacer row
+          {}, 
           { 'Description': 'Total Income', 'Amount': totalIncome },
           { 'Description': 'Total Expenses', 'Amount': -totalExpenses },
           { 'Description': 'Net Balance', 'Amount': netBalance },
         ];
     
     const finalData = [...data, ...summaryRows];
-
     const worksheet = XLSX.utils.json_to_sheet(finalData);
-
-    if (isArabic) {
-      worksheet['!RTL'] = true;
-    }
+    if (isArabic) worksheet['!RTL'] = true;
     
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, t.title);
     XLSX.writeFile(workbook, 'Mawazin_Report.xlsx');
   };
-
 
   return (
     <div className="space-y-6">
@@ -171,7 +160,7 @@ export default function TransactionsPage() {
                       <TableRow key={transaction.id}>
                         <TableCell>
                           <div className="font-medium">{transaction.description}</div>
-                          <div className="text-sm text-muted-foreground">
+                          <div className="text-sm text-muted-foreground tabular-nums">
                             {new Date(transaction.date).toLocaleDateString(dateLocale, { year: 'numeric', month: 'short', day: 'numeric' })}
                           </div>
                         </TableCell>

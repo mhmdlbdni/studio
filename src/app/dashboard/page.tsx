@@ -1,6 +1,7 @@
+
 'use client';
 
-import { useMemo, useState, useRef, useEffect, use } from 'react';
+import { useMemo, useState, useRef, use } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Plus, Bot, Wallet, TrendingUp, TrendingDown, CircleDollarSign, Coins, ChevronUp, ChevronDown, Check } from 'lucide-react';
@@ -22,7 +23,7 @@ export default function DashboardPage({ searchParams }: { searchParams: Promise<
   const [reorderingId, setReorderingId] = useState<string | null>(null);
   const longPressTimer = useRef<NodeJS.Timeout | null>(null);
   
-  // Next.js 15 compatibility: Unwrap searchParams if needed, though we don't use it directly here
+  // Next.js 15 compatibility: Unwrap searchParams
   const _resolvedSearchParams = use(searchParams);
 
   const currency = user?.currency || 'YER';
@@ -75,7 +76,7 @@ export default function DashboardPage({ searchParams }: { searchParams: Promise<
   };
 
   const formatCurrency = (amount: number) => {
-    // Force English numerals for deployment readiness
+    // Force English numerals (1, 2, 3) even in Arabic context
     return new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(amount);
   };
 
@@ -113,7 +114,7 @@ export default function DashboardPage({ searchParams }: { searchParams: Promise<
 
         <CardContent className="relative z-10 pb-6 md:pb-10 px-6 md:px-10">
           <div className="flex flex-col gap-0.5">
-            <div className="text-4xl xs:text-5xl md:text-7xl font-black tracking-tighter text-foreground dark:text-white drop-shadow-2xl leading-tight">
+            <div className="text-4xl xs:text-5xl md:text-7xl font-black tracking-tighter text-foreground dark:text-white drop-shadow-2xl leading-tight tabular-nums">
               {formatCurrency(netBalance)}
             </div>
             <div className="flex items-center gap-2 mt-4">
@@ -174,25 +175,19 @@ export default function DashboardPage({ searchParams }: { searchParams: Promise<
         <div className="grid grid-cols-1 gap-4 px-2">
           {potDetails.map((pot, index) => {
             const PotIcon = pot.icon;
-            const totalAllocated = totalIncome * (pot.percentage / 100);
-            const remainingBalance = pot.balance;
-            const liquidLevel = totalAllocated > 0 ? (remainingBalance / totalAllocated) * 100 : 0;
-            const safeLevel = Math.max(0, Math.min(liquidLevel, 100));
-            const isTarget = reorderingId === pot.id;
-            
             return (
               <div 
                 key={pot.id} 
                 className={cn(
                   "relative transition-all duration-300",
-                  isTarget ? "scale-[1.05] z-20 shadow-2xl" : reorderingId ? "opacity-50 grayscale scale-[0.98]" : "hover:scale-[1.01]"
+                  reorderingId === pot.id ? "scale-[1.05] z-20 shadow-2xl" : reorderingId ? "opacity-50 grayscale scale-[0.98]" : "hover:scale-[1.01]"
                 )}
                 onMouseDown={() => handleTouchStart(pot.id)}
                 onMouseUp={handleTouchEnd}
                 onTouchStart={() => handleTouchStart(pot.id)}
                 onTouchEnd={handleTouchEnd}
               >
-                {isTarget && (
+                {reorderingId === pot.id && (
                   <div className="absolute -right-2 top-1/2 -translate-y-1/2 z-30 flex flex-col gap-2">
                     <Button 
                       size="icon" 
@@ -216,7 +211,7 @@ export default function DashboardPage({ searchParams }: { searchParams: Promise<
                 <Link href={reorderingId ? "#" : `/pots/${pot.id}`} className="block w-full">
                   <Card className={cn(
                     "group relative overflow-hidden bg-card/60 backdrop-blur-3xl rounded-[2.5rem] border-white/10 transition-all duration-300",
-                    isTarget ? "border-primary/50" : "hover:border-primary/50 active:scale-[0.98]"
+                    reorderingId === pot.id ? "border-primary/50" : "hover:border-primary/50 active:scale-[0.98]"
                   )}>
                     <CardContent className="p-5 md:p-8 flex flex-col gap-5">
                       <div className="flex items-center justify-between w-full">
@@ -237,17 +232,6 @@ export default function DashboardPage({ searchParams }: { searchParams: Promise<
                           </p>
                         </div>
                       </div>
-
-                      <div className="relative w-full h-3 rounded-full bg-black/20 border border-white/5 overflow-hidden">
-                        <div 
-                          className="absolute bottom-0 left-0 top-0 transition-all duration-1000 ease-in-out"
-                          style={{ 
-                            width: `${safeLevel}%`, 
-                            backgroundColor: pot.color,
-                            boxShadow: `0 0 20px ${pot.color}80`
-                          }}
-                        />
-                      </div>
                     </CardContent>
                   </Card>
                 </Link>
@@ -257,7 +241,7 @@ export default function DashboardPage({ searchParams }: { searchParams: Promise<
         </div>
       </div>
 
-      {/* Floating Buttons */}
+      {/* Floating UI */}
       <div className={cn(
         "fixed bottom-8 z-30 flex flex-col gap-5",
         language.dir === 'rtl' ? 'left-6' : 'right-6'
